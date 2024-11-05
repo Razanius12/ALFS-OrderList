@@ -9,6 +9,10 @@
 <script src="assets/js/plugin/datatables/datatables.min.js"></script>
 <!-- Kaiadmin JS -->
 <script src="assets/js/kaiadmin.min.js"></script>
+<!-- Chart JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Custom JS -->
+<script src="main/customJS.js"></script>
 <script>
  $(document).ready(function () {
   $("#basic-datatables").DataTable({});

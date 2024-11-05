@@ -2,7 +2,7 @@
  <div class="page-inner">
 
   <div class="page-header">
-   <h3 class="fw-bold mb-3">Order Data</h3>
+   <h3 class="fw-bold mb-3">Workers</h3>
    <ul class="breadcrumbs mb-3">
     <li class="nav-home">
      <a href="./index.php">
@@ -13,7 +13,7 @@
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=orderData">Order Data</a>
+     <a href="./index.php?page=orderData">Workers</a>
    </ul>
   </div>
 
