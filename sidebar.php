@@ -46,10 +46,9 @@
      <h4 class="text-section">Components</h4>
     </li>
     <li class="nav-item">
-     <a data-bs-toggle="collapse" href="#forms">
+     <a href="#">
       <i class="fas fa-pen-square"></i>
-      <p>Forms</p>
-      <span class="caret"></span>
+      <p>Workers</p>
      </a>
      <div class="collapse" id="forms">
       <ul class="nav nav-collapse">
@@ -62,7 +61,7 @@
      </div>
     </li>
     <li class="nav-item active">
-     <a href="orderdata.php">
+     <a href="main/pages/orderdata.php">
       <i class="fas fa-table"></i>
       <p>Order Data</p>
      </a>
