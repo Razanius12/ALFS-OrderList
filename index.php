@@ -7,9 +7,16 @@ include 'head.php';
 
 <body>
  <div class="wrapper">
- <?php
- include 'sidebar.php';
- ?>
+  <?php
+  include 'sidebar.php';
+  ?>
+
+  <div class="main-panel">
+   <?php
+   include 'navbar.php';
+   ?>
+  </div>
+  
  </div>
 
  <?php
