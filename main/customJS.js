@@ -21,7 +21,7 @@ const dpbc = new Chart(ctx, {
     ],
     datasets: [
       {
-        label: "Sales",
+        label: "Clients",
         backgroundColor: "rgb(23, 125, 255)",
         borderColor: "rgb(23, 125, 255)",
         data: [3, 2, 9, 5, 4, 6, 4, 6, 7, 8, 7, 4],
