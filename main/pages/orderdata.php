@@ -36,16 +36,15 @@ $result = mysqli_query($conn, $query);
    <div class="col-md-12">
     <div class="card">
      <div class="card-header">
-      <h4 class="card-title">Orders Management</h4>
+      <div class="d-flex align-items-center">
+       <h4 class="card-title">Orders Management</h4>
+        <button type="button" class="btn btn-primary btn-round ms-auto" data-bs-toggle="modal"
+         data-bs-target="#addOrderModal">
+         <i class="fa fa-plus"></i> Add New Order
+        </button>
+      </div>
      </div>
      <div class="card-body">
-
-      <div>
-       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOrderModal">
-        <i class="fa fa-plus"></i> Add New Order
-       </button>
-      </div>
-
       <div class="table-responsive">
        <table id="multi-filter-select" class="display table table-striped table-hover">
         <thead>
@@ -57,7 +56,6 @@ $result = mysqli_query($conn, $query);
           <th>Start Date</th>
           <th>Status</th>
           <th>Workers</th>
-          <th>Amount</th>
           <th style="width: 10%">Action</th>
          </tr>
         </thead>
@@ -75,7 +73,6 @@ $result = mysqli_query($conn, $query);
             </span>
            </td>
            <td><?= htmlspecialchars($order['assigned_workers']) ?></td>
-           <td><?= number_format($order['total_amount'], 2) ?></td>
            <td>
             <div class="form-button-action">
              <button type="button" class="btn btn-link btn-primary btn-lg" data-bs-toggle="modal"
