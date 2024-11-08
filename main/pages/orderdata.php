@@ -4,20 +4,30 @@
 require_once 'config/database.php';
 
 // Fetch orders from database
-$query = "SELECT o.*, a.name_admin as project_manager 
-          FROM orders o 
-          JOIN admins a ON o.project_manager_id = a.id_admin 
-          ORDER BY o.created_at DESC";
+$query = "SELECT o.id_order, o.order_name, o.status, o.start_date, 
+a.name_admin as project_manager,
+GROUP_CONCAT(w.name_worker) as assigned_workers
+FROM orders o
+LEFT JOIN admins a ON o.project_manager_id = a.id_admin
+LEFT JOIN project_assignments pa ON o.id_order = pa.id_order
+LEFT JOIN workers w ON pa.id_worker = w.id_worker
+GROUP BY o.id_order";
 $result = mysqli_query($conn, $query);
 
 // Helper function to determine badge class based on status
-function getStatusBadgeClass($status) {
+function getStatusBadgeClass($status)
+{
  switch (strtoupper($status)) {
-     case 'COMPLETED': return 'success';
-     case 'IN_PROGRESS': return 'info';
-     case 'PENDING': return 'warning';
-     case 'CANCELLED': return 'danger';
-     default: return 'secondary';
+  case 'COMPLETED':
+   return 'success';
+  case 'IN_PROGRESS':
+   return 'info';
+  case 'PENDING':
+   return 'warning';
+  case 'CANCELLED':
+   return 'danger';
+  default:
+   return 'secondary';
  }
 }
 
@@ -60,30 +70,29 @@ function getStatusBadgeClass($status) {
        <table id="multi-filter-select" class="display table table-striped table-hover">
         <thead>
          <tr>
-          <th>Order ID</th>
+          <th data-orderable="true" style="display: none;">Order ID</th>
           <th>Project Name</th>
-          <th>Client</th>
           <th>Project Manager</th>
+          <th>Worked By</th> <!-- this field is filled by a worker that working on the project -->
           <th>Start Date</th>
           <th>Status</th>
-          <th>Workers</th>
           <th style="width: 10%">Action</th>
          </tr>
         </thead>
         <tbody>
-         <?php while ($row = mysqli_fetch_assoc($result)): ?>
+         <?php while ($order = mysqli_fetch_assoc($result)): ?>
           <tr>
-           <td><?= htmlspecialchars($order['id_order']) ?></td>
+           <td style="display: none;"><?= htmlspecialchars($order['id_order']) ?></td>
            <td><?= htmlspecialchars($order['order_name']) ?></td>
-           <td><?= htmlspecialchars($order['client_name']) ?></td>
            <td><?= htmlspecialchars($order['project_manager']) ?></td>
+           <td><?= htmlspecialchars($order['assigned_workers']) ?></td>
            <td><?= htmlspecialchars($order['start_date']) ?></td>
+           </td>
            <td>
-            <span class="badge bg-<?= getStatusBadgeClass($order['project_status']) ?>">
-             <?= htmlspecialchars($order['project_status']) ?>
+            <span class="badge bg-<?= getStatusBadgeClass($order['status']) ?>">
+             <?= htmlspecialchars($order['status']) ?>
             </span>
            </td>
-           <td><?= htmlspecialchars($order['assigned_workers']) ?></td>
            <td>
             <div class="form-button-action">
              <button type="button" class="btn btn-link btn-primary btn-lg" data-bs-toggle="modal"
@@ -115,7 +124,7 @@ function getStatusBadgeClass($status) {
      </div>
      <form id="addOrderForm" method="POST" action="/api/addOrder.php">
       <div class="modal-body">
-       <div class="row">
+       <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
           <label>Project Name</label>
@@ -124,38 +133,33 @@ function getStatusBadgeClass($status) {
         </div>
         <div class="col-md-6">
          <div class="form-group">
-          <label>Client Name</label>
-          <input type="text" class="form-control" name="client_name" required>
-         </div>
-        </div>
-       </div>
-       <div class="row mt-3">
-        <div class="col-md-6">
-         <div class="form-group">
           <label>Project Manager</label>
           <select class="form-control" name="project_manager_id" required>
            <?php
            $query = "SELECT a.id_admin, a.name_admin 
-           FROM admins a 
-           JOIN positions p ON a.id_position = p.id_position 
-           WHERE p.position_name LIKE '%manager%' 
-           AND p.department = 'ADMIN'";
-           ?>
+            FROM admins a
+            JOIN positions p ON a.id_position = p.id_position
+            WHERE p.position_name LIKE '%manager%'
+            AND p.department = 'ADMIN'";
+           $adminOptions = mysqli_query($conn, $query);
+           while ($admin = mysqli_fetch_assoc($adminOptions)): ?>
+            <option value="<?= $admin['id_admin'] ?>"><?= $admin['name_admin'] ?></option>
+           <?php endwhile; ?>
           </select>
          </div>
         </div>
+       </div>
+       <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
           <label>Start Date</label>
           <input type="date" class="form-control" name="start_date" required>
          </div>
         </div>
-       </div>
-       <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
           <label>Project Status</label>
-          <select class="form-control" name="project_status" required>
+          <select class="form-control" name="status" required>
            <option value="PENDING">Pending</option>
            <option value="IN_PROGRESS">In Progress</option>
            <option value="COMPLETED">Completed</option>
@@ -163,18 +167,12 @@ function getStatusBadgeClass($status) {
           </select>
          </div>
         </div>
-        <div class="col-md-6">
-         <div class="form-group">
-          <label>Assigned Workers</label>
-          <input type="number" class="form-control" name="assigned_workers" required min="1">
-         </div>
-        </div>
        </div>
        <div class="row mt-3">
         <div class="col-md-12">
          <div class="form-group">
           <label>Project Description</label>
-          <textarea class="form-control" name="description" rows="3"></textarea>
+          <textarea class="form-control" name="description" rows="6"></textarea>
          </div>
         </div>
        </div>
@@ -199,7 +197,7 @@ function getStatusBadgeClass($status) {
      <form id="#editOrderForm" method="POST" action="/api/updateOrder.php">
       <input type="hidden" name="id_order" id="edit_order_id">
       <div class="modal-body">
-       <div class="row">
+       <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
           <label>Project Name</label>
@@ -208,57 +206,66 @@ function getStatusBadgeClass($status) {
         </div>
         <div class="col-md-6">
          <div class="form-group">
-          <label>Client Name</label>
-          <input type="text" class="form-control" name="client_name" id="edit_client_name" required>
-         </div>
-        </div>
-       </div>
-       <div class="row mt-3">
-        <div class="col-md-6">
-         <div class="form-group">
           <label>Project Manager</label>
           <select class="form-control" name="project_manager_id" id="edit_project_manager_id" required>
            <?php
            $query = "SELECT a.id_admin, a.name_admin 
-           FROM admins a 
-           JOIN positions p ON a.id_position = p.id_position 
-           WHERE p.position_name LIKE '%manager%' 
-           AND p.department = 'ADMIN'";
-           ?>
+            FROM admins a
+            JOIN positions p ON a.id_position = p.id_position
+            WHERE p.position_name LIKE '%manager%'
+            AND p.department = 'ADMIN'";
+           $adminOptions = mysqli_query($conn, $query);
+           while ($admin = mysqli_fetch_assoc($adminOptions)): ?>
+            <option value="<?= $admin['id_admin'] ?>"><?= $admin['name_admin'] ?></option>
+           <?php endwhile; ?>
           </select>
          </div>
         </div>
+       </div>
+       <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
           <label>Start Date</label>
           <input type="date" class="form-control" name="start_date" id="edit_start_date" required>
          </div>
         </div>
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Project Status</label>
+          <select class="form-control" name="status" id="edit_project_status" required>
+           <option value="PENDING">Pending</option>
+           <option value="IN_PROGRESS">In Progress</option>
+           <option value="COMPLETED">Completed</option>
+           <option value="CANCELLED">Cancelled</option>
+          </select>
+         </div>
+        </div>
        </div>
        <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
-          <label>Project Status</label>
-          <select class="form-control" name="project_status" id="edit_project_status" required>
-           <option value="Pending">Pending</option>
-           <option value="In Progress">In Progress</option>
-           <option value="Completed">Completed</option>
-           <option value="Overdue">Overdue</option>
+          <label>Assign Worker</label>
+          <select class="form-control" name="worker_id" id="edit_project_status" <?php echo ($status === 'PENDING') ? 'required' : ''; ?>>
+           <option value="">Select Worker</option>
+           <?php
+           $query = "SELECT w.id_worker, w.name_worker, w.availability_status 
+                FROM workers w
+                JOIN positions p ON w.id_position = p.id_position
+                WHERE w.availability_status = 'AVAILABLE'";
+           $workerOptions = mysqli_query($conn, $query);
+           while ($worker = mysqli_fetch_assoc($workerOptions)): ?>
+            <option value="<?= $worker['id_worker'] ?>">
+             <?= htmlspecialchars($worker['name_worker']) ?>
+             (<?= htmlspecialchars($worker['availability_status']) ?>)
+            </option>
+           <?php endwhile; ?>
           </select>
          </div>
         </div>
         <div class="col-md-6">
          <div class="form-group">
-          <label>Assigned Workers</label>
-          <input type="number" class="form-control" name="assigned_workers" id="edit_assigned_workers" required min="1">
-         </div>
-        </div>
-       </div>
-       <div class="row mt-3">
-        <div class="col-md-12">
-         <div class="form-group">
           <label>Project Description</label>
-          <textarea class="form-control" name="description" id="edit_description" rows="3"></textarea>
+          <textarea class="form-control" name="description" id="edit_description" rows="6"></textarea>
          </div>
         </div>
        </div>
@@ -277,184 +284,194 @@ function getStatusBadgeClass($status) {
 
 <!-- Add necessary JavaScript -->
 <script>
+ // Initialize DataTable
  $(document).ready(function () {
-  // Initialize DataTable with multi-filter
-  $('#multi-filter-select').DataTable({
-   "pageLength": 10,
-   initComplete: function () {
-    this.api().columns().every(function () {
-     var column = this;
-     var select = $('<select class="form-control"><option value=""></option></select>')
-      .appendTo($(column.footer()).empty())
-      .on('change', function () {
-       var val = $.fn.dataTable.util.escapeRegex(
-        $(this).val()
-       );
-       column
-        .search(val ? '^' + val + '$' : '', true, false)
-        .draw();
-      });
-
-     column.data().unique().sort().each(function (d, j) {
-      select.append('<option value="' + d + '">' + d + '</option>')
-     });
-    });
-   }
+  const orderTable = $('#multi-filter-select').DataTable({
+   "order": [[0, "desc"]], // Sort by Order ID descending
+   "columnDefs": [
+    { "targets": [0], "visible": false } // Hide Order ID column
+   ]
   });
 
-  // Add the new modal handlers here
-  // Handle Add Order Form Submission
-  $('#addOrderForm').on('submit', function (e) {
-   e.preventDefault();
-   const formData = new FormData(this);
-
-   fetch('/api/addOrder.php', {
-    method: 'POST',
-    body: formData
-   })
-    .then(response => response.json())
-    .then(data => {
-     if (data.success) {
-      Swal.fire({
-       title: 'Success!',
-       text: 'Order has been added successfully',
-       icon: 'success'
-      }).then(() => {
-       location.reload();
-      });
-     } else {
-      Swal.fire({
-       title: 'Error!',
-       text: data.message || 'Failed to add order',
-       icon: 'error'
-      });
-     }
-    })
-    .catch(error => {
-     console.error('Error:', error);
-     Swal.fire({
-      title: 'Error!',
-      text: 'An unexpected error occurred',
-      icon: 'error'
-     });
-    });
-  });
-
-  // Handle Edit Order Modal Population
-  $('#editOrderModal').on('show.bs.modal', function (event) {
-   const button = $(event.relatedTarget);
+  // Edit Order Modal Handler
+  $('#editOrderModal').on('show.bs.modal', function (e) {
+   const button = $(e.relatedTarget);
    const orderId = button.data('order-id');
 
-   // Fetch order details
-   fetch(`/api/getOrder.php?id=${orderId}`)
-    .then(response => response.json())
-    .then(data => {
-     if (data.success) {
-      const order = data.order;
-      $('#edit_order_id').val(order.id_order);
-      $('#edit_order_name').val(order.order_name);
-      $('#edit_client_name').val(order.client_name);
-      $('#edit_project_manager_id').val(order.project_manager_id);
-      $('#edit_start_date').val(order.start_date);
-      $('#edit_project_status').val(order.project_status);
-      $('#edit_assigned_workers').val(order.assigned_workers);
-      $('#edit_description').val(order.description);
+   // Show loading state
+   Swal.fire({
+    title: 'Loading...',
+    allowOutsideClick: false,
+    didOpen: () => {
+     Swal.showLoading();
+    }
+   });
+
+   // Fetch order data
+   $.ajax({
+    url: '/api/getOrder.php',
+    type: 'GET',
+    data: { id_order: orderId },
+    success: function (response) {
+     const data = JSON.parse(response);
+
+     // Populate form fields
+     $('#edit_order_id').val(data.id_order);
+     $('#edit_order_name').val(data.order_name);
+     $('#edit_project_manager_id').val(data.project_manager_id);
+     $('#edit_start_date').val(data.start_date);
+     $('#edit_project_status').val(data.status);
+     $('#edit_description').val(data.description);
+
+     if (data.worker_id) {
+      $('#edit_worker_id').val(data.worker_id);
      }
-    })
-    .catch(error => {
-     console.error('Error:', error);
+
+     Swal.close();
+    },
+    error: function () {
      Swal.fire({
-      title: 'Error!',
-      text: 'Failed to load order details',
-      icon: 'error'
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to fetch order data'
      });
-    });
+    }
+   });
   });
 
-  // Handle Edit Order Form Submission
-  $('#editOrderForm').on('submit', function (e) {
-   e.preventDefault();
-   const formData = new FormData(this);
-
-   fetch('/api/updateOrder.php', {
-    method: 'POST',
-    body: formData
-   })
-    .then(response => response.json())
-    .then(data => {
-     if (data.success) {
-      Swal.fire({
-       title: 'Success!',
-       text: 'Order has been updated successfully',
-       icon: 'success'
-      }).then(() => {
-       location.reload();
-      });
-     } else {
-      Swal.fire({
-       title: 'Error!',
-       text: data.message || 'Failed to update order',
-       icon: 'error'
-      });
-     }
-    })
-    .catch(error => {
-     console.error('Error:', error);
-     Swal.fire({
-      title: 'Error!',
-      text: 'An unexpected error occurred',
-      icon: 'error'
-     });
-    });
-  });
- });
-
- // Function to handle order deletion
- function deleteOrder(orderId) {
-  Swal.fire({
-   title: 'Are you sure?',
-   text: "You won't be able to revert this!",
-   icon: 'warning',
-   showCancelButton: true,
-   confirmButtonColor: '#3085d6',
-   cancelButtonColor: '#d33',
-   confirmButtonText: 'Yes, delete it!'
-  }).then((result) => {
-   if (result.isConfirmed) {
-    fetch('/api/deleteOrder.php', {
-     method: 'POST',
-     headers: {
-      'Content-Type': 'application/json',
-     },
-     body: JSON.stringify({ id: orderId })
-    })
-     .then(response => response.json())
-     .then(data => {
-      if (data.success) {
-       Swal.fire(
-        'Deleted!',
-        'Order has been deleted.',
-        'success'
-       ).then(() => {
-        location.reload();
-       });
-      } else {
+  // Delete Order Handler
+  window.deleteOrder = function (orderId) {
+   Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+   }).then((result) => {
+    if (result.isConfirmed) {
+     $.ajax({
+      url: '/api/deleteOrder.php',
+      type: 'POST',
+      data: { id_order: orderId },
+      success: function (response) {
+       const data = JSON.parse(response);
+       if (data.success) {
+        Swal.fire(
+         'Deleted!',
+         'Order has been deleted.',
+         'success'
+        ).then(() => {
+         // Reload the page or remove the row from table
+         location.reload();
+        });
+       } else {
+        Swal.fire(
+         'Error!',
+         data.message || 'Failed to delete order',
+         'error'
+        );
+       }
+      },
+      error: function () {
        Swal.fire(
         'Error!',
-        data.message || 'Failed to delete order',
+        'Failed to delete order',
         'error'
        );
       }
-     })
-     .catch(error => {
-      console.error('Error:', error);
-      Swal.fire(
-       'Error!',
-       'An unexpected error occurred',
-       'error'
-      );
      });
-   }
+    }
+   });
+  };
+
+  // Add Order Form Submit Handler
+  $('#addOrderForm').on('submit', function (e) {
+   e.preventDefault();
+
+   Swal.fire({
+    title: 'Adding Order...',
+    allowOutsideClick: false,
+    didOpen: () => {
+     Swal.showLoading();
+    }
+   });
+
+   $.ajax({
+    url: $(this).attr('action'),
+    type: 'POST',
+    data: $(this).serialize(),
+    success: function (response) {
+     const data = JSON.parse(response);
+     if (data.success) {
+      Swal.fire({
+       icon: 'success',
+       title: 'Success',
+       text: 'Order added successfully'
+      }).then(() => {
+       location.reload();
+      });
+     } else {
+      Swal.fire({
+       icon: 'error',
+       title: 'Error',
+       text: data.message || 'Failed to add order'
+      });
+     }
+    },
+    error: function () {
+     Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to add order'
+     });
+    }
+   });
   });
- }
+
+  // Edit Order Form Submit Handler
+  $('#editOrderForm').on('submit', function (e) {
+   e.preventDefault();
+
+   Swal.fire({
+    title: 'Updating Order...',
+    allowOutsideClick: false,
+    didOpen: () => {
+     Swal.showLoading();
+    }
+   });
+
+   $.ajax({
+    url: $(this).attr('action'),
+    type: 'POST',
+    data: $(this).serialize(),
+    success: function (response) {
+     const data = JSON.parse(response);
+     if (data.success) {
+      Swal.fire({
+       icon: 'success',
+       title: 'Success',
+       text: 'Order updated successfully'
+      }).then(() => {
+       location.reload();
+      });
+     } else {
+      Swal.fire({
+       icon: 'error',
+       title: 'Error',
+       text: data.message || 'Failed to update order'
+      });
+     }
+    },
+    error: function () {
+     Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to update order'
+     });
+    }
+   });
+  });
+ });
 </script>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 06, 2024 at 12:22 PM
+-- Generation Time: Nov 07, 2024 at 10:34 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -63,11 +63,9 @@ CREATE TABLE `orders` (
   `id_order` int(4) NOT NULL,
   `order_name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `client_name` varchar(255) NOT NULL,
   `project_manager_id` int(4) NOT NULL,
   `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') NOT NULL DEFAULT 'PENDING',
   `start_date` date NOT NULL,
-  `completed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -97,8 +95,7 @@ CREATE TABLE `project_assignments` (
   `id_worker` int(4) NOT NULL,
   `assigned_by` int(4) NOT NULL,
   `status` enum('ASSIGNED','IN_PROGRESS','COMPLETED') NOT NULL DEFAULT 'ASSIGNED',
-  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `completed_at` timestamp NULL DEFAULT NULL
+  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
