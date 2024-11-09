@@ -1,5 +1,5 @@
 <?php
-require_once '../config/connection.php';
+require_once '../../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_order'])) {
  $id_order = $_POST['id_order'];

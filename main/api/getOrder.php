@@ -1,5 +1,5 @@
 <?php
-require_once '../config/connection.php';
+require_once '../../config/database.php';
 
 if (isset($_GET['id_order'])) {
  $id_order = $_GET['id_order'];

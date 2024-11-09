@@ -1,7 +1,36 @@
+<?php
+// Database connection
+require_once 'config/database.php';
+
+// Fetch workers from database
+$query = "SELECT w.id_worker, w.username, w.name_worker, w.gender_worker, 
+w.phone_number, w.availability_status, w.current_tasks, w.password,
+p.position_name,
+GROUP_CONCAT(o.order_name) as assigned_orders
+FROM workers w
+LEFT JOIN positions p ON w.id_position = p.id_position
+LEFT JOIN project_assignments pa ON w.id_worker = pa.id_worker
+LEFT JOIN orders o ON pa.id_order = o.id_order
+GROUP BY w.id_worker";
+$result = mysqli_query($conn, $query);
+
+// Helper function to determine badge class based on availability
+function getAvailabilityBadgeClass($status)
+{
+ return strtoupper($status) === 'AVAILABLE' ? 'success' : 'warning';
+}
+
+// Helper function to mask password
+function maskPassword($password)
+{
+ return str_repeat('•', strlen($password));
+}
+?>
+
 <div class="container">
  <div class="page-inner">
 
-  <div class="page-header">
+  <div class="page-header mb-0">
    <h3 class="fw-bold mb-3">Workers</h3>
    <ul class="breadcrumbs mb-3">
     <li class="nav-home">
@@ -13,7 +42,7 @@
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=orderData">Workers</a>
+     <a href="./index.php?page=workers">Workers</a>
    </ul>
   </div>
 
@@ -22,274 +51,71 @@
    <div class="col-md-12">
     <div class="card">
      <div class="card-header">
-      <h4 class="card-title">Multi Filter Select</h4>
+      <div class="d-flex align-items-center">
+       <h4 class="card-title">Workers Management</h4>
+       <button type="button" class="btn btn-primary btn-round ms-auto" data-bs-toggle="modal"
+        data-bs-target="#addWorkerModal">
+        <i class="fa fa-plus"></i> Add New Worker
+       </button>
+      </div>
      </div>
      <div class="card-body">
       <div class="table-responsive">
        <table id="multi-filter-select" class="display table table-striped table-hover">
         <thead>
          <tr>
+          <th data-orderable="true" style="display: none;">Worker ID</th>
           <th>Name</th>
+          <th>Username</th>
+          <th>Password</th>
           <th>Position</th>
-          <th>Office</th>
-          <th>Age</th>
-          <th>Start date</th>
-          <th>Salary</th>
+          <th>Gender</th>
+          <th>Phone</th>
+          <th>Current Tasks</th>
+          <th>Assigned Projects</th>
+          <th>Status</th>
           <th style="width: 10%">Action</th>
          </tr>
         </thead>
-        <tfoot>
-         <tr>
-          <th>Name</th>
-          <th>Position</th>
-          <th>Office</th>
-          <th>Age</th>
-          <th>Start date</th>
-          <th>Salary</th>
-          <th style="width: 10%">Action</th>
-         </tr>
-        </tfoot>
         <tbody>
-         <tr>
-          <td>Tiger Nixon</td>
-          <td>System Architect</td>
-          <td>Edinburgh</td>
-          <td>61</td>
-          <td>2011/04/25</td>
-          <td>$320,800</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Garrett Winters</td>
-          <td>Accountant</td>
-          <td>Tokyo</td>
-          <td>63</td>
-          <td>2011/07/25</td>
-          <td>$170,750</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Ashton Cox</td>
-          <td>Junior Technical Author</td>
-          <td>San Francisco</td>
-          <td>66</td>
-          <td>2009/01/12</td>
-          <td>$86,000</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Cedric Kelly</td>
-          <td>Senior Javascript Developer</td>
-          <td>Edinburgh</td>
-          <td>22</td>
-          <td>2012/03/29</td>
-          <td>$433,060</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Airi Satou</td>
-          <td>Accountant</td>
-          <td>Tokyo</td>
-          <td>33</td>
-          <td>2008/11/28</td>
-          <td>$162,700</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Brielle Williamson</td>
-          <td>Integration Specialist</td>
-          <td>New York</td>
-          <td>61</td>
-          <td>2012/12/02</td>
-          <td>$372,000</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Herrod Chandler</td>
-          <td>Sales Assistant</td>
-          <td>San Francisco</td>
-          <td>59</td>
-          <td>2012/08/06</td>
-          <td>$137,500</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Rhona Davidson</td>
-          <td>Integration Specialist</td>
-          <td>Tokyo</td>
-          <td>55</td>
-          <td>2010/10/14</td>
-          <td>$327,900</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Colleen Hurst</td>
-          <td>Javascript Developer</td>
-          <td>San Francisco</td>
-          <td>39</td>
-          <td>2009/09/15</td>
-          <td>$205,500</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Sonya Frost</td>
-          <td>Software Engineer</td>
-          <td>Edinburgh</td>
-          <td>23</td>
-          <td>2008/12/13</td>
-          <td>$103,600</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Jena Gaines</td>
-          <td>Office Manager</td>
-          <td>London</td>
-          <td>30</td>
-          <td>2008/12/19</td>
-          <td>$90,560</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
-         <tr>
-          <td>Quinn Flynn</td>
-          <td>Support Lead</td>
-          <td>Edinburgh</td>
-          <td>22</td>
-          <td>2013/03/03</td>
-          <td>$342,000</td>
-          <td>
-           <div class="form-button-action">
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg"
-             data-original-title="Edit Task">
-             <i class="fa fa-edit"></i>
-            </button>
-            <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger"
-             data-original-title="Remove">
-             <i class="fa fa-times"></i>
-            </button>
-           </div>
-          </td>
-         </tr>
+         <?php while ($worker = mysqli_fetch_assoc($result)): ?>
+          <tr>
+           <td style="display: none;"><?= htmlspecialchars($worker['id_worker']) ?></td>
+           <td><?= htmlspecialchars($worker['name_worker']) ?></td>
+           <td><?= htmlspecialchars($worker['username']) ?></td>
+           <td>
+            <div class="password-container">
+             <span class="password-text" data-password="<?= htmlspecialchars($worker['password']) ?>">
+              <?= maskPassword($worker['password']) ?>
+             </span>
+             <button class="btn btn-link btn-sm toggle-password" type="button">
+              <i class="fa fa-eye"></i>
+             </button>
+            </div>
+           </td>
+           <td><?= htmlspecialchars($worker['position_name']) ?></td>
+           <td><?= htmlspecialchars($worker['gender_worker']) ?></td>
+           <td><?= htmlspecialchars($worker['phone_number']) ?></td>
+           <td><?= htmlspecialchars($worker['current_tasks']) ?></td>
+           <td><?= htmlspecialchars($worker['assigned_orders']) ?></td>
+           <td>
+            <span class="badge bg-<?= getAvailabilityBadgeClass($worker['availability_status']) ?>">
+             <?= htmlspecialchars($worker['availability_status']) ?>
+            </span>
+           </td>
+           <td>
+            <div class="form-button-action">
+             <button type="button" class="btn btn-link btn-primary btn-lg" data-bs-toggle="modal"
+              data-bs-target="#editWorkerModal" data-worker-id="<?= $worker['id_worker'] ?>">
+              <i class="fa fa-edit"></i>
+             </button>
+             <button type="button" class="btn btn-link btn-danger" onclick="deleteWorker(<?= $worker['id_worker'] ?>)">
+              <i class="fa fa-times"></i>
+             </button>
+            </div>
+           </td>
+          </tr>
+         <?php endwhile; ?>
         </tbody>
        </table>
       </div>
@@ -300,4 +126,208 @@
 
   </div>
  </div>
+
+ <!-- Add Worker Modal -->
+ <div class="modal fade" id="addWorkerModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h5 class="modal-title">Add New Worker</h5>
+     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="addWorkerForm" method="POST" action="main/api/addWorker.php">
+     <div class="modal-body">
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Username</label>
+         <input type="text" class="form-control" name="username" required>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Password</label>
+         <div class="input-group">
+          <input type="password" class="form-control" name="password" required>
+          <button class="btn btn-outline-secondary toggle-password" type="button">
+           <i class="fa fa-eye"></i>
+          </button>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Full Name</label>
+         <input type="text" class="form-control" name="name_worker" required>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Position</label>
+         <select class="form-control" name="id_position" id="position-select">
+          <option value="">Select Position</option>
+          <?php
+          $query = "SELECT id_position, position_name 
+                    FROM positions 
+                    WHERE department = 'WORKER'";
+          $positionOptions = mysqli_query($conn, $query);
+          while ($position = mysqli_fetch_assoc($positionOptions)): ?>
+           <option value="<?= $position['id_position'] ?>"><?= $position['position_name'] ?></option>
+          <?php endwhile; ?>
+         </select>
+         <input type="hidden" name="new_position" id="new-position-input">
+        </div>
+       </div>
+      </div>
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Gender</label>
+         <select class="form-control" name="gender_worker" required>
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+          <option value="OTHER">Other</option>
+         </select>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Phone Number</label>
+         <input type="tel" class="form-control" name="phone_number" required>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Add Worker</button>
+     </div>
+    </form>
+   </div>
+  </div>
+ </div>
+
+ <!-- Edit Worker Modal -->
+ <div class="modal fade" id="editWorkerModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h5 class="modal-title">Edit Worker</h5>
+     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="editWorkerForm" method="POST" action="main/api/updateWorker.php">
+     <input type="hidden" name="id_worker" id="edit_worker_id">
+     <div class="modal-body">
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Username</label>
+         <input type="text" class="form-control" name="username" id="edit_username" required>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Password (leave blank to keep current)</label>
+         <div class="input-group">
+          <input type="password" class="form-control" name="password" id="edit_password">
+          <button class="btn btn-outline-secondary toggle-password" type="button">
+           <i class="fa fa-eye"></i>
+          </button>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Full Name</label>
+         <input type="text" class="form-control" name="name_worker" id="edit_name_worker" required>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Position</label>
+         <select class="form-control" name="id_position" id="position-select">
+          <option value="">Select Position</option>
+          <?php
+          $query = "SELECT id_position, position_name 
+                    FROM positions 
+                    WHERE department = 'WORKER'";
+          $positionOptions = mysqli_query($conn, $query);
+          while ($position = mysqli_fetch_assoc($positionOptions)): ?>
+           <option value="<?= $position['id_position'] ?>"><?= $position['position_name'] ?></option>
+          <?php endwhile; ?>
+         </select>
+         <input type="hidden" name="new_position" id="new-position-input">
+        </div>
+       </div>
+      </div>
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Gender</label>
+         <select class="form-control" name="gender_worker" id="edit_gender" required>
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+          <option value="OTHER">Other</option>
+         </select>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Phone Number</label>
+         <input type="tel" class="form-control" name="phone_number" id="edit_phone_number" required>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+     </div>
+    </form>
+   </div>
+  </div>
+ </div>
+
 </div>
+
+<!-- passwords css -->
+<style>
+ .password-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+ }
+
+ .password-text {
+  font-family: monospace;
+ }
+
+ .toggle-password {
+  padding: 0;
+  color: #666;
+  background: none;
+  border: none;
+ }
+
+ .toggle-password:hover {
+  color: #333;
+ }
+
+ /* For input groups in forms */
+ .input-group .toggle-password {
+  border: 1px solid #ced4da;
+  padding: 0.375rem 0.75rem;
+ }
+</style>
+
+<script src="assets/js/core/jquery-3.7.1.min.js"></script>
+<script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+<script>
+ <?php
+ include 'main/js/workers.js';
+ ?>
+</script>
