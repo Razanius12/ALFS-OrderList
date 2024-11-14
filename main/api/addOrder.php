@@ -85,12 +85,12 @@ try {
  // Insert order
  $stmt = $conn->prepare("
         INSERT INTO orders (
-            order_name, 
-            project_manager_id, 
-            start_date, 
-            status, 
-            description,
-            created_at
+        order_name, 
+        project_manager_id, 
+        start_date, 
+        status, 
+        description,
+        created_at
         ) VALUES (?, ?, ?, ?, ?, NOW())
     ");
 

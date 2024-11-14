@@ -2,7 +2,7 @@
 <html lang="en">
 
 <?php
-include 'head.php';
+include_once 'head.php';
 ?>
 
 <body>
@@ -26,6 +26,9 @@ include 'head.php';
    case 'workers':
     includePage('main/sidebars/sidebarWorkers.php');
     break;
+   case 'addNewPosition':
+    includePage('main/sidebars/sidebarWorkers.php');
+    break;
    case 'alfOffices':
     includePage('main/sidebars/sidebarAlfOffices.php');
     break;
@@ -42,7 +45,7 @@ include 'head.php';
 
   <div class="main-panel">
    <?php
-   include 'navbar.php';
+   include_once 'navbar.php';
 
    // check if "page" has parameter and prevent user from getting knowhere
    $page = $_GET['page'] ?? 'dashboard';
@@ -60,6 +63,9 @@ include 'head.php';
      break;
     case 'workers':
      includePage('main/pages/workers.php');
+     break;
+    case 'addNewPosition':
+     includePage('main/pages/addNewPosition.php');
      break;
     case 'alfOffices':
      includePage('main/pages/alfOffices.php');
@@ -85,14 +91,14 @@ include 'head.php';
     }
    }
 
-   include 'footer.php';
+   include_once 'footer.php';
    ?>
   </div>
 
  </div>
 
  <?php
- include 'script.php';
+ include_once 'script.php';
  ?>
 
 </body>

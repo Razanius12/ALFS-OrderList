@@ -9,7 +9,7 @@
   <div class="sidebar-content">
    <ul class="nav nav-secondary">
     <li class="nav-item">
-     <a href="./index.php?page=dashboard">
+     <a href="index.php?page=dashboard">
       <i class="fas fa-home"></i>
       <p>Dashboard</p>
      </a>
@@ -21,13 +21,13 @@
      <h4 class="text-section">Contents</h4>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=workers">
+     <a href="index.php?page=workers">
       <i class="fas fa-pen-square"></i>
       <p>Workers</p>
      </a>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=orderData">
+     <a href="index.php?page=orderData">
       <i class="fas fa-table"></i>
       <p>Order Data</p>
      </a>

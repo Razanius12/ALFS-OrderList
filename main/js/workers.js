@@ -194,49 +194,4 @@ document.addEventListener('DOMContentLoaded', function () {
   });
  });
 
- // Position handling
- const savePositionBtn = document.getElementById('savePositionBtn');
- if (savePositionBtn) {
-  savePositionBtn.addEventListener('click', function () {
-   const positionInput = document.getElementById('positionInput');
-   positionInput.addEventListener('change', function () {
-    const input = this.value.trim();
-
-    // Check if the input is a new position
-    fetch('main/api/checkPosition.php', {
-     method: 'POST',
-     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-     },
-     body: `position_name=${encodeURIComponent(input)}`
-    })
-     .then(response => response.json())
-     .then(data => {
-      if (!data.exists) {
-       // Prompt to add new position
-       if (confirm(`Position "${input}" does not exist. Do you want to add it?`)) {
-        // AJAX call to save new position
-        fetch('main/api/savePosition.php', {
-         method: 'POST',
-         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-         },
-         body: `position_name=${encodeURIComponent(input)}`
-        })
-         .then(response => response.json())
-         .then(data => {
-          if (data.success) {
-           // Add to datalist
-           const datalist = document.getElementById('positions');
-           const newOption = document.createElement('option');
-           newOption.value = input;
-           datalist.appendChild(newOption);
-          }
-         });
-       }
-      }
-     });
-   });
-  });
- }
 });

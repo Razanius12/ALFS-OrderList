@@ -1,4 +1,5 @@
 <?php
+
 // Database connection
 require_once 'config/database.php';
 
@@ -34,7 +35,7 @@ function maskPassword($password)
    <h3 class="fw-bold mb-3">Workers</h3>
    <ul class="breadcrumbs mb-3">
     <li class="nav-home">
-     <a href="./index.php">
+     <a href="index.php">
       <i class="icon-home"></i>
      </a>
     </li>
@@ -42,7 +43,8 @@ function maskPassword($password)
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=workers">Workers</a>
+     <a href="index.php?page=workers">Workers</a>
+    </li>
    </ul>
   </div>
 
@@ -166,18 +168,26 @@ function maskPassword($password)
        <div class="col-md-6">
         <div class="form-group">
          <label>Position</label>
-         <select class="form-control" name="id_position" id="position-select">
-          <option value="">Select Position</option>
-          <?php
-          $query = "SELECT id_position, position_name 
-                    FROM positions 
-                    WHERE department = 'WORKER'";
-          $positionOptions = mysqli_query($conn, $query);
-          while ($position = mysqli_fetch_assoc($positionOptions)): ?>
-           <option value="<?= $position['id_position'] ?>"><?= $position['position_name'] ?></option>
-          <?php endwhile; ?>
-         </select>
-         <input type="hidden" name="new_position" id="new-position-input">
+         <div class="input-group">
+          <select class="form-control position-select" name="id_position" data-department="WORKER">
+           <option value="">Select Position</option>
+           <?php
+           $query = "SELECT id_position, position_name 
+                      FROM positions 
+                      WHERE department = 'WORKER'";
+           $positionOptions = mysqli_query($conn, $query);
+           while ($position = mysqli_fetch_assoc($positionOptions)): ?>
+            <option value="<?= $position['id_position'] ?>">
+             <?= $position['position_name'] ?>
+            </option>
+           <?php endwhile; ?>
+          </select>
+          <div class="input-group-append">
+             <a href="index.php?page=addNewPosition" class="btn btn-outline-secondary">
+              <i class="fas fa-plus"></i>
+             </a>
+          </div>
+         </div>
         </div>
        </div>
       </div>
@@ -249,18 +259,26 @@ function maskPassword($password)
        <div class="col-md-6">
         <div class="form-group">
          <label>Position</label>
-         <select class="form-control" name="id_position" id="position-select">
-          <option value="">Select Position</option>
-          <?php
-          $query = "SELECT id_position, position_name 
-                    FROM positions 
-                    WHERE department = 'WORKER'";
-          $positionOptions = mysqli_query($conn, $query);
-          while ($position = mysqli_fetch_assoc($positionOptions)): ?>
-           <option value="<?= $position['id_position'] ?>"><?= $position['position_name'] ?></option>
-          <?php endwhile; ?>
-         </select>
-         <input type="hidden" name="new_position" id="new-position-input">
+         <div class="input-group">
+          <select class="form-control position-select" name="id_position" data-department="WORKER">
+           <option value="">Select Position</option>
+           <?php
+           $query = "SELECT id_position, position_name 
+                      FROM positions 
+                      WHERE department = 'WORKER'";
+           $positionOptions = mysqli_query($conn, $query);
+           while ($position = mysqli_fetch_assoc($positionOptions)): ?>
+            <option value="<?= $position['id_position'] ?>">
+             <?= $position['position_name'] ?>
+            </option>
+           <?php endwhile; ?>
+          </select>
+          <div class="input-group-append">
+           <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#addPositionModal">
+            <i class="fas fa-plus"></i>
+           </button>
+          </div>
+         </div>
         </div>
        </div>
       </div>
@@ -324,8 +342,6 @@ function maskPassword($password)
  }
 </style>
 
-<script src="assets/js/core/jquery-3.7.1.min.js"></script>
-<script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
 <script>
  <?php
  include 'main/js/workers.js';

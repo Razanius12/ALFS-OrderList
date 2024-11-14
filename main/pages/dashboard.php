@@ -6,8 +6,8 @@
     <h6 class="op-7 mb-2">Welcome to ALF Solution Admin Dashboard</h6>
    </div>
    <div class="ms-md-auto py-2 py-md-0">
-    <a href="./index.php?page=workers" class="btn btn-label btn-round me-2">Manage Workers</a>
-    <a href="./index.php?page=orderData" class="btn btn-primary btn-round">Add Order</a>
+    <a href="index.php?page=workers" class="btn btn-label btn-round me-2">Manage Workers</a>
+    <a href="index.php?page=orderData" class="btn btn-primary btn-round">Add Order</a>
    </div>
   </div>
   <div class="row">

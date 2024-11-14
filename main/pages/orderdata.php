@@ -40,7 +40,7 @@ function getStatusBadgeClass($status)
    <h3 class="fw-bold mb-3">Order Data</h3>
    <ul class="breadcrumbs mb-3">
     <li class="nav-home">
-     <a href="./index.php">
+     <a href="index.php">
       <i class="icon-home"></i>
      </a>
     </li>
@@ -48,7 +48,7 @@ function getStatusBadgeClass($status)
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=orderData">Order Data</a>
+     <a href="index.php?page=orderData">Order Data</a>
     </li>
    </ul>
   </div>
