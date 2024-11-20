@@ -164,11 +164,13 @@ try {
             <td>
              <div class="form-button-action">
               <button type="button" class="btn btn-link btn-primary btn-lg" data-toggle="modal"
-               data-target="#editPositionModal" data-position-id="<?= htmlspecialchars($position['id_position']) ?>">
+               data-target="#editPositionModal" data-position-id="<?php echo $position['id_position']; ?>"
+               data-position-name="<?php echo htmlspecialchars($position['position_name']); ?>"
+               data-department="<?php echo htmlspecialchars($position['department']); ?>">
                <i class="fa fa-edit"></i>
               </button>
               <button type="button" class="btn btn-link btn-danger"
-               onclick="deletePosition(<?= htmlspecialchars($position['id_position']) ?>)">
+               onclick="deletePosition(<?= $position['id_position'] ?>)">
                <i class="fa fa-times"></i>
               </button>
              </div>
@@ -186,28 +188,158 @@ try {
  </div>
 </div>
 
+<!-- Edit Position Modal -->
+<div class="modal fade" id="editPositionModal" tabindex="-1" role="dialog" aria-labelledby="editPositionModalLabel"
+ aria-hidden="true">
+ <div class="modal-dialog" role="document">
+  <div class="modal-content">
+   <div class="modal-header">
+    <h5 class="modal-title" id="editPositionModalLabel">Edit Position</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+     <span aria-hidden="true">&times;</span>
+    </button>
+   </div>
+   <form id="editPositionForm">
+    <div class="modal-body">
+     <div id="editPositionErrorContainer" class="alert alert-danger" style="display:none;"></div>
+
+     <input type="hidden" name="id_position" id="editPositionId">
+
+     <div class="form-group">
+      <label for="editPositionName">Position Name</label>
+      <input type="text" class="form-control" id="editPositionName" name="position_name" maxlength="32" required>
+     </div>
+
+     <div class="form-group">
+      <label for="editPositionDepartment">Department</label>
+      <select class="form-control" id="editPositionDepartment" name="department" required>
+       <option value="ADMIN">Admin</option>
+       <option value="WORKER">Worker</option>
+      </select>
+     </div>
+    </div>
+    <div class="modal-footer">
+     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+     <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 <script>
- function deletePosition(positionId) {
-  if (confirm('Are you sure you want to delete this position?')) {
-   // Use fetch API for better error handling
-   fetch('main/api/deletePosition.php?id=' + encodeURIComponent(positionId), {
-    method: 'GET',
-    headers: {
-     'Content-Type': 'application/json'
-    }
+ // Function to populate edit modal
+ document.addEventListener('DOMContentLoaded', function () {
+  // Ensure modal trigger buttons are correctly set up
+  const editButtons = document.querySelectorAll('.edit-position-btn');
+
+  editButtons.forEach(button => {
+   button.addEventListener('click', function () {
+    // Get position details from data attributes
+    const positionId = this.getAttribute('data-position-id');
+    const positionName = this.getAttribute('data-position-name');
+    const department = this.getAttribute('data-department');
+
+    // Populate modal fields
+    document.getElementById('editPositionId').value = positionId;
+    document.getElementById('editPositionName').value = positionName;
+    document.getElementById('editPositionDepartment').value = department;
+
+    // Show the modal
+    $('#editPositionModal').modal('show');
+   });
+  });
+
+  // Handle form submission
+  document.getElementById('editPositionForm').addEventListener('submit', function (e) {
+   e.preventDefault();
+
+   const formData = new FormData(this);
+
+   fetch('main/api/updatePosition.php', {
+    method: 'POST',
+    body: formData
    })
     .then(response => response.json())
     .then(data => {
      if (data.success) {
-      location.reload();
+      // Update table row
+      const positionId = formData.get('id_position');
+      const row = document.querySelector(`.edit-position-btn[data-position-id="${positionId}"]`).closest('tr');
+
+      row.cells[1].textContent = formData.get('position_name');
+      row.cells[2].textContent = formData.get('department');
+
+      // Close modal
+      $('#editPositionModal').modal('hide');
+
+      // Show success message
+      alert(data.message || 'Position updated successfully');
      } else {
-      alert('Error deleting position: ' + data.message);
+      // Show error in modal
+      const errorContainer = document.getElementById('editPositionErrorContainer');
+      errorContainer.innerHTML = data.message || 'Error updating position';
+      errorContainer.style.display = 'block';
      }
     })
     .catch(error => {
      console.error('Error:', error);
-     alert('Error deleting position. Please try again.');
+     const errorContainer = document.getElementById('editPositionErrorContainer');
+     errorContainer.innerHTML = 'An unexpected error occurred';
+     errorContainer.style.display = 'block';
+    });
+  });
+ });
+
+ function deletePosition(positionId) {
+  if (confirm('Are you sure you want to delete this position?')) {
+   const deleteUrl = 'main/api/deletePosition.php?id=' + encodeURIComponent(positionId);
+
+   fetch(deleteUrl, {
+    method: 'GET',
+    headers: {
+     'Accept': 'application/json',
+     'Content-Type': 'application/json'
+    }
+   })
+    .then(response => {
+     if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+     }
+     return response.json();
+    })
+    .then(data => {
+     if (data.success) {
+      // Try multiple ways to find and remove the row
+      const row = document.querySelector(`tr button[onclick="deletePosition(${positionId})"]`)?.closest('tr');
+
+      if (row) {
+       row.remove();
+      } else {
+       console.warn(`Could not find row for position ${positionId}`);
+      }
+
+      alert(data.message || 'Position deleted successfully');
+     } else {
+      alert(data.message || 'Error deleting position');
+     }
+    })
+    .catch(error => {
+     console.error('Delete Error:', error);
+     alert('Error deleting position: ' + error.message);
     });
   }
+ }
+
+ // Optional: Add edit functionality
+ function editPosition(positionId) {
+  // Implement edit modal or inline editing logic
+  console.log('Edit position:', positionId);
  }
 </script>
