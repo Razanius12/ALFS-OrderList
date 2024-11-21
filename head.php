@@ -2,7 +2,7 @@
  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
  <title>ALF Solution Order List</title>
  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
- <link rel="icon" href="main/img/alf.png" type="image/x-icon" />
+ <link rel="icon" href="main/img/ALFLogoLight.png" type="image/x-icon" />
 
  <!-- Fonts and icons -->
  <script src="assets/js/plugin/webfont/webfont.min.js"></script>
