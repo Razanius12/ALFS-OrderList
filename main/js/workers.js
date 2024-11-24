@@ -1,21 +1,42 @@
 document.addEventListener('DOMContentLoaded', function () {
  $(document).ready(function () {
-  // Password toggle function
-  $(document).on('click', '.toggle-password', function (e) {
-   e.preventDefault();
+  // Toggle password visibility for both static table and modal forms
+  $(document).on('click', '.toggle-password', function () {
+   const $container = $(this).closest('.password-container, .input-group');
+   const $passwordInput = $container.find('input, .password-text');
+   const $eyeIcon = $(this).find('i');
 
-   const inputGroup = $(this).closest('.input-group');
-   const passwordInput = inputGroup.find('input[type="password"], input[type="text"]');
-   const icon = $(this).find('i');
+   // Check if it's an input or a span
+   if ($passwordInput.is('input')) {
+    // For input fields
+    if ($passwordInput.attr('type') === 'password') {
+     $passwordInput.attr('type', 'text');
+     $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+     $passwordInput.attr('type', 'password');
+     $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+   } else if ($passwordInput.hasClass('password-text')) {
+    // For span elements with masked passwords
+    const currentText = $passwordInput.text();
+    const actualPassword = $passwordInput.attr('data-password');
 
-   if (passwordInput.attr('type') === 'password') {
-    passwordInput.attr('type', 'text');
-    icon.removeClass('fa-eye').addClass('fa-eye-slash');
-   } else {
-    passwordInput.attr('type', 'password');
-    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+    if (currentText === actualPassword) {
+     // Currently showing password, hide it
+     $passwordInput.text(maskPassword(actualPassword));
+     $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+    } else {
+     // Currently masked, show password
+     $passwordInput.text(actualPassword);
+     $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+    }
    }
   });
+
+  // Helper function to mask password
+  function maskPassword(password) {
+   return password.replace(/./g, '•');
+  }
 
   // Edit Worker Modal Handler
   $('#editWorkerModal').on('show.bs.modal', function (e) {
@@ -74,9 +95,9 @@ document.addEventListener('DOMContentLoaded', function () {
      $.ajax({
       url: 'main/api/deleteWorker.php',
       type: 'POST',
+      dataType: 'json', // This will automatically parse JSON
       data: { id_worker: workerId },
-      success: function (response) {
-       const data = JSON.parse(response);
+      success: function (data) { // Changed from response to data
        if (data.success) {
         Swal.fire(
          'Deleted!',
@@ -93,10 +114,11 @@ document.addEventListener('DOMContentLoaded', function () {
         );
        }
       },
-      error: function () {
+      error: function (xhr, status, error) {
+       console.error('Error details:', xhr.responseText, status, error);
        Swal.fire(
         'Error!',
-        'Failed to delete worker',
+        'Failed to delete worker: ' + xhr.responseText,
         'error'
        );
       }
@@ -120,14 +142,14 @@ document.addEventListener('DOMContentLoaded', function () {
    $.ajax({
     url: $(this).attr('action'),
     type: 'POST',
+    dataType: 'json', // Add this line to parse JSON automatically
     data: $(this).serialize(),
-    success: function (response) {
-     const data = JSON.parse(response);
+    success: function (data) { // Change response to data
      if (data.success) {
       Swal.fire({
        icon: 'success',
        title: 'Success',
-       text: 'Worker added successfully'
+       text: data.message || 'Worker added successfully'
       }).then(() => {
        location.reload();
       });
@@ -139,11 +161,15 @@ document.addEventListener('DOMContentLoaded', function () {
       });
      }
     },
-    error: function () {
+    error: function (xhr, status, error) {
+     // More detailed error handling
+     console.error('AJAX Error:', status, error);
+     console.log('Response Text:', xhr.responseText);
+
      Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Failed to add worker'
+      text: xhr.responseText || 'Failed to add worker'
      });
     }
    });

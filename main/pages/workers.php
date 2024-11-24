@@ -173,8 +173,8 @@ function maskPassword($password)
            <option value="">Select Position</option>
            <?php
            $query = "SELECT id_position, position_name 
-                      FROM positions 
-                      WHERE department = 'WORKER'";
+                     FROM positions 
+                     WHERE department = 'WORKER'";
            $positionOptions = mysqli_query($conn, $query);
            while ($position = mysqli_fetch_assoc($positionOptions)): ?>
             <option value="<?= $position['id_position'] ?>">
@@ -183,9 +183,9 @@ function maskPassword($password)
            <?php endwhile; ?>
           </select>
           <div class="input-group-append">
-             <a href="index.php?page=addNewPosition" class="btn btn-outline-secondary">
-              <i class="fas fa-plus"></i>
-             </a>
+           <a href="index.php?page=addNewPosition" class="btn btn-outline-secondary">
+            <i class="fas fa-plus"></i>
+           </a>
           </div>
          </div>
         </div>

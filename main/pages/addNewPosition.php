@@ -32,6 +32,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
    if ($stmt->execute()) {
     $success = "New position added successfully!";
+
+    // Reset input fields after success
+    $position_name = ''; // Clear position name
+    $department = '';    // Clear department
    } else {
     $errors[] = "Error adding position: " . $stmt->error;
    }
@@ -112,7 +116,7 @@ try {
          <div class="form-group">
           <label for="position_name">Position Name</label>
           <input type="text" class="form-control" id="position_name" name="position_name" maxlength="32" required
-           value="<?= isset($_POST['position_name']) ? htmlspecialchars($_POST['position_name']) : '' ?>">
+           value="<?= isset($success) ? '' : htmlspecialchars($_POST['position_name'] ?? '') ?>">
          </div>
         </div>
         <div class="col-md-6">
@@ -120,8 +124,8 @@ try {
           <label for="department">Department</label>
           <select class="form-control" id="department" name="department" required>
            <option value="">Select Department</option>
-           <option value="ADMIN" <?= (isset($_POST['department']) && $_POST['department'] === 'ADMIN') ? 'selected' : '' ?>>Admin</option>
-           <option value="WORKER" <?= (isset($_POST['department']) && $_POST['department'] === 'WORKER') ? 'selected' : '' ?>>Worker</option>
+           <option value="ADMIN" <?= (isset($success) ? '' : (isset($_POST['department']) && $_POST['department'] === 'ADMIN' ? 'selected' : '')) ?>>Admin</option>
+           <option value="WORKER" <?= (isset($success) ? '' : (isset($_POST['department']) && $_POST['department'] === 'WORKER' ? 'selected' : '')) ?>>Worker</option>
           </select>
          </div>
         </div>
@@ -229,7 +233,7 @@ try {
 
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 

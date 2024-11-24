@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: application/json');
-header("Access-Control-Allow-Origin: *"); // the "*" will later be replaced with the domain of the website
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
@@ -44,27 +43,25 @@ try {
  // Validate required fields
  $required_fields = ['username', 'name_worker', 'password', 'id_position', 'gender_worker', 'phone_number'];
  foreach ($required_fields as $field) {
-  if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+  if (!isset($_POST[$field]) || empty($_POST[$field])) {
    throw new Exception("$field is required");
   }
  }
 
  // Sanitize and validate input
- $username = mysqli_real_escape_string($conn, trim($_POST['username']));
- $name_worker = mysqli_real_escape_string($conn, trim($_POST['name_worker']));
- $password = trim($_POST['password']);
+ $username = mysqli_real_escape_string($conn, $_POST['username']);
+ $name_worker = mysqli_real_escape_string($conn, $_POST['name_worker']);
+ $password = mysqli_real_escape_string($conn, $_POST['password']);
  $id_position = (int) $_POST['id_position'];
- $gender_worker = mysqli_real_escape_string($conn, trim($_POST['gender_worker']));
- $phone_number = mysqli_real_escape_string($conn, trim($_POST['phone_number']));
+ $gender_worker = mysqli_real_escape_string($conn, $_POST['gender_worker']);
+ $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number']);
+
+ // Debug: Log received password
+ error_log("Received password: " . $password);
 
  // Validate username format (alphanumeric and underscores only)
  if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
   throw new Exception('Username can only contain letters, numbers, and underscores');
- }
-
- // Validate phone number format (adjust regex according to your needs)
- if (!preg_match('/^[0-9+\-\s()]{8,16}$/', $phone_number)) {
-  throw new Exception('Invalid phone number format');
  }
 
  // Validate gender
@@ -97,9 +94,6 @@ try {
  }
  mysqli_stmt_close($stmt);
 
- // Hash password
- $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
  // Insert new worker
  $insert_query = "INSERT INTO workers (username, name_worker, password, id_position, gender_worker, phone_number) 
                      VALUES (?, ?, ?, ?, ?, ?)";
@@ -110,7 +104,7 @@ try {
   "sssiss",
   $username,
   $name_worker,
-  $hashed_password,
+  $password,
   $id_position,
   $gender_worker,
   $phone_number
@@ -133,8 +127,15 @@ try {
 } catch (Exception $e) {
  $response['success'] = false;
  $response['message'] = $e->getMessage();
+
+ // Debug: Log the full exception
+ error_log("Exception: " . $e->getMessage());
+ error_log("Trace: " . $e->getTraceAsString());
 } finally {
  mysqli_close($conn);
- echo json_encode($response);
+
+ // Ensure JSON is properly encoded
+ echo json_encode($response, JSON_PRETTY_PRINT);
+ exit; // Add exit to prevent any additional output
 }
 ?>
