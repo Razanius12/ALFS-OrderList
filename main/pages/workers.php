@@ -131,7 +131,7 @@ function maskPassword($password)
 
  <!-- Add Worker Modal -->
  <div class="modal fade" id="addWorkerModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-lg">
    <div class="modal-content">
     <div class="modal-header">
      <h5 class="modal-title">Add New Worker</h5>
@@ -221,7 +221,7 @@ function maskPassword($password)
 
  <!-- Edit Worker Modal -->
  <div class="modal fade" id="editWorkerModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-lg">
    <div class="modal-content">
     <div class="modal-header">
      <h5 class="modal-title">Edit Worker</h5>
@@ -260,12 +260,12 @@ function maskPassword($password)
         <div class="form-group">
          <label>Position</label>
          <div class="input-group">
-          <select class="form-control position-select" name="id_position" data-department="WORKER">
+          <select class="form-control position-select" name="id_position" id="edit_position" data-department="WORKER">
            <option value="">Select Position</option>
            <?php
            $query = "SELECT id_position, position_name 
-                      FROM positions 
-                      WHERE department = 'WORKER'";
+                     FROM positions 
+                     WHERE department = 'WORKER'";
            $positionOptions = mysqli_query($conn, $query);
            while ($position = mysqli_fetch_assoc($positionOptions)): ?>
             <option value="<?= $position['id_position'] ?>">

@@ -1,4 +1,8 @@
 <?php
+// Required headers
+header('Content-Type: application/json');
+
+// Include database connection
 require_once '../../config/database.php';
 
 if (isset($_GET['id_order'])) {

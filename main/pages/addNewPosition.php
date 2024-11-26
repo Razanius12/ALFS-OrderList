@@ -195,13 +195,11 @@ try {
 <!-- Edit Position Modal -->
 <div class="modal fade" id="editPositionModal" tabindex="-1" role="dialog" aria-labelledby="editPositionModalLabel"
  aria-hidden="true">
- <div class="modal-dialog" role="document">
+ <div class="modal-dialog">
   <div class="modal-content">
    <div class="modal-header">
     <h5 class="modal-title" id="editPositionModalLabel">Edit Position</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-     <span aria-hidden="true">&times;</span>
-    </button>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
    </div>
    <form id="editPositionForm">
     <div class="modal-body">
@@ -223,7 +221,7 @@ try {
      </div>
     </div>
     <div class="modal-footer">
-     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
      <button type="submit" class="btn btn-primary">Save Changes</button>
     </div>
    </form>
@@ -238,112 +236,7 @@ try {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
- // Function to populate edit modal
- document.addEventListener('DOMContentLoaded', function () {
-  // Ensure modal trigger buttons are correctly set up
-  const editButtons = document.querySelectorAll('.edit-position-btn');
-
-  editButtons.forEach(button => {
-   button.addEventListener('click', function () {
-    // Get position details from data attributes
-    const positionId = this.getAttribute('data-position-id');
-    const positionName = this.getAttribute('data-position-name');
-    const department = this.getAttribute('data-department');
-
-    // Populate modal fields
-    document.getElementById('editPositionId').value = positionId;
-    document.getElementById('editPositionName').value = positionName;
-    document.getElementById('editPositionDepartment').value = department;
-
-    // Show the modal
-    $('#editPositionModal').modal('show');
-   });
-  });
-
-  // Handle form submission
-  document.getElementById('editPositionForm').addEventListener('submit', function (e) {
-   e.preventDefault();
-
-   const formData = new FormData(this);
-
-   fetch('main/api/updatePosition.php', {
-    method: 'POST',
-    body: formData
-   })
-    .then(response => response.json())
-    .then(data => {
-     if (data.success) {
-      // Update table row
-      const positionId = formData.get('id_position');
-      const row = document.querySelector(`.edit-position-btn[data-position-id="${positionId}"]`).closest('tr');
-
-      row.cells[1].textContent = formData.get('position_name');
-      row.cells[2].textContent = formData.get('department');
-
-      // Close modal
-      $('#editPositionModal').modal('hide');
-
-      // Show success message
-      alert(data.message || 'Position updated successfully');
-     } else {
-      // Show error in modal
-      const errorContainer = document.getElementById('editPositionErrorContainer');
-      errorContainer.innerHTML = data.message || 'Error updating position';
-      errorContainer.style.display = 'block';
-     }
-    })
-    .catch(error => {
-     console.error('Error:', error);
-     const errorContainer = document.getElementById('editPositionErrorContainer');
-     errorContainer.innerHTML = 'An unexpected error occurred';
-     errorContainer.style.display = 'block';
-    });
-  });
- });
-
- function deletePosition(positionId) {
-  if (confirm('Are you sure you want to delete this position?')) {
-   const deleteUrl = 'main/api/deletePosition.php?id=' + encodeURIComponent(positionId);
-
-   fetch(deleteUrl, {
-    method: 'GET',
-    headers: {
-     'Accept': 'application/json',
-     'Content-Type': 'application/json'
-    }
-   })
-    .then(response => {
-     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-     }
-     return response.json();
-    })
-    .then(data => {
-     if (data.success) {
-      // Try multiple ways to find and remove the row
-      const row = document.querySelector(`tr button[onclick="deletePosition(${positionId})"]`)?.closest('tr');
-
-      if (row) {
-       row.remove();
-      } else {
-       console.warn(`Could not find row for position ${positionId}`);
-      }
-
-      alert(data.message || 'Position deleted successfully');
-     } else {
-      alert(data.message || 'Error deleting position');
-     }
-    })
-    .catch(error => {
-     console.error('Delete Error:', error);
-     alert('Error deleting position: ' + error.message);
-    });
-  }
- }
-
- // Optional: Add edit functionality
- function editPosition(positionId) {
-  // Implement edit modal or inline editing logic
-  console.log('Edit position:', positionId);
- }
+ <?php
+ include 'main/js/addNewPosition.js';
+ ?>
 </script>

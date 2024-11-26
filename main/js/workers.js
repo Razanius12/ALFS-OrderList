@@ -57,24 +57,40 @@ document.addEventListener('DOMContentLoaded', function () {
     url: 'main/api/getWorker.php',
     type: 'GET',
     data: { id_worker: workerId },
+    dataType: 'json', // This helps jQuery parse the JSON automatically
     success: function (response) {
-     const data = JSON.parse(response);
+     if (response.success) {
+      const data = response.data;
 
-     // Populate form fields
-     $('#edit_worker_id').val(data.id_worker);
-     $('#edit_name_worker').val(data.name_worker);
-     $('#edit_username').val(data.username);
-     $('#edit_position').val(data.id_position);
-     $('#edit_gender').val(data.gender_worker);
-     $('#edit_phone_number').val(data.phone_number);
+      // Populate form fields
+      $('#edit_worker_id').val(data.id_worker);
+      $('#edit_name_worker').val(data.name_worker);
+      $('#edit_username').val(data.username);
+      $('#edit_position').val(data.id_position);
+      $('#edit_gender').val(data.gender_worker);
+      $('#edit_phone_number').val(data.phone_number);
 
-     Swal.close();
+      // Populate password field if applicable
+      // SECURITY WARNING: Be very careful about handling passwords
+      $('#edit_password').val(data.password);
+
+      // Set the selected position
+      $('#edit_position').val(data.id_position)
+
+      Swal.close();
+     } else {
+      Swal.fire({
+       icon: 'error',
+       title: 'Error',
+       text: response.message || 'Failed to fetch worker data'
+      });
+     }
     },
-    error: function () {
+    error: function (xhr, status, error) {
      Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Failed to fetch worker data'
+      text: 'Failed to fetch worker data: ' + error
      });
     }
    });
@@ -179,6 +195,9 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#editWorkerForm').on('submit', function (e) {
    e.preventDefault();
 
+   // Create FormData object to handle file uploads and more complex form data
+   var formData = new FormData(this);
+
    Swal.fire({
     title: 'Updating Worker...',
     allowOutsideClick: false,
@@ -190,14 +209,16 @@ document.addEventListener('DOMContentLoaded', function () {
    $.ajax({
     url: $(this).attr('action'),
     type: 'POST',
-    data: $(this).serialize(),
-    success: function (response) {
-     const data = JSON.parse(response);
+    data: formData,
+    processData: false,  // Important for FormData
+    contentType: false,  // Important for FormData
+    dataType: 'json',   // Explicitly tell jQuery to expect JSON
+    success: function (data) {
      if (data.success) {
       Swal.fire({
        icon: 'success',
        title: 'Success',
-       text: 'Worker updated successfully'
+       text: data.message || 'Worker updated successfully'
       }).then(() => {
        location.reload();
       });
@@ -209,11 +230,12 @@ document.addEventListener('DOMContentLoaded', function () {
       });
      }
     },
-    error: function () {
+    error: function (xhr, status, error) {
+     console.error('Error details:', xhr.responseText);
      Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Failed to update worker'
+      text: 'Failed to update worker: ' + (xhr.responseJSON?.message || error)
      });
     }
    });

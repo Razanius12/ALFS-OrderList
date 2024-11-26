@@ -1,55 +1,57 @@
 <?php
-require_once '../../config/database.php';
+// Required headers
+header("Content-Type: application/json");
 
-header('Content-Type: application/json');
+// Database connection
+require_once '../../config/database.php';
 
 $response = ['success' => false, 'message' => 'Unknown error'];
 
 try {
- // Input validation
- $id_position = filter_input(INPUT_POST, 'id_position', FILTER_VALIDATE_INT);
- $position_name = trim($_POST['position_name'] ?? '');
- $department = $_POST['department'] ?? '';
-
- // Validate inputs
- $errors = [];
-
- if (!$id_position) {
-  $errors[] = "Invalid position ID";
+ // Ensure all required fields are present
+ $requiredFields = ['id_position', 'position_name', 'department'];
+ foreach ($requiredFields as $field) {
+  if (!isset($_POST[$field]) || empty($_POST[$field])) {
+   throw new Exception("Missing required field: $field");
+  }
  }
 
- if (empty($position_name)) {
-  $errors[] = "Position name is required";
- } elseif (strlen($position_name) > 32) {
-  $errors[] = "Position name must be less than 32 characters";
+ // Sanitize inputs
+ $id_position = mysqli_real_escape_string($conn, $_POST['id_position']);
+ $position_name = mysqli_real_escape_string($conn, $_POST['position_name']);
+ $department = mysqli_real_escape_string($conn, $_POST['department']);
+
+ // Validate department
+ if (!in_array($department, ['ADMIN', 'WORKER'])) {
+  throw new Exception("Invalid department selected");
  }
 
- if (empty($department) || !in_array($department, ['ADMIN', 'WORKER'])) {
-  $errors[] = "Invalid department";
+ // Validate position name length
+ if (strlen($position_name) > 32) {
+  throw new Exception("Position name must be less than 32 characters");
  }
 
- if (!empty($errors)) {
-  $response['message'] = implode(', ', $errors);
-  echo json_encode($response);
-  exit;
- }
+ // Prepare UPDATE query
+ $query = "UPDATE positions 
+           SET 
+             position_name = '$position_name', 
+             department = '$department'
+           WHERE id_position = '$id_position'";
 
- // Prepare update statement
- $sql = "UPDATE positions SET position_name = ?, department = ? WHERE id_position = ?";
-
- $stmt = $conn->prepare($sql);
- $stmt->bind_param("ssi", $position_name, $department, $id_position);
-
- if ($stmt->execute()) {
-  $response['success'] = true;
-  $response['message'] = "Position updated successfully";
+ // Execute query
+ if (mysqli_query($conn, $query)) {
+  echo json_encode([
+   'success' => true,
+   'message' => 'Position updated successfully'
+  ]);
  } else {
-  $response['message'] = "Error updating position: " . $stmt->error;
+  throw new Exception('Failed to update position: ' . mysqli_error($conn));
  }
-
- $stmt->close();
 } catch (Exception $e) {
- $response['message'] = "Database error: " . $e->getMessage();
-} finally {
- echo json_encode($response);
+ // Error handling
+ echo json_encode([
+  'success' => false,
+  'message' => $e->getMessage()
+ ]);
 }
+?>

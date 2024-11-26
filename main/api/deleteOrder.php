@@ -1,4 +1,8 @@
 <?php
+// Required headers
+header("Content-Type: application/json");
+
+// Database connection
 require_once '../../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_order'])) {

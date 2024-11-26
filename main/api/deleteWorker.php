@@ -1,9 +1,8 @@
 <?php
+// Required headers
 header('Content-Type: application/json');
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Database connection
+// Include database connection
 require_once '../../config/database.php';
 
 // Set content type to JSON
