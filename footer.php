@@ -1,5 +1,5 @@
 <footer class="footer">
- <div class="container-fluid d-flex justify-content-between">
+ <div class="container-fluid d-flex justify-content-between align-items-center">
   <nav class="pull-left">
    <ul class="nav">
     <li class="nav-item">
@@ -15,14 +15,15 @@
     </li>
    </ul>
   </nav>
-  <div class="copyright">
-   2024, made with <i class="fa fa-heart heart text-danger"></i> by
-   <a href="http://www.themekita.com">ThemeKita</a>
-  </div>
-  <div>
-   Distributed by
-   <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
+  <div class="d-flex align-items-center">
+   <div class="copyright me-3">
+    2024, made by Razanius12 and Fauzan <i class=""></i> by
+    <a href="http://www.themekita.com">ThemeKita</a>
+   </div>
+   <div>
+    Distributed by
+    <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
+   </div>
   </div>
  </div>
 </footer>
-</div>
