@@ -21,7 +21,7 @@ if (!empty($_POST['new_position'])) {
 
  if (mysqli_num_rows($checkResult) == 0) {
   // Insert new position
-  $insertPositionQuery = "INSERT INTO positions (position_name, department) VALUES ('$newPositionName', 'WORKER')";
+  $insertPositionQuery = "INSERT INTO positions (position_name, department) VALUES ('$newPositionName', 'ADMIN')";
   mysqli_query($conn, $insertPositionQuery);
 
   // Get the ID of the newly inserted position
@@ -40,7 +40,7 @@ try {
  }
 
  // Validate required fields
- $required_fields = ['username', 'name_worker', 'password', 'id_position', 'gender_worker', 'phone_number'];
+ $required_fields = ['username', 'name_admin', 'password', 'id_position', 'phone_number'];
  foreach ($required_fields as $field) {
   if (!isset($_POST[$field]) || empty($_POST[$field])) {
    throw new Exception("$field is required");
@@ -49,10 +49,9 @@ try {
 
  // Sanitize and validate input
  $username = mysqli_real_escape_string($conn, $_POST['username']);
- $name_worker = mysqli_real_escape_string($conn, $_POST['name_worker']);
+ $name_admin = mysqli_real_escape_string($conn, $_POST['name_admin']);
  $password = mysqli_real_escape_string($conn, $_POST['password']);
  $id_position = (int) $_POST['id_position'];
- $gender_worker = mysqli_real_escape_string($conn, $_POST['gender_worker']);
  $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number']);
 
  // Debug: Log received password
@@ -63,14 +62,8 @@ try {
   throw new Exception('Username can only contain letters, numbers, and underscores');
  }
 
- // Validate gender
- $allowed_genders = ['MALE', 'FEMALE', 'OTHER'];
- if (!in_array($gender_worker, $allowed_genders)) {
-  throw new Exception('Invalid gender value');
- }
-
  // Check if username already exists
- $check_query = "SELECT id_worker FROM workers WHERE username = ?";
+ $check_query = "SELECT id_admin FROM admins WHERE username = ?";
  $stmt = mysqli_prepare($conn, $check_query);
  mysqli_stmt_bind_param($stmt, "s", $username);
  mysqli_stmt_execute($stmt);
@@ -81,8 +74,8 @@ try {
  }
  mysqli_stmt_close($stmt);
 
- // Validate position exists and is a worker position
- $position_query = "SELECT id_position FROM positions WHERE id_position = ? AND department = 'WORKER'";
+ // Validate position exists and is an admin position
+ $position_query = "SELECT id_position FROM positions WHERE id_position = ? AND department = 'ADMIN'";
  $stmt = mysqli_prepare($conn, $position_query);
  mysqli_stmt_bind_param($stmt, "i", $id_position);
  mysqli_stmt_execute($stmt);
@@ -93,32 +86,31 @@ try {
  }
  mysqli_stmt_close($stmt);
 
- // Insert new worker
- $insert_query = "INSERT INTO workers (username, name_worker, password, id_position, gender_worker, phone_number) 
-                  VALUES (?, ?, ?, ?, ?, ?)";
+ // Insert new admin
+ $insert_query = "INSERT INTO admins (username, name_admin, password, id_position, phone_number) 
+                  VALUES (?, ?, ?, ?, ?)";
 
  $stmt = mysqli_prepare($conn, $insert_query);
  mysqli_stmt_bind_param(
   $stmt,
-  "sssiss",
+  "sssss",
   $username,
-  $name_worker,
+  $name_admin,
   $password,
   $id_position,
-  $gender_worker,
   $phone_number
  );
 
  if (mysqli_stmt_execute($stmt)) {
   $response['success'] = true;
-  $response['message'] = 'Worker added successfully';
+  $response['message'] = 'Admin added successfully';
   $response['data'] = [
-   'id_worker' => mysqli_insert_id($conn),
+   'id_admin' => mysqli_insert_id($conn),
    'username' => $username,
-   'name_worker' => $name_worker
+   'name_admin' => $name_admin
   ];
  } else {
-  throw new Exception('Failed to add worker: ' . mysqli_error($conn));
+  throw new Exception('Failed to add admin: ' . mysqli_error($conn));
  }
 
  mysqli_stmt_close($stmt);

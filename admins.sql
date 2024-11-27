@@ -24,40 +24,29 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `workers`
+-- Table structure for table `admins`
 --
 
-CREATE TABLE `workers` (
-  `id_worker` int(4) NOT NULL,
+CREATE TABLE `admins` (
+  `id_admin` int(4) NOT NULL,
   `username` varchar(255) NOT NULL,
-  `name_worker` varchar(255) NOT NULL,
+  `name_admin` varchar(255) NOT NULL,
   `id_position` int(4) NOT NULL,
-  `gender_worker` enum('MALE','FEMALE','OTHER') NOT NULL,
   `phone_number` varchar(16) NOT NULL,
-  `availability_status` enum('AVAILABLE','TASKED') NOT NULL DEFAULT 'AVAILABLE',
-  `current_tasks` int(2) NOT NULL DEFAULT 0,
   `password` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `workers`
---
-
-INSERT INTO `workers` (`id_worker`, `username`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `current_tasks`, `password`, `created_at`, `updated_at`) VALUES
-(6, 'razanius12', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'AVAILABLE', 0, 'realgamer', '2024-11-26 07:14:02', '2024-11-26 07:54:18'),
-(7, 'ftdAulia', 'Fitdia Aulia', 13, 'FEMALE', '6281234345656', 'AVAILABLE', 0, 'auliadongs333', '2024-11-26 07:38:02', '2024-11-26 07:54:38');
-
---
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `workers`
+-- Indexes for table `admins`
 --
-ALTER TABLE `workers`
-  ADD PRIMARY KEY (`id_worker`),
+ALTER TABLE `admins`
+  ADD PRIMARY KEY (`id_admin`),
   ADD UNIQUE KEY `username` (`username`),
   ADD KEY `id_position` (`id_position`);
 
@@ -66,20 +55,20 @@ ALTER TABLE `workers`
 --
 
 --
--- AUTO_INCREMENT for table `workers`
+-- AUTO_INCREMENT for table `admins`
 --
-ALTER TABLE `workers`
-  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+ALTER TABLE `admins`
+  MODIFY `id_admin` int(4) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `workers`
+-- Constraints for table `admins`
 --
-ALTER TABLE `workers`
-  ADD CONSTRAINT `workers_ibfk_1` FOREIGN KEY (`id_position`) REFERENCES `positions` (`id_position`);
+ALTER TABLE `admins`
+  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`id_position`) REFERENCES `positions` (`id_position`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

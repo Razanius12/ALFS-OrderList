@@ -116,7 +116,7 @@
        </li>
        <li>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="#">Manage Admins</a>
+        <a class="dropdown-item" href="index.php?page=admins">Manage Admins</a>
         <a class="dropdown-item" href="#">Account Setting</a>
         <div class="dropdown-divider"></div>
         <a class="dropdown-item" href="#">Logout</a>

@@ -5,57 +5,63 @@ header('Content-Type: application/json');
 // Database connection
 require_once '../../config/database.php';
 
-// Check if form is submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
- // Validate inputs
- $positionName = trim($_POST['positionName'] ?? '');
- $department = $_POST['department'] ?? '';
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+ $position_name = trim($_POST['position_name']);
+ $department = $_POST['department'];
 
- // Input validation
+ // Validate input
  $errors = [];
 
- if (empty($positionName)) {
-  $errors[] = "Position name is required.";
+ if (empty($position_name)) {
+  $errors[] = "Position name is required";
+ } elseif (strlen($position_name) > 32) {
+  $errors[] = "Position name must be less than 32 characters";
  }
 
- if (!in_array($department, ['WORKER', 'ADMIN'])) {
-  $errors[] = "Invalid department selected.";
+ if (empty($department)) {
+  $errors[] = "Department is required";
+ } elseif (!in_array($department, ['ADMIN', 'WORKER'])) {
+  $errors[] = "Invalid department selected";
  }
 
- // Check if position already exists
- $checkQuery = "SELECT idPosition FROM positions 
-                WHERE positionName = ? AND department = ?";
- $checkStmt = $conn->prepare($checkQuery);
- $checkStmt->bind_param("ss", $positionName, $department);
- $checkStmt->execute();
- $checkResult = $checkStmt->get_result();
-
- if ($checkResult->num_rows > 0) {
-  $errors[] = "Position already exists.";
- }
-
- // If no errors, proceed with insertion
  if (empty($errors)) {
-  $insertQuery = "INSERT INTO positions (positionName, department) VALUES (?, ?)";
-  $insertStmt = $conn->prepare($insertQuery);
-  $insertStmt->bind_param("ss", $positionName, $department);
+  // Prepare SQL to insert new position
+  $sql = "INSERT INTO positions (position_name, department) VALUES (?, ?)";
 
-  if ($insertStmt->execute()) {
-   // Set success message in session
-   $_SESSION['successMessage'] = "Position '$positionName' added successfully!";
+  try {
+   $stmt = $conn->prepare($sql);
+   $stmt->bind_param("ss", $position_name, $department);
 
-   // Redirect back to workers.php
-   header("Location: workers.php");
-   exit();
-  } else {
-   $errors[] = "Failed to add position. Please try again.";
+   if ($stmt->execute()) {
+    echo json_encode([
+     'success' => true,
+     'message' => 'New position added successfully!',
+     'id' => $stmt->insert_id
+    ]);
+   } else {
+    echo json_encode([
+     'success' => false,
+     'message' => 'Error adding position: ' . $stmt->error
+    ]);
+   }
+
+   $stmt->close();
+  } catch (Exception $e) {
+   echo json_encode([
+    'success' => false,
+    'message' => 'Database error: ' . $e->getMessage()
+   ]);
   }
+ } else {
+  echo json_encode([
+   'success' => false,
+   'message' => $errors
+  ]);
  }
-
- // If there are errors, store them in session
- if (!empty($errors)) {
-  $_SESSION['errorMessages'] = $errors;
-  header("Location: main/pages/addNewPosition.php");
-  exit();
- }
+} else {
+ echo json_encode([
+  'success' => false,
+  'message' => 'Invalid request method'
+ ]);
 }
+?>

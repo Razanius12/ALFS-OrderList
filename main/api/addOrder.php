@@ -28,10 +28,6 @@ function validateInput($data)
   }
  }
 
- if (empty($data['status']) || !in_array($data['status'], ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])) {
-  $errors[] = "Valid status is required";
- }
-
  // Validate project manager exists and is a manager
  if (!empty($data['project_manager_id'])) {
   global $conn;
@@ -65,7 +61,7 @@ try {
   'order_name' => trim($_POST['order_name'] ?? ''),
   'project_manager_id' => trim($_POST['project_manager_id'] ?? ''),
   'start_date' => trim($_POST['start_date'] ?? ''),
-  'status' => trim($_POST['status'] ?? ''),
+  'status' => 'PENDING',  // Set the status to "PENDING"
   'description' => trim($_POST['description'] ?? ''),
   'worker_ids' => isset($_POST['worker_ids']) ? (array) $_POST['worker_ids'] : []
  ];
@@ -82,12 +78,12 @@ try {
  // Insert order
  $stmt = $conn->prepare("
         INSERT INTO orders (
-        order_name, 
-        project_manager_id, 
-        start_date, 
-        status, 
-        description,
-        created_at
+         order_name, 
+         project_manager_id, 
+         start_date, 
+         status, 
+         description,
+         created_at
         ) VALUES (?, ?, ?, ?, ?, NOW())
     ");
 
@@ -111,10 +107,10 @@ try {
  if (!empty($data['worker_ids'])) {
   $stmt = $conn->prepare("
             INSERT INTO project_assignments (
-                id_order, 
-                id_worker, 
-                id_admin, 
-                assigned_at
+             id_order, 
+             id_worker, 
+             id_admin, 
+             assigned_at
             ) VALUES (?, ?, ?, NOW())
         ");
 
@@ -137,18 +133,18 @@ try {
 
  // Fetch the created order with assignments
  $query = "SELECT 
-                o.id_order, 
-                o.order_name, 
-                o.status, 
-                o.start_date, 
-                a.name_admin as project_manager,
-                GROUP_CONCAT(DISTINCT w.name_worker) as assigned_workers
-              FROM orders o
-              LEFT JOIN admins a ON o.project_manager_id = a.id_admin
-              LEFT JOIN project_assignments pa ON o.id_order = pa.id_order
-              LEFT JOIN workers w ON pa.id_worker = w.id_worker
-              WHERE o.id_order = ?
-              GROUP BY o.id_order";
+            o.id_order, 
+            o.order_name, 
+            o.status, 
+            o.start_date, 
+            a.name_admin as project_manager,
+            GROUP_CONCAT(DISTINCT w.name_worker) as assigned_workers
+           FROM orders o
+           LEFT JOIN admins a ON o.project_manager_id = a.id_admin
+           LEFT JOIN project_assignments pa ON o.id_order = pa.id_order
+           LEFT JOIN workers w ON pa.id_worker = w.id_worker
+           WHERE o.id_order = ?
+           GROUP BY o.id_order";
 
  $stmt = $conn->prepare($query);
  $stmt->bind_param("i", $order_id);

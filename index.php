@@ -17,6 +17,9 @@ include_once 'head.php';
    case 'undefined':
     includePage('main/sidebars/sidebarDashboard.php');
     break;
+    case 'admins':
+     includePage('main/sidebars/sidebarDefault.php');
+     break;
    case 'dashboard':
     includePage('main/sidebars/sidebarDashboard.php');
     break;
@@ -55,6 +58,9 @@ include_once 'head.php';
     case 'undefined':
      includePage('main/pages/dashboard.php');
      break;
+     case 'admins':
+      includePage('main/pages/admins.php');
+      break;
     case 'dashboard':
      includePage('main/pages/dashboard.php');
      break;

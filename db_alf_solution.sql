@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 07, 2024 at 10:34 AM
+-- Generation Time: Nov 27, 2024 at 05:38 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -56,6 +56,18 @@ CREATE TABLE `daily_earnings` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `gmaps`
+--
+
+CREATE TABLE `gmaps` (
+  `id_maps` int(4) NOT NULL,
+  `name_city_district` varchar(32) NOT NULL,
+  `link_embed` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `orders`
 --
 
@@ -82,6 +94,15 @@ CREATE TABLE `positions` (
   `department` enum('ADMIN','WORKER') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `positions`
+--
+
+INSERT INTO `positions` (`id_position`, `position_name`, `department`, `created_at`) VALUES
+(13, 'Content Creator', 'WORKER', '2024-11-24 05:01:22'),
+(17, 'Designer', 'WORKER', '2024-11-24 07:40:15'),
+(18, 'Live Host', 'WORKER', '2024-11-24 07:42:36');
 
 -- --------------------------------------------------------
 
@@ -149,6 +170,14 @@ CREATE TABLE `workers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `workers`
+--
+
+INSERT INTO `workers` (`id_worker`, `username`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `current_tasks`, `password`, `created_at`, `updated_at`) VALUES
+(6, 'razanius12', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'AVAILABLE', 0, 'realgamer', '2024-11-26 07:14:02', '2024-11-26 07:54:18'),
+(7, 'ftdAulia', 'Fitdia Aulia', 13, 'FEMALE', '6281234345656', 'AVAILABLE', 0, 'auliadongs333', '2024-11-26 07:38:02', '2024-11-26 07:54:38');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -166,6 +195,12 @@ ALTER TABLE `admins`
 ALTER TABLE `daily_earnings`
   ADD PRIMARY KEY (`id_earning`),
   ADD UNIQUE KEY `unique_date` (`date`);
+
+--
+-- Indexes for table `gmaps`
+--
+ALTER TABLE `gmaps`
+  ADD PRIMARY KEY (`id_maps`);
 
 --
 -- Indexes for table `orders`
@@ -214,6 +249,12 @@ ALTER TABLE `daily_earnings`
   MODIFY `id_earning` int(4) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `gmaps`
+--
+ALTER TABLE `gmaps`
+  MODIFY `id_maps` int(4) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
@@ -223,7 +264,7 @@ ALTER TABLE `orders`
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `id_position` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_position` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `project_assignments`
@@ -235,7 +276,7 @@ ALTER TABLE `project_assignments`
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
