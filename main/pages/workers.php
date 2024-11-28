@@ -342,8 +342,4 @@ function maskPassword($password)
  }
 </style>
 
-<script>
- <?php
- include 'main/js/workers.js';
- ?>
-</script>
+<script src="main/js/workers.js"></script>

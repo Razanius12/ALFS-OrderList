@@ -229,8 +229,4 @@ try {
  </div>
 </div>
 
-<script>
- <?php
- include 'main/js/addNewPosition.js';
- ?>
-</script>
+<script src="main/js/addNewPosition.js"></script>

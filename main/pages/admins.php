@@ -299,8 +299,4 @@ function maskPassword($password)
  }
 </style>
 
-<script>
- <?php
- include 'main/js/admins.js';
- ?>
-</script>
+<script src="main/js/admins.js"></script>

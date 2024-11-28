@@ -115,7 +115,7 @@ function getStatusBadgeClass($status)
   </div>
 
   <!-- Add Order Modal -->
-  <div class="modal fade" id="addOrderModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal fade" id="addOrderModal" tabindex="-1" role="dialog">
    <div class="modal-dialog modal-lg">
     <div class="modal-content">
      <div class="modal-header">
@@ -273,8 +273,4 @@ function getStatusBadgeClass($status)
 </div>
 
 <!-- Add necessary JavaScript -->
-<script>
- <?php
- include 'main/js/orderData.js';
- ?>
-</script>
+<script src="main/js/orderData.js"></script>
