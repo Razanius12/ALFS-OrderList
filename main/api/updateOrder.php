@@ -1,204 +1,143 @@
 <?php
 // Required headers
-header("Content-Type: application/json");
+header('Content-Type: application/json');
 
-// Database connection
+// Include database connection
 require_once '../../config/database.php';
 
-// Function to validate input
-function validateInput($data)
-{
- $errors = [];
-
- if (empty($data['id_order'])) {
-  $errors[] = "Order ID is required";
- }
-
- if (empty($data['order_name'])) {
-  $errors[] = "Project name is required";
- }
-
- if (empty($data['project_manager_id'])) {
-  $errors[] = "Project manager is required";
- }
-
- if (empty($data['start_date'])) {
-  $errors[] = "Start date is required";
- } else {
-  // Validate date format
-  $date = date_create($data['start_date']);
-  if (!$date) {
-   $errors[] = "Invalid date format";
-  }
- }
-
- if (empty($data['status']) || !in_array($data['status'], ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])) {
-  $errors[] = "Valid status is required";
- }
-
- // Validate project manager exists and is a manager
- if (!empty($data['project_manager_id'])) {
-  global $conn;
-  $stmt = $conn->prepare("
-            SELECT a.id_admin 
-            FROM admins a
-            JOIN positions p ON a.id_position = p.id_position
-            WHERE a.id_admin = ? 
-            AND p.position_name LIKE '%manager%'
-            AND p.department = 'ADMIN'
-        ");
-  $stmt->bind_param("i", $data['project_manager_id']);
-  $stmt->execute();
-  if (!$stmt->get_result()->fetch_assoc()) {
-   $errors[] = "Invalid project manager selected";
-  }
-  $stmt->close();
- }
-
- return $errors;
-}
-
 try {
- // Check if it's a POST request
- if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  throw new Exception('Only POST method is allowed');
- }
+ // Start a transaction for atomic operations
+ mysqli_begin_transaction($conn);
 
- // Get posted data
- $data = [
-  'id_order' => trim($_POST['id_order'] ?? ''),
-  'order_name' => trim($_POST['order_name'] ?? ''),
-  'project_manager_id' => trim($_POST['project_manager_id'] ?? ''),
-  'start_date' => trim($_POST['start_date'] ?? ''),
-  'status' => trim($_POST['status'] ?? ''),
-  'description' => trim($_POST['description'] ?? ''),
-  'worker_ids' => isset($_POST['worker_ids']) ? (array) $_POST['worker_ids'] : []
- ];
-
- // Begin transaction
- $conn->begin_transaction();
-
- // Validate input
- $errors = validateInput($data);
- if (!empty($errors)) {
-  throw new Exception('Validation failed: ' . implode(', ', $errors));
- }
-
- // Check if order exists
- $stmt = $conn->prepare("SELECT id_order FROM orders WHERE id_order = ?");
- $stmt->bind_param("i", $data['id_order']);
- $stmt->execute();
- if (!$stmt->get_result()->fetch_assoc()) {
-  throw new Exception("Order not found");
- }
- $stmt->close();
-
- // Update order
- $stmt = $conn->prepare("
-        UPDATE orders 
-        SET order_name = ?,
-            project_manager_id = ?,
-            start_date = ?,
-            status = ?,
-            description = ?
-        WHERE id_order = ?
-    ");
-
- $stmt->bind_param(
-  "sssssi",
-  $data['order_name'],
-  $data['project_manager_id'],
-  $data['start_date'],
-  $data['status'],
-  $data['description'],
-  $data['id_order']
- );
-
- if (!$stmt->execute()) {
-  throw new Exception("Error updating order: " . $stmt->error);
- }
- $stmt->close();
-
- // Update worker assignments
- // First, remove existing assignments
- $stmt = $conn->prepare("DELETE FROM project_assignments WHERE id_order = ?");
- $stmt->bind_param("i", $data['id_order']);
- if (!$stmt->execute()) {
-  throw new Exception("Error removing existing assignments: " . $stmt->error);
- }
- $stmt->close();
-
- // Then add new assignments if any
- if (!empty($data['worker_ids'])) {
-  $stmt = $conn->prepare("
-            INSERT INTO project_assignments (
-                id_order, 
-                id_worker, 
-                id_admin, 
-                assigned_at
-            ) VALUES (?, ?, ?, NOW())
-        ");
-
-  foreach ($data['worker_ids'] as $worker_id) {
-   $stmt->bind_param(
-    "iii",
-    $data['id_order'],
-    $worker_id,
-    $data['project_manager_id']
-   );
-   if (!$stmt->execute()) {
-    throw new Exception("Error assigning worker: " . $stmt->error);
-   }
+ // Ensure all required fields are present
+ $requiredFields = ['order_id', 'order_name', 'project_manager_id', 'start_date', 'order_status'];
+ foreach ($requiredFields as $field) {
+  if (!isset($_POST[$field]) || empty($_POST[$field])) {
+   throw new Exception("Missing required field: $field");
   }
-  $stmt->close();
  }
 
- // Commit transaction
- $conn->commit();
+ // Sanitize inputs
+ $order_id = mysqli_real_escape_string($conn, $_POST['order_id']);
+ $order_name = mysqli_real_escape_string($conn, $_POST['order_name']);
+ $project_manager_id = mysqli_real_escape_string($conn, $_POST['project_manager_id']);
+ $start_date = mysqli_real_escape_string($conn, $_POST['start_date']);
+ $order_status = mysqli_real_escape_string($conn, $_POST['order_status']);
 
- // Fetch the updated order with assignments
- $query = "SELECT 
-                o.id_order, 
-                o.order_name, 
-                o.status, 
-                o.start_date, 
-                a.name_admin as project_manager,
-                GROUP_CONCAT(DISTINCT w.name_worker) as assigned_workers
-              FROM orders o
-              LEFT JOIN admins a ON o.project_manager_id = a.id_admin
-              LEFT JOIN project_assignments pa ON o.id_order = pa.id_order
-              LEFT JOIN workers w ON pa.id_worker = w.id_worker
-              WHERE o.id_order = ?
-              GROUP BY o.id_order";
+ // Optional fields
+ $description = isset($_POST['description']) ? mysqli_real_escape_string($conn, $_POST['description']) : '';
+ $assigned_worker = isset($_POST['assigned_worker']) && !empty($_POST['assigned_worker'])
+  ? mysqli_real_escape_string($conn, $_POST['assigned_worker'])
+  : 'NULL';
 
- $stmt = $conn->prepare($query);
- $stmt->bind_param("i", $data['id_order']);
- $stmt->execute();
- $result = $stmt->get_result();
- $order_data = $result->fetch_assoc();
+ // Check current order status
+ $currentStatusQuery = "SELECT status FROM orders WHERE id_order = '$order_id'";
+ $result = mysqli_query($conn, $currentStatusQuery);
+ if (!$result) {
+  throw new Exception('Failed to fetch current order status: ' . mysqli_error($conn));
+ }
 
- // Create success response
- http_response_code(200);
+ $currentStatus = mysqli_fetch_assoc($result)['status'];
+
+ // Check if trying to set status to COMPLETED while currently PENDING
+ if ($currentStatus === 'PENDING' && $order_status === 'COMPLETED') {
+  throw new Exception('Cannot set order status to COMPLETED while it is currently PENDING. Please set it to IN_PROGRESS first.');
+ }
+
+ // Prepare UPDATE query for orders
+ $orderQuery = "UPDATE orders 
+                SET 
+                 order_name = '$order_name', 
+                 project_manager_id = '$project_manager_id', 
+                 start_date = '$start_date', 
+                 status = '$order_status'";
+
+ // Add description if provided
+ if (!empty($description)) {
+  $orderQuery .= ", description = '$description'";
+ }
+
+ // Add worker assignment if provided
+ if ($assigned_worker !== 'NULL') {
+  $orderQuery .= ", worker_id = '$assigned_worker'";
+ } else {
+  $orderQuery .= ", worker_id = NULL";
+ }
+
+ $orderQuery .= " WHERE id_order = '$order_id'";
+
+ // Execute order update
+ if (!mysqli_query($conn, $orderQuery)) {
+  throw new Exception('Failed to update order: ' . mysqli_error($conn));
+ }
+
+ // If order status is IN_PROGRESS and a worker is assigned
+ if ($order_status === 'IN_PROGRESS' && $assigned_worker !== 'NULL') {
+  // First, reset any previous worker's assignment
+  $resetPreviousWorkerQuery = "UPDATE workers 
+                               SET 
+                                availability_status = 'AVAILABLE', 
+                                assigned_order_id = NULL 
+                               WHERE assigned_order_id = '$order_id'";
+  if (!mysqli_query($conn, $resetPreviousWorkerQuery)) {
+   throw new Exception('Failed to reset previous worker: ' . mysqli_error($conn));
+  }
+
+  // Update assigned worker's status and assigned order
+  $workerUpdateQuery = "UPDATE workers 
+                       SET 
+                        availability_status = 'TASKED', 
+                        assigned_order_id = '$order_id' 
+                       WHERE id_worker = '$assigned_worker'";
+  if (!mysqli_query($conn, $workerUpdateQuery)) {
+   throw new Exception('Failed to update worker status: ' . mysqli_error($conn));
+  }
+ } elseif ($order_status === 'COMPLETED' && $assigned_worker !== NULL) {
+  // Reset any previous worker's assignment and unlink worker from order in one query
+  $query = "UPDATE workers 
+            LEFT JOIN orders ON workers.assigned_order_id = orders.id_order
+            SET 
+              workers.availability_status = 'AVAILABLE', 
+              workers.assigned_order_id = NULL,
+              orders.worker_id = NULL
+            WHERE workers.assigned_order_id = '$order_id'";
+
+  if (!mysqli_query($conn, $query)) {
+   throw new Exception('Failed to update worker status and unlink from order: ' . mysqli_error($conn));
+  }
+ } elseif ($assigned_worker === 'NULL') {
+  // If no worker is assigned, reset any previous worker's assignment
+  $resetPreviousWorkerQuery = "UPDATE workers 
+                               SET 
+                                availability_status = 'AVAILABLE', 
+                                assigned_order_id = NULL 
+                               WHERE assigned_order_id = '$order_id'";
+  if (!mysqli_query($conn, $resetPreviousWorkerQuery)) {
+   throw new Exception('Failed to reset previous worker: ' . mysqli_error($conn));
+  }
+ }
+
+ // Commit the transaction
+ mysqli_commit($conn);
+
  echo json_encode([
   'success' => true,
-  'message' => 'Order updated successfully',
-  'data' => $order_data
+  'message' => 'Order and worker updated successfully',
+  'order_id' => $order_id
  ]);
 
 } catch (Exception $e) {
- // Rollback transaction on error
- if ($conn->connect_error === null) {
-  $conn->rollback();
- }
+ // Rollback the transaction in case of error
+ mysqli_rollback($conn);
 
- // Handle any errors
- http_response_code(500);
+ // Error handling
+ http_response_code(400); // Bad Request
  echo json_encode([
   'success' => false,
-  'message' => 'Failed to update order',
-  'error' => $e->getMessage()
+  'message' => $e->getMessage()
  ]);
 }
 
 // Close connection
-$conn->close();
+mysqli_close($conn);
+?>

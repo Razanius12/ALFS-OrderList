@@ -5,9 +5,6 @@ header('Content-Type: application/json');
 // Include database connection
 require_once '../../config/database.php';
 
-// Set content type to JSON
-header('Content-Type: application/json');
-
 // Response array
 $response = [
  'success' => false,
@@ -30,13 +27,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  mysqli_begin_transaction($conn);
 
  try {
-  // First, remove any related project assignments
-  $assignmentQuery = "DELETE FROM project_assignments WHERE id_worker = ?";
-  $assignmentStmt = mysqli_prepare($conn, $assignmentQuery);
-  mysqli_stmt_bind_param($assignmentStmt, "i", $id_worker);
-  mysqli_stmt_execute($assignmentStmt);
+  // Check for related orders
+  $checkOrdersQuery = "SELECT COUNT(*) as count FROM orders WHERE project_manager_id = ?";
+  $checkStmt = mysqli_prepare($conn, $checkOrdersQuery);
+  mysqli_stmt_bind_param($checkStmt, "i", $id_worker);
+  mysqli_stmt_execute($checkStmt);
+  mysqli_stmt_bind_result($checkStmt, $count);
+  mysqli_stmt_fetch($checkStmt);
+  mysqli_stmt_close($checkStmt);
 
-  // Then delete the worker
+  // If there are related orders, do not allow deletion
+  if ($count > 0) {
+   $response['message'] = 'Cannot delete worker with existing orders.';
+   echo json_encode($response);
+   exit;
+  }
+
+  // Proceed to delete the worker
   $workerQuery = "DELETE FROM workers WHERE id_worker = ?";
   $workerStmt = mysqli_prepare($conn, $workerQuery);
   mysqli_stmt_bind_param($workerStmt, "i", $id_worker);
@@ -57,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   // Close statements
-  mysqli_stmt_close($assignmentStmt);
   mysqli_stmt_close($workerStmt);
  } catch (Exception $e) {
   // Rollback the transaction in case of any error
@@ -75,3 +81,4 @@ echo json_encode($response);
 // Close the database connection
 mysqli_close($conn);
 exit;
+?>

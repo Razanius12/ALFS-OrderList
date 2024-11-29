@@ -3,10 +3,22 @@
 require_once 'config/database.php';
 
 // Existing query to fetch orders
-$query = "SELECT o.*, 
-          a.name_admin AS project_manager
-          FROM orders o
-          LEFT JOIN admins a ON o.project_manager_id = a.id_admin";
+$query = "SELECT 
+            o.id_order, 
+            o.order_name, 
+            o.status, 
+            o.start_date,
+            a.name_admin AS project_manager,
+            w.name_worker AS assigned_worker,
+            w.availability_status AS worker_availability
+          FROM 
+            orders o
+          LEFT JOIN 
+            admins a ON o.project_manager_id = a.id_admin
+          LEFT JOIN 
+            workers w ON o.worker_id = w.id_worker
+          ORDER BY 
+            o.id_order DESC";
 
 // Execute query with error checking
 $result = mysqli_query($conn, $query);
@@ -18,8 +30,10 @@ if ($result === false) {
  exit;
 }
 
-// Worker dropdown query
-$workerQuery = "SELECT id_worker, name_worker 
+$workerQuery = "SELECT 
+                id_worker, 
+                name_worker, 
+                availability_status 
                 FROM workers 
                 WHERE availability_status = 'AVAILABLE'";
 $workerOptions = mysqli_query($conn, $workerQuery);
@@ -87,11 +101,10 @@ function getStatusBadgeClass($status)
          <tr>
           <th data-orderable="true" style="display: none;">Order ID</th>
           <th>Order Name</th>
-          <th>Status</th>
           <th>Start Date</th>
           <th>Project Manager</th>
           <th>Assigned Workers</th>
-          <th>Assignment Status</th>
+          <th>Order Status</th>
           <th style="width: 10%">Action</th>
          </tr>
         </thead>
@@ -102,14 +115,21 @@ function getStatusBadgeClass($status)
            <td style="display: none;"><?= htmlspecialchars($order['id_order']) ?></td>
            <td><?= htmlspecialchars($order['order_name']) ?></td>
            <td>
+            <?php
+            // Convert datetime 
+            $startDateTime = new DateTime($order['start_date']);
+            echo $startDateTime->format('Y F d') . ' at ' . $startDateTime->format('h:i A');
+            ?>
+           </td>
+           <td><?= htmlspecialchars($order['project_manager'] ?? 'N/A') ?></td>
+           <td>
+            <?= $order['assigned_worker'] ? htmlspecialchars($order['assigned_worker']) : 'No one' ?>
+           </td>
+           <td>
             <span class="badge bg-<?= getStatusBadgeClass($order['status']) ?>">
              <?= htmlspecialchars($order['status']) ?>
             </span>
            </td>
-           <td><?= htmlspecialchars($order['start_date']) ?></td>
-           <td><?= htmlspecialchars($order['project_manager'] ?? 'N/A') ?></td>
-           <td><?= htmlspecialchars($order['assigned_workers'] ?? 'Unassigned') ?></td>
-           <td><?= htmlspecialchars($order['assignment_status'] ?? 'N/A') ?></td>
            <td>
             <div class="form-button-action">
              <button type="button" class="btn btn-link btn-primary btn-lg" data-bs-toggle="modal"
@@ -164,16 +184,22 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Start Date</label>
-          <input type="date" class="form-control" name="start_date" required>
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
          </div>
         </div>
         <div class="col-md-6">
          <div class="form-group">
-          <label>Assign Worker</label>
-          <select class="form-control" name="worker_id" required>
+          <label>Assign Worker (Optional)</label>
+          <select class="form-control" name="assigned_worker">
            <option value="">Select Worker</option>
-           <?php while ($worker = mysqli_fetch_assoc($workerOptions)): ?>
-            <option value="<?= $worker['id_worker'] ?>"><?= htmlspecialchars($worker['name_worker']) ?></option>
+           <?php
+           // Reset the pointer to the beginning of the result set
+           mysqli_data_seek($workerOptions, 0);
+           while ($worker = mysqli_fetch_assoc($workerOptions)): ?>
+            <option value="<?= $worker['id_worker'] ?>">
+             <?= htmlspecialchars($worker['name_worker']) ?>
+             (<?= $worker['availability_status'] ?>)
+            </option>
            <?php endwhile; ?>
           </select>
          </div>
@@ -197,7 +223,92 @@ function getStatusBadgeClass($status)
    </div>
   </div>
 
+  <!-- Edit Order Modal -->
+  <?php
+  mysqli_data_seek($adminOptions, 0);
+  mysqli_data_seek($workerOptions, 0);
+  ?>
+  <div class="modal fade" id="editOrderModal" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title">Edit Order</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+     </div>
+     <form id="editOrderForm" method="POST" action="main/api/updateOrder.php">
+      <div class="modal-body">
+       <input type="hidden" id="edit_order_id" name="order_id">
+       <div class="row mt-3">
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Project Name</label>
+          <input type="text" class="form-control" id="edit_order_name" name="order_name" required>
+         </div>
+        </div>
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Project Manager</label>
+          <select class="form-control" id="edit_project_manager" name="project_manager_id" required>
+           <option value="">Select Project Manager</option>
+           <?php while ($admin = mysqli_fetch_assoc($adminOptions)): ?>
+            <option value="<?= $admin['id_admin'] ?>"><?= htmlspecialchars($admin['name_admin']) ?></option>
+           <?php endwhile; ?>
+          </select>
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Start Date</label>
+          <input type="datetime-local" class="form-control" id="edit_start_date" name="start_date" required>
+         </div>
+        </div>
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Order Status</label>
+          <select class="form-control" id="edit_order_status" name="order_status">
+           <option value="PENDING">Pending</option>
+           <option value="IN_PROGRESS">In Progress</option>
+           <option value="ON_HOLD">On Hold</option>
+           <option value="COMPLETED">Completed</option>
+           <option value="CANCELLED">Cancelled</option>
+          </select>
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Assign Worker (Optional)</label>
+          <select class="form-control" id="edit_assigned_worker" name="assigned_worker">
+           <option value="">Select Worker</option>
+           <?php while ($worker = mysqli_fetch_assoc($workerOptions)): ?>
+            <option value="<?= $worker['id_worker'] ?>">
+             <?= htmlspecialchars($worker['name_worker']) ?>
+             (<?= $worker['availability_status'] ?>)
+            </option>
+           <?php endwhile; ?>
+          </select>
+         </div>
+        </div>
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Project Description</label>
+          <textarea class="form-control" id="edit_description" name="description" rows="4"></textarea>
+         </div>
+        </div>
+       </div>
+      </div>
 
+      <div class="modal-footer">
+       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+       <button type="submit" class="btn btn-primary">Update Order</button>
+      </div>
+     </form>
+    </div>
+   </div>
+  </div>
 
  </div>
 </div>

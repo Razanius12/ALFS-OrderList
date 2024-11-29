@@ -22,24 +22,38 @@ try {
  $gender_worker = mysqli_real_escape_string($conn, $_POST['gender_worker']);
  $phone_number = mysqli_real_escape_string($conn, $_POST['phone_number']);
 
- // Handle password update (without hashing for debugging)
+ // Handle password update
  $passwordUpdate = '';
  if (!empty($_POST['password'])) {
-  // Use the plain text password (not recommended for production)
+  // In production, use password_hash() 
   $password = mysqli_real_escape_string($conn, $_POST['password']);
   $passwordUpdate = ", password = '$password'";
  }
 
- // Prepare UPDATE query
+ // Handle order assignment
+ $orderAssignmentUpdate = '';
+ if (isset($_POST['assigned_order_id']) && !empty($_POST['assigned_order_id'])) {
+  $assigned_order_id = mysqli_real_escape_string($conn, $_POST['assigned_order_id']);
+
+  // First, clear previous worker assignment for this order
+  $clearPreviousOrderQuery = "UPDATE orders SET worker_id = NULL WHERE worker_id = '$id_worker'";
+  mysqli_query($conn, $clearPreviousOrderQuery);
+
+  // Update new order with worker assignment
+  $updateOrderQuery = "UPDATE orders SET worker_id = '$id_worker' WHERE id_order = '$assigned_order_id'";
+  mysqli_query($conn, $updateOrderQuery);
+ }
+
+ // Prepare UPDATE query for worker
  $query = "UPDATE workers 
-            SET 
-             username = '$username', 
-             name_worker = '$name_worker', 
-             id_position = '$id_position', 
-             gender_worker = '$gender_worker', 
-             phone_number = '$phone_number'
-             $passwordUpdate
-            WHERE id_worker = '$id_worker'";
+           SET 
+            username = '$username', 
+            name_worker = '$name_worker', 
+            id_position = '$id_position', 
+            gender_worker = '$gender_worker', 
+            phone_number = '$phone_number'
+            $passwordUpdate
+           WHERE id_worker = '$id_worker'";
 
  // Execute query
  if (mysqli_query($conn, $query)) {

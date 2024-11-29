@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
     url: 'main/api/getWorker.php',
     type: 'GET',
     data: { id_worker: workerId },
-    dataType: 'json', // This helps jQuery parse the JSON automatically
+    dataType: 'json',
     success: function (response) {
      if (response.success) {
       const data = response.data;
@@ -75,7 +75,10 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#edit_password').val(data.password);
 
       // Set the selected position
-      $('#edit_position').val(data.id_position)
+      $('#edit_position').val(data.id_position);
+
+      // Add order assignment population
+      $('#edit_assigned_order').val(data.assigned_order_id || '');
 
       Swal.close();
      } else {
@@ -111,9 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
      $.ajax({
       url: 'main/api/deleteWorker.php',
       type: 'POST',
-      dataType: 'json', // This will automatically parse JSON
+      dataType: 'json',
       data: { id_worker: workerId },
-      success: function (data) { // Changed from response to data
+      success: function (data) {
        if (data.success) {
         Swal.fire(
          'Deleted!',
@@ -195,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#editWorkerForm').on('submit', function (e) {
    e.preventDefault();
 
-   // Create FormData object to handle file uploads and more complex form data
+   // Create FormData object to handle form data
    var formData = new FormData(this);
 
    Swal.fire({
@@ -220,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
        title: 'Success',
        text: data.message || 'Worker updated successfully'
       }).then(() => {
+       // Reload the page or update the table
        location.reload();
       });
      } else {
@@ -240,6 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
    });
   });
+
  });
 
 });

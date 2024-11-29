@@ -5,28 +5,91 @@ header('Content-Type: application/json');
 // Include database connection
 require_once '../../config/database.php';
 
-if (isset($_GET['id_order'])) {
- $id_order = $_GET['id_order'];
+try {
+ // Check if order_id is provided
+ if (isset($_GET['order_id'])) {
+  // Sanitize input
+  $order_id = mysqli_real_escape_string($conn, $_GET['order_id']);
 
- $query = "SELECT o.*, 
-              pa.id_worker,
-              w.name_worker
-              FROM orders o
-              LEFT JOIN project_assignments pa ON o.id_order = pa.id_order 
-                AND pa.status != 'COMPLETED'
-              LEFT JOIN workers w ON pa.id_worker = w.id_worker
-              WHERE o.id_order = ?";
+  // Prepare comprehensive SQL query
+  $query = "SELECT 
+                    o.id_order, 
+                    o.order_name, 
+                    o.description,
+                    o.start_date, 
+                    o.status,
+                    o.project_manager_id,
+                    o.worker_id,
+                    a.name_admin AS project_manager_name,
+                    w.name_worker AS worker_name
+                  FROM 
+                    orders o
+                  LEFT JOIN 
+                    admins a ON o.project_manager_id = a.id_admin
+                  LEFT JOIN 
+                    workers w ON o.worker_id = w.id_worker
+                  WHERE 
+                    o.id_order = '$order_id'";
 
- $stmt = mysqli_prepare($conn, $query);
- mysqli_stmt_bind_param($stmt, "i", $id_order);
- mysqli_stmt_execute($stmt);
- $result = mysqli_stmt_get_result($stmt);
+  // Execute query
+  $result = mysqli_query($conn, $query);
 
- if ($row = mysqli_fetch_assoc($result)) {
-  echo json_encode($row);
+  // Check if query was successful
+  if ($result) {
+   // Fetch order data
+   $order = mysqli_fetch_assoc($result);
+
+   if ($order) {
+    // Prepare available workers for dropdown
+    $workerQuery = "SELECT 
+                                id_worker, 
+                                name_worker 
+                                FROM workers 
+                                WHERE availability_status = 'AVAILABLE'";
+    $workerResult = mysqli_query($conn, $workerQuery);
+
+    $workerOptions = [];
+    while ($worker = mysqli_fetch_assoc($workerResult)) {
+     $workerOptions[] = $worker;
+    }
+
+    // Return order data as JSON
+    echo json_encode([
+     'success' => true,
+     'data' => $order,
+     'workers' => $workerOptions
+    ]);
+   } else {
+    // Order not found
+    echo json_encode([
+     'success' => false,
+     'message' => 'Order not found'
+    ]);
+   }
+
+   // Free result sets
+   mysqli_free_result($result);
+   if (isset($workerResult)) {
+    mysqli_free_result($workerResult);
+   }
+  } else {
+   // Query failed
+   echo json_encode([
+    'success' => false,
+    'message' => 'Error executing query: ' . mysqli_error($conn)
+   ]);
+  }
  } else {
-  echo json_encode(['error' => 'Order not found']);
+  // No order ID provided
+  echo json_encode([
+   'success' => false,
+   'message' => 'Order ID is required'
+  ]);
  }
-} else {
- echo json_encode(['error' => 'No order ID provided']);
+} catch (Exception $e) {
+ echo json_encode([
+  'success' => false,
+  'message' => $e->getMessage()
+ ]);
 }
+?>

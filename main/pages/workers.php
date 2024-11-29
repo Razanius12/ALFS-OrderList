@@ -5,13 +5,13 @@ require_once 'config/database.php';
 
 // Fetch workers from database
 $query = "SELECT w.id_worker, w.username, w.name_worker, w.gender_worker, 
-          w.phone_number, w.availability_status, w.current_tasks, w.password,
+          w.phone_number, w.availability_status, w.password,
           p.position_name,
-          GROUP_CONCAT(o.order_name SEPARATOR ', ') AS assigned_orders
+          o.order_name AS assigned_order
           FROM workers w
           LEFT JOIN positions p ON w.id_position = p.id_position
-          LEFT JOIN orders o ON o.project_manager_id = w.id_worker
-          GROUP BY w.id_worker, p.position_name"; // Group by worker ID and position name
+          LEFT JOIN orders o ON o.worker_id = w.id_worker
+          GROUP BY w.id_worker";
 $result = mysqli_query($conn, $query);
 
 // Helper function to determine badge class based on availability
@@ -72,8 +72,7 @@ function maskPassword($password)
           <th>Position</th>
           <th>Gender</th>
           <th>Phone</th>
-          <th>Current Tasks</th>
-          <th>Assigned Projects</th>
+          <th>Assigned Order</th>
           <th>Status</th>
           <th style="width: 10%">Action</th>
          </tr>
@@ -97,8 +96,7 @@ function maskPassword($password)
            <td><?= htmlspecialchars($worker['position_name']) ?></td>
            <td><?= htmlspecialchars($worker['gender_worker']) ?></td>
            <td><?= htmlspecialchars($worker['phone_number']) ?></td>
-           <td><?= htmlspecialchars($worker['current_tasks']) ?></td>
-           <td><?= htmlspecialchars($worker['assigned_orders']) ?></td>
+           <td><?= htmlspecialchars($worker['assigned_order']) ?></td>
            <td>
             <span class="badge bg-<?= getAvailabilityBadgeClass($worker['availability_status']) ?>">
              <?= htmlspecialchars($worker['availability_status']) ?>
@@ -195,6 +193,7 @@ function maskPassword($password)
         <div class="form-group">
          <label>Gender</label>
          <select class="form-control" name="gender_worker" required>
+          <option value="">Select Gender</option>
           <option value="MALE">Male</option>
           <option value="FEMALE">Female</option>
           <option value="OTHER">Other</option>
@@ -296,6 +295,29 @@ function maskPassword($password)
         <div class="form-group">
          <label>Phone Number</label>
          <input type="tel" class="form-control" name="phone_number" id="edit_phone_number" required>
+        </div>
+       </div>
+      </div>
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>Assign Order (Optional)</label>
+         <select class="form-control" name="assigned_order_id" id="edit_assigned_order">
+          <option value="">Select Order</option>
+          <?php
+          // Fetch available orders
+          $orderQuery = "SELECT id_order, order_name, status 
+                         FROM orders 
+                         WHERE worker_id IS NULL OR worker_id = ''
+                         ORDER BY order_name";
+          $orderResult = mysqli_query($conn, $orderQuery);
+          while ($order = mysqli_fetch_assoc($orderResult)): ?>
+           <option value="<?= $order['id_order'] ?>">
+            <?= htmlspecialchars($order['order_name']) ?>
+            (<?= htmlspecialchars($order['status']) ?>)
+           </option>
+          <?php endwhile; ?>
+         </select>
         </div>
        </div>
       </div>

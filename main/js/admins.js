@@ -242,5 +242,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
    });
   });
+  
  });
 });

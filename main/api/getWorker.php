@@ -11,17 +11,19 @@ try {
   // Sanitize input
   $id_worker = mysqli_real_escape_string($conn, $_GET['id_worker']);
 
-  // Prepare SQL query
+  // Prepare SQL query to fetch worker details with position and potential order assignment
   $query = "SELECT 
-            id_worker, 
-            name_worker, 
-            username, 
-            id_position, 
-            gender_worker, 
-            phone_number,
-            password
-            FROM workers 
-            WHERE id_worker = '$id_worker'";
+             w.id_worker, 
+             w.name_worker, 
+             w.username, 
+             w.id_position, 
+             w.gender_worker,
+             w.phone_number,
+             w.password,
+             o.id_order AS assigned_order_id
+            FROM workers w
+            LEFT JOIN orders o ON w.id_worker = o.worker_id
+            WHERE w.id_worker = '$id_worker'";
 
   // Execute query
   $result = mysqli_query($conn, $query);

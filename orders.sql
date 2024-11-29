@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 29, 2024 at 09:45 AM
+-- Generation Time: Nov 29, 2024 at 01:46 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -29,14 +29,21 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `orders` (
   `id_order` int(4) NOT NULL,
-  `order_name` varchar(255) NOT NULL,
+  `project_manager_id` int(4) DEFAULT NULL,
+  `worker_id` int(11) DEFAULT NULL,
+  `order_name` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `project_manager_id` int(4) NOT NULL,
-  `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') NOT NULL DEFAULT 'PENDING',
-  `start_date` date NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `start_date` date DEFAULT NULL,
+  `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') DEFAULT 'PENDING'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `status`) VALUES
+(1, 1, NULL, 'test', 'this is a test', '2024-11-29', 'PENDING'),
+(2, 1, NULL, 'as', 's', '2024-11-29', 'PENDING');
 
 --
 -- Indexes for dumped tables
@@ -47,7 +54,8 @@ CREATE TABLE `orders` (
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id_order`),
-  ADD KEY `project_manager_id` (`project_manager_id`);
+  ADD KEY `project_manager_id` (`project_manager_id`),
+  ADD KEY `fk_worker` (`worker_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -57,7 +65,7 @@ ALTER TABLE `orders`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_order` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
@@ -67,6 +75,7 @@ ALTER TABLE `orders`
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_worker` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`id_worker`),
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`project_manager_id`) REFERENCES `admins` (`id_admin`);
 COMMIT;
 

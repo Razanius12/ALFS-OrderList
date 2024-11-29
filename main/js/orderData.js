@@ -1,6 +1,28 @@
 document.addEventListener('DOMContentLoaded', function () {
  $(document).ready(function () {
 
+  // Function to set current date and time
+  function setCurrentDateTime() {
+   // Get current date and time
+   const now = new Date();
+
+   // Format date to match datetime-local input requirements
+   const year = now.getFullYear();
+   const month = String(now.getMonth() + 1).padStart(2, '0');
+   const day = String(now.getDate()).padStart(2, '0');
+   const hours = String(now.getHours()).padStart(2, '0');
+   const minutes = String(now.getMinutes()).padStart(2, '0');
+
+   // Create datetime-local format (YYYY-MM-DDTHH:mm)
+   const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+   // Set the value of the input
+   $('#start_date').val(formattedDateTime);
+  }
+
+  // Call the function when the page loads
+  setCurrentDateTime();
+
   // Edit Order Modal Handler
   $('#editOrderModal').on('show.bs.modal', function (e) {
    const button = $(e.relatedTarget);
@@ -17,34 +39,75 @@ document.addEventListener('DOMContentLoaded', function () {
 
    // Fetch order data
    $.ajax({
-    url: '/api/getOrder.php',
+    url: 'main/api/getOrder.php',
     type: 'GET',
-    data: { id_order: orderId },
+    data: { order_id: orderId },
+    dataType: 'json',
     success: function (response) {
-     const data = JSON.parse(response);
+     if (response.success) {
+      const data = response.data;
+      const workers = response.workers;
 
-     // Populate form fields
-     $('#edit_order_id').val(data.id_order);
-     $('#edit_order_name').val(data.order_name);
-     $('#edit_project_manager_id').val(data.project_manager_id);
-     $('#edit_start_date').val(data.start_date);
-     $('#edit_project_status').val(data.status);
-     $('#edit_description').val(data.description);
+      // Populate form fields
+      $('#edit_order_id').val(data.id_order);
+      $('#edit_order_name').val(data.order_name);
+      $('#edit_description').val(data.description);
 
-     // Check if worker_id exists and is not null before setting
-     if (data.worker_id) {
-      $('#edit_worker_id').val(data.worker_id);
+      // Format date for datetime-local input
+      if (data.start_date) {
+       const formattedDate = new Date(data.start_date);
+       $('#edit_start_date').val(
+        formattedDate.toISOString().slice(0, 16)
+       );
+      }
+
+      // Populate status dropdown
+      $('#edit_status').val(data.status);
+
+      // Populate project manager dropdown
+      $('#edit_project_manager').val(data.project_manager_id);
+
+      // Populate worker dropdown
+      const workerDropdown = $('#edit_assigned_worker');
+      workerDropdown.empty();
+
+      // Add a default option
+      workerDropdown.append(
+       '<option value="">Select Worker</option>'
+      );
+
+      // Add current worker (if assigned) as a selected option
+      if (data.worker_id) {
+       workerDropdown.append(
+        `<option value="${data.worker_id}" selected>
+        ${data.worker_name}
+       </option>`
+       );
+      }
+
+      // Add available workers
+      workers.forEach(function (worker) {
+       workerDropdown.append(
+        `<option value="${worker.id_worker}">
+        ${worker.name_worker}
+       </option>`
+       );
+      });
+
+      Swal.close();
      } else {
-      $('#edit_worker_id').val(''); // Reset to default
+      Swal.fire({
+       icon: 'error',
+       title: 'Error',
+       text: response.message || 'Failed to fetch order data'
+      });
      }
-
-     Swal.close();
     },
-    error: function () {
+    error: function (xhr, status, error) {
      Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Failed to fetch order data'
+      text: 'Failed to fetch order data: ' + error
      });
     }
    });
@@ -63,18 +126,17 @@ document.addEventListener('DOMContentLoaded', function () {
    }).then((result) => {
     if (result.isConfirmed) {
      $.ajax({
-      url: '/api/deleteOrder.php',
+      url: 'main/api/deleteOrder.php',
       type: 'POST',
+      dataType: 'json',
       data: { id_order: orderId },
-      success: function (response) {
-       const data = JSON.parse(response);
+      success: function (data) {
        if (data.success) {
         Swal.fire(
          'Deleted!',
          'Order has been deleted.',
          'success'
         ).then(() => {
-         // Reload the page or remove the row from table
          location.reload();
         });
        } else {
@@ -149,6 +211,9 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#editOrderForm').on('submit', function (e) {
    e.preventDefault();
 
+   // Create FormData object to handle file uploads and more complex form data
+   var formData = new FormData(this);
+
    Swal.fire({
     title: 'Updating Order...',
     allowOutsideClick: false,
@@ -160,14 +225,16 @@ document.addEventListener('DOMContentLoaded', function () {
    $.ajax({
     url: $(this).attr('action'),
     type: 'POST',
-    data: $(this).serialize(),
-    success: function (response) {
-     const data = JSON.parse(response);
+    data: formData,
+    processData: false,  // Important for FormData
+    contentType: false,  // Important for FormData
+    dataType: 'json',   // Explicitly tell jQuery to expect JSON
+    success: function (data) {
      if (data.success) {
       Swal.fire({
        icon: 'success',
        title: 'Success',
-       text: 'Order updated successfully'
+       text: data.message || 'Order updated successfully'
       }).then(() => {
        location.reload();
       });
@@ -179,15 +246,17 @@ document.addEventListener('DOMContentLoaded', function () {
       });
      }
     },
-    error: function () {
+    error: function (xhr, status, error) {
+     console.error('Error details:', xhr.responseText);
      Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Failed to update order'
+      text: 'Failed to update order: ' + (xhr.responseJSON?.message || error)
      });
     }
    });
   });
+
  });
 
 });
