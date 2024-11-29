@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2024 at 05:41 AM
+-- Generation Time: Nov 29, 2024 at 09:45 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -39,6 +39,14 @@ CREATE TABLE `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id_admin`, `username`, `name_admin`, `id_position`, `phone_number`, `password`, `created_at`, `updated_at`) VALUES
+(1, 'theMostPowerfulAdmin', 'Powerful Admin', 41, '6281234567878', 'realsheeesh', '2024-11-27 06:22:26', '2024-11-28 09:08:33'),
+(3, 'gnjr4PRI', 'Ganjar Apriyanto', 40, '6285624634849', 'apriyanto2222', '2024-11-28 09:10:03', '2024-11-28 09:10:03');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -58,7 +66,7 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id_admin` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_admin` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

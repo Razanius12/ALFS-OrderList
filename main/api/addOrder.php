@@ -1,179 +1,122 @@
 <?php
 // Required headers
-header("Content-Type: application/json");
+header('Content-Type: application/json');
 
 // Database connection
 require_once '../../config/database.php';
 
-// Function to validate input
-function validateInput($data)
-{
- $errors = [];
-
- if (empty($data['order_name'])) {
-  $errors[] = "Project name is required";
- }
-
- if (empty($data['project_manager_id'])) {
-  $errors[] = "Project manager is required";
- }
-
- if (empty($data['start_date'])) {
-  $errors[] = "Start date is required";
- } else {
-  // Validate date format
-  $date = date_create($data['start_date']);
-  if (!$date) {
-   $errors[] = "Invalid date format";
-  }
- }
-
- // Validate project manager exists and is a manager
- if (!empty($data['project_manager_id'])) {
-  global $conn;
-  $stmt = $conn->prepare("
-            SELECT a.id_admin 
-            FROM admins a
-            JOIN positions p ON a.id_position = p.id_position
-            WHERE a.id_admin = ? 
-            AND p.position_name LIKE '%manager%'
-            AND p.department = 'ADMIN'
-        ");
-  $stmt->bind_param("i", $data['project_manager_id']);
-  $stmt->execute();
-  if (!$stmt->get_result()->fetch_assoc()) {
-   $errors[] = "Invalid project manager selected";
-  }
-  $stmt->close();
- }
-
- return $errors;
-}
+// Initialize response array
+$response = [
+ 'success' => false,
+ 'message' => '',
+ 'data' => null
+];
 
 try {
- // Check if it's a POST request
+ // Check if request method is POST
  if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  throw new Exception('Only POST method is allowed');
+  throw new Exception('Invalid request method');
  }
 
- // Get posted data
- $data = [
-  'order_name' => trim($_POST['order_name'] ?? ''),
-  'project_manager_id' => trim($_POST['project_manager_id'] ?? ''),
-  'start_date' => trim($_POST['start_date'] ?? ''),
-  'status' => 'PENDING',  // Set the status to "PENDING"
-  'description' => trim($_POST['description'] ?? ''),
-  'worker_ids' => isset($_POST['worker_ids']) ? (array) $_POST['worker_ids'] : []
- ];
-
- // Begin transaction
- $conn->begin_transaction();
-
- // Validate input
- $errors = validateInput($data);
- if (!empty($errors)) {
-  throw new Exception('Validation failed: ' . implode(', ', $errors));
+ // Validate required fields
+ $required_fields = ['order_name', 'project_manager_id', 'start_date', 'worker_id'];
+ foreach ($required_fields as $field) {
+  if (!isset($_POST[$field]) || empty($_POST[$field])) {
+   throw new Exception("$field is required");
+  }
  }
 
- // Insert order
- $stmt = $conn->prepare("
-        INSERT INTO orders (
-         order_name, 
-         project_manager_id, 
-         start_date, 
-         status, 
-         description,
-         created_at
-        ) VALUES (?, ?, ?, ?, ?, NOW())
-    ");
+ // Sanitize and validate input
+ $order_name = mysqli_real_escape_string($conn, $_POST['order_name']);
+ $project_manager_id = (int) $_POST['project_manager_id'];
+ $start_date = mysqli_real_escape_string($conn, $_POST['start_date']);
+ $worker_id = (int) $_POST['worker_id'];
 
- $stmt->bind_param(
-  "sssss",
-  $data['order_name'],
-  $data['project_manager_id'],
-  $data['start_date'],
-  $data['status'],
-  $data['description']
+ // Optional description
+ $description = isset($_POST['description']) ? mysqli_real_escape_string($conn, $_POST['description']) : NULL;
+
+ // Validate project manager ID
+ $check_manager_query = "SELECT id_admin FROM admins WHERE id_admin = ?";
+ $stmt = mysqli_prepare($conn, $check_manager_query);
+ mysqli_stmt_bind_param($stmt, "i", $project_manager_id);
+ mysqli_stmt_execute($stmt);
+ mysqli_stmt_store_result($stmt);
+
+ if (mysqli_stmt_num_rows($stmt) === 0) {
+  throw new Exception('Invalid project manager selected');
+ }
+ mysqli_stmt_close($stmt);
+
+ // Validate worker ID
+ $check_worker_query = "SELECT id_worker FROM workers WHERE id_worker = ?";
+ $stmt = mysqli_prepare($conn, $check_worker_query);
+ mysqli_stmt_bind_param($stmt, "i", $worker_id);
+ mysqli_stmt_execute($stmt);
+ mysqli_stmt_store_result($stmt);
+
+ if (mysqli_stmt_num_rows($stmt) === 0) {
+  throw new Exception('Invalid worker selected');
+ }
+ mysqli_stmt_close($stmt);
+
+ // Insert new order with default status as PENDING
+ $insert_query = "INSERT INTO orders (
+                  order_name, 
+                  status, 
+                  start_date, 
+                  project_manager_id, 
+                  description
+                  ) VALUES (?, 'PENDING', ?, ?, ?)";
+
+ $stmt = mysqli_prepare($conn, $insert_query);
+ mysqli_stmt_bind_param(
+  $stmt,
+  "ssis",
+  $order_name,
+  $start_date,
+  $project_manager_id,
+  $description
  );
 
- if (!$stmt->execute()) {
-  throw new Exception("Error creating order: " . $stmt->error);
- }
+ if (mysqli_stmt_execute($stmt)) {
+  $order_id = mysqli_insert_id($conn);
 
- $order_id = $conn->insert_id;
- $stmt->close();
+  // Insert worker assignment
+  $assignment_query = "INSERT INTO project_assignments (id_order, id_worker) VALUES (?, ?)";
+  $assignment_stmt = mysqli_prepare($conn, $assignment_query);
+  mysqli_stmt_bind_param($assignment_stmt, "ii", $order_id, $worker_id);
 
- // Insert worker assignments if any
- if (!empty($data['worker_ids'])) {
-  $stmt = $conn->prepare("
-            INSERT INTO project_assignments (
-             id_order, 
-             id_worker, 
-             id_admin, 
-             assigned_at
-            ) VALUES (?, ?, ?, NOW())
-        ");
-
-  foreach ($data['worker_ids'] as $worker_id) {
-   $stmt->bind_param(
-    "iii",
-    $order_id,
-    $worker_id,
-    $data['project_manager_id']  // Using the same project manager for assignments
-   );
-   if (!$stmt->execute()) {
-    throw new Exception("Error assigning worker: " . $stmt->error);
-   }
+  if (mysqli_stmt_execute($assignment_stmt)) {
+   $response['success'] = true;
+   $response['message'] = 'Order added successfully';
+   $response['data'] = [
+    'id_order' => $order_id,
+    'order_name' => $order_name,
+    'status' => 'PENDING'
+   ];
+  } else {
+   throw new Exception('Failed to assign worker: ' . mysqli_error($conn));
   }
-  $stmt->close();
+
+  mysqli_stmt_close($assignment_stmt);
+ } else {
+  throw new Exception('Failed to add order: ' . mysqli_error($conn));
  }
 
- // Commit transaction
- $conn->commit();
-
- // Fetch the created order with assignments
- $query = "SELECT 
-            o.id_order, 
-            o.order_name, 
-            o.status, 
-            o.start_date, 
-            a.name_admin as project_manager,
-            GROUP_CONCAT(DISTINCT w.name_worker) as assigned_workers
-           FROM orders o
-           LEFT JOIN admins a ON o.project_manager_id = a.id_admin
-           LEFT JOIN project_assignments pa ON o.id_order = pa.id_order
-           LEFT JOIN workers w ON pa.id_worker = w.id_worker
-           WHERE o.id_order = ?
-           GROUP BY o.id_order";
-
- $stmt = $conn->prepare($query);
- $stmt->bind_param("i", $order_id);
- $stmt->execute();
- $result = $stmt->get_result();
- $order_data = $result->fetch_assoc();
-
- // Create success response
- http_response_code(201);
- echo json_encode([
-  'success' => true,
-  'message' => 'Order created successfully',
-  'data' => $order_data
- ]);
+ mysqli_stmt_close($stmt);
 
 } catch (Exception $e) {
- // Rollback transaction on error
- if ($conn->connect_error === null) {
-  $conn->rollback();
- }
+ $response['success'] = false;
+ $response['message'] = $e->getMessage();
 
- // Handle any errors
- http_response_code(500);
- echo json_encode([
-  'success' => false,
-  'message' => 'Failed to create order',
-  'error' => $e->getMessage()
- ]);
+ // Debug: Log the full exception
+ error_log("Exception: " . $e->getMessage());
+ error_log("Trace: " . $e->getTraceAsString());
+} finally {
+ mysqli_close($conn);
+
+ // Ensure JSON is properly encoded
+ echo json_encode($response, JSON_PRETTY_PRINT);
+ exit;
 }
-
-// Close connection
-$conn->close();
+?>

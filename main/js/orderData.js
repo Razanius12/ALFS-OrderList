@@ -112,14 +112,14 @@ document.addEventListener('DOMContentLoaded', function () {
    $.ajax({
     url: $(this).attr('action'),
     type: 'POST',
+    dataType: 'json',
     data: $(this).serialize(),
-    success: function (response) {
-     const data = JSON.parse(response);
+    success: function (data) {
      if (data.success) {
       Swal.fire({
        icon: 'success',
        title: 'Success',
-       text: 'Order added successfully'
+       text: data.message || 'Order added successfully'
       }).then(() => {
        location.reload();
       });
@@ -131,11 +131,15 @@ document.addEventListener('DOMContentLoaded', function () {
       });
      }
     },
-    error: function () {
+    error: function (xhr, status, error) {
+     // More detailed error handling
+     console.error('AJAX Error:', status, error);
+     console.log('Response Text:', xhr.responseText);
+
      Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Failed to add order'
+      text: xhr.responseText || 'Failed to add order'
      });
     }
    });

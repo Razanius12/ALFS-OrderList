@@ -27,18 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  mysqli_begin_transaction($conn);
 
  try {
-  // Check for related project assignments
-  $checkAssignmentsQuery = "SELECT COUNT(*) as count FROM project_assignments WHERE assigned_by = ?";
-  $checkStmt = mysqli_prepare($conn, $checkAssignmentsQuery);
+  // Check for related orders
+  $checkOrdersQuery = "SELECT COUNT(*) as count FROM orders WHERE project_manager_id = ?";
+  $checkStmt = mysqli_prepare($conn, $checkOrdersQuery);
   mysqli_stmt_bind_param($checkStmt, "i", $id_admin);
   mysqli_stmt_execute($checkStmt);
   mysqli_stmt_bind_result($checkStmt, $count);
   mysqli_stmt_fetch($checkStmt);
   mysqli_stmt_close($checkStmt);
 
-  // If there are related project assignments, do not allow deletion
+  // If there are related orders, do not allow deletion
   if ($count > 0) {
-   $response['message'] = 'Cannot delete admin with existing project assignments.';
+   $response['message'] = 'Cannot delete admin with existing orders.';
    echo json_encode($response);
    exit;
   }

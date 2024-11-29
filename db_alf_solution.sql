@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2024 at 05:38 AM
+-- Generation Time: Nov 29, 2024 at 08:46 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -37,6 +37,14 @@ CREATE TABLE `admins` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id_admin`, `username`, `name_admin`, `id_position`, `phone_number`, `password`, `created_at`, `updated_at`) VALUES
+(1, 'theMostPowerfulAdmin', 'Powerful Admin', 41, '6281234567878', 'realsheeesh', '2024-11-27 06:22:26', '2024-11-28 09:08:33'),
+(3, 'gnjr4PRI', 'Ganjar Apriyanto', 40, '6285624634849', 'apriyanto2222', '2024-11-28 09:10:03', '2024-11-28 09:10:03');
 
 -- --------------------------------------------------------
 
@@ -102,7 +110,9 @@ CREATE TABLE `positions` (
 INSERT INTO `positions` (`id_position`, `position_name`, `department`, `created_at`) VALUES
 (13, 'Content Creator', 'WORKER', '2024-11-24 05:01:22'),
 (17, 'Designer', 'WORKER', '2024-11-24 07:40:15'),
-(18, 'Live Host', 'WORKER', '2024-11-24 07:42:36');
+(18, 'Live Host', 'WORKER', '2024-11-24 07:42:36'),
+(40, 'Project Manager', 'ADMIN', '2024-11-27 05:03:40'),
+(41, 'CEO', 'ADMIN', '2024-11-27 05:03:48');
 
 -- --------------------------------------------------------
 
@@ -240,7 +250,7 @@ ALTER TABLE `workers`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id_admin` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_admin` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `daily_earnings`
@@ -264,7 +274,7 @@ ALTER TABLE `orders`
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `id_position` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id_position` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `project_assignments`
@@ -276,7 +286,7 @@ ALTER TABLE `project_assignments`
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables

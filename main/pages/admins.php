@@ -5,9 +5,9 @@ require_once 'config/database.php';
 
 // Fetch admins from database
 $query = "SELECT a.id_admin, a.username, a.name_admin, a.phone_number, a.password,
-p.position_name
-FROM admins a
-LEFT JOIN positions p ON a.id_position = p.id_position";
+          p.position_name
+          FROM admins a
+          LEFT JOIN positions p ON a.id_position = p.id_position";
 $result = mysqli_query($conn, $query);
 
 // Helper function to mask password

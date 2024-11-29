@@ -5,14 +5,13 @@ require_once 'config/database.php';
 
 // Fetch workers from database
 $query = "SELECT w.id_worker, w.username, w.name_worker, w.gender_worker, 
-w.phone_number, w.availability_status, w.current_tasks, w.password,
-p.position_name,
-GROUP_CONCAT(o.order_name) as assigned_orders
-FROM workers w
-LEFT JOIN positions p ON w.id_position = p.id_position
-LEFT JOIN project_assignments pa ON w.id_worker = pa.id_worker
-LEFT JOIN orders o ON pa.id_order = o.id_order
-GROUP BY w.id_worker";
+          w.phone_number, w.availability_status, w.current_tasks, w.password,
+          p.position_name,
+          GROUP_CONCAT(o.order_name SEPARATOR ', ') AS assigned_orders
+          FROM workers w
+          LEFT JOIN positions p ON w.id_position = p.id_position
+          LEFT JOIN orders o ON o.project_manager_id = w.id_worker
+          GROUP BY w.id_worker, p.position_name"; // Group by worker ID and position name
 $result = mysqli_query($conn, $query);
 
 // Helper function to determine badge class based on availability
