@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
      label: "Clients",
      backgroundColor: "rgb(23, 125, 255)",
      borderColor: "rgb(23, 125, 255)",
-     data: [1, 2, 5, 6, 5, 4, 6, 4, 6, 7, 8, 7, 0],
+     data: [1, 2, 5, 6, 5, 4, 6, 4, 6, 7, 8, 7, 9, 0],
     },
    ],
   },
