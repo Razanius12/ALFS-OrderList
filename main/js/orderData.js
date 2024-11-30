@@ -53,12 +53,14 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#edit_order_name').val(data.order_name);
       $('#edit_description').val(data.description);
 
-      // Format date for datetime-local input
+      // Format and set the start date
       if (data.start_date) {
-       const formattedDate = new Date(data.start_date);
-       $('#edit_start_date').val(
-        formattedDate.toISOString().slice(0, 16)
-       );
+       const startDate = new Date(data.start_date); // Assuming this is in UTC
+       const localStartDate = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000)); // Adjust for timezone offset
+       const formattedStartDate = localStartDate.toISOString().slice(0, 16); // Format to YYYY-MM-DDTHH:MM
+       $('#edit_start_date').val(formattedStartDate);
+      } else {
+       setCurrentDateTime(); // Optionally set current date if no start_date
       }
 
       // Populate status dropdown
@@ -80,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
       if (data.worker_id) {
        workerDropdown.append(
         `<option value="${data.worker_id}" selected>
-        ${data.worker_name}
-       </option>`
+         ${data.worker_name}
+         </option>`
        );
       }
 
@@ -248,12 +250,33 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     error: function (xhr, status, error) {
      console.error('Error details:', xhr.responseText);
-     Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Failed to update order: ' + (xhr.responseJSON?.message || error)
-     });
+
+     // Check if the response indicates that the order can be deleted
+     if (xhr.responseText.includes('delete the order directly')) {
+      Swal.fire({
+       icon: 'warning',
+       title: 'Order Pending',
+       text: xhr.responseJSON?.message || 'Failed to update order',
+       showCancelButton: true,
+       confirmButtonText: 'Delete Order',
+       cancelButtonText: 'Cancel'
+      }).then((result) => {
+       if (result.isConfirmed) {
+        // Retrieve order ID from the hidden input field in the edit order modal
+        var orderId = $('#edit_order_id').val();
+        deleteOrder(orderId); // Pass the order ID to the deleteOrder function
+       }
+      });
+     } else {
+      // Handle other types of errors (like trying to update to "completed")
+      Swal.fire({
+       icon: 'error',
+       title: 'Error',
+       text: 'Failed to update order: ' + (xhr.responseJSON?.message || error)
+      });
+     }
     }
+
    });
   });
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 29, 2024 at 08:46 AM
+-- Generation Time: Nov 30, 2024 at 03:35 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -81,14 +81,23 @@ CREATE TABLE `gmaps` (
 
 CREATE TABLE `orders` (
   `id_order` int(4) NOT NULL,
-  `order_name` varchar(255) NOT NULL,
+  `project_manager_id` int(4) DEFAULT NULL,
+  `worker_id` int(11) DEFAULT NULL,
+  `order_name` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `project_manager_id` int(4) NOT NULL,
-  `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') NOT NULL DEFAULT 'PENDING',
-  `start_date` date NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `start_date` datetime DEFAULT NULL,
+  `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') DEFAULT 'PENDING'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `status`) VALUES
+(3, 3, 10, 'DA', 'pengennya gini dan gitu', '2024-11-23 23:56:00', 'PENDING'),
+(6, 3, 6, 'DA - 20241122', 'awokaowkoawkaw', '2024-11-21 08:40:00', 'IN_PROGRESS'),
+(8, 1, NULL, 'test', 'asssssssssssss', '2024-11-28 18:28:00', 'COMPLETED'),
+(9, 1, NULL, 'DA - 20241129', '', '2024-11-29 18:57:00', 'CANCELLED');
 
 -- --------------------------------------------------------
 
@@ -117,75 +126,31 @@ INSERT INTO `positions` (`id_position`, `position_name`, `department`, `created_
 -- --------------------------------------------------------
 
 --
--- Table structure for table `project_assignments`
---
-
-CREATE TABLE `project_assignments` (
-  `id_assignment` int(4) NOT NULL,
-  `id_order` int(4) NOT NULL,
-  `id_worker` int(4) NOT NULL,
-  `assigned_by` int(4) NOT NULL,
-  `status` enum('ASSIGNED','IN_PROGRESS','COMPLETED') NOT NULL DEFAULT 'ASSIGNED',
-  `assigned_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Triggers `project_assignments`
---
-DELIMITER $$
-CREATE TRIGGER `after_project_assignment` AFTER INSERT ON `project_assignments` FOR EACH ROW BEGIN
-    UPDATE workers 
-    SET current_tasks = current_tasks + 1,
-        availability_status = CASE 
-            WHEN current_tasks + 1 > 0 THEN 'TASKED'
-            ELSE 'AVAILABLE'
-        END
-    WHERE id_worker = NEW.id_worker;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_project_completion` AFTER UPDATE ON `project_assignments` FOR EACH ROW BEGIN
-    IF NEW.status = 'COMPLETED' AND OLD.status != 'COMPLETED' THEN
-        UPDATE workers 
-        SET current_tasks = current_tasks - 1,
-            availability_status = CASE 
-                WHEN current_tasks - 1 = 0 THEN 'AVAILABLE'
-                ELSE 'TASKED'
-            END
-        WHERE id_worker = NEW.id_worker;
-    END IF;
-END
-$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `workers`
 --
 
 CREATE TABLE `workers` (
   `id_worker` int(4) NOT NULL,
   `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `name_worker` varchar(255) NOT NULL,
   `id_position` int(4) NOT NULL,
   `gender_worker` enum('MALE','FEMALE','OTHER') NOT NULL,
   `phone_number` varchar(16) NOT NULL,
   `availability_status` enum('AVAILABLE','TASKED') NOT NULL DEFAULT 'AVAILABLE',
-  `current_tasks` int(2) NOT NULL DEFAULT 0,
-  `password` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `assigned_order_id` int(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `workers`
 --
 
-INSERT INTO `workers` (`id_worker`, `username`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `current_tasks`, `password`, `created_at`, `updated_at`) VALUES
-(6, 'razanius12', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'AVAILABLE', 0, 'realgamer', '2024-11-26 07:14:02', '2024-11-26 07:54:18'),
-(7, 'ftdAulia', 'Fitdia Aulia', 13, 'FEMALE', '6281234345656', 'AVAILABLE', 0, 'auliadongs333', '2024-11-26 07:38:02', '2024-11-26 07:54:38');
+INSERT INTO `workers` (`id_worker`, `username`, `password`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `created_at`, `updated_at`, `assigned_order_id`) VALUES
+(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'TASKED', '2024-11-26 07:14:02', '2024-11-30 01:42:27', 6),
+(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', '2024-11-29 10:01:30', '2024-11-29 15:29:41', NULL),
+(11, 'vivi', 'prettiestgurls', 'Evelyna Cristina Ziovaj', 18, 'FEMALE', '6281238314426', 'AVAILABLE', '2024-11-29 12:12:42', '2024-11-29 15:15:52', NULL);
 
 --
 -- Indexes for dumped tables
@@ -217,7 +182,8 @@ ALTER TABLE `gmaps`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id_order`),
-  ADD KEY `project_manager_id` (`project_manager_id`);
+  ADD KEY `project_manager_id` (`project_manager_id`),
+  ADD KEY `worker_id` (`worker_id`) USING BTREE;
 
 --
 -- Indexes for table `positions`
@@ -226,21 +192,13 @@ ALTER TABLE `positions`
   ADD PRIMARY KEY (`id_position`);
 
 --
--- Indexes for table `project_assignments`
---
-ALTER TABLE `project_assignments`
-  ADD PRIMARY KEY (`id_assignment`),
-  ADD KEY `id_order` (`id_order`),
-  ADD KEY `id_worker` (`id_worker`),
-  ADD KEY `assigned_by` (`assigned_by`);
-
---
 -- Indexes for table `workers`
 --
 ALTER TABLE `workers`
   ADD PRIMARY KEY (`id_worker`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD KEY `id_position` (`id_position`);
+  ADD KEY `id_position` (`id_position`),
+  ADD KEY `assigned_order_id` (`assigned_order_id`) USING BTREE;
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -268,7 +226,7 @@ ALTER TABLE `gmaps`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_order` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `positions`
@@ -277,16 +235,10 @@ ALTER TABLE `positions`
   MODIFY `id_position` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
--- AUTO_INCREMENT for table `project_assignments`
---
-ALTER TABLE `project_assignments`
-  MODIFY `id_assignment` int(4) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables
@@ -302,20 +254,14 @@ ALTER TABLE `admins`
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_worker` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`id_worker`),
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`project_manager_id`) REFERENCES `admins` (`id_admin`);
-
---
--- Constraints for table `project_assignments`
---
-ALTER TABLE `project_assignments`
-  ADD CONSTRAINT `project_assignments_ibfk_1` FOREIGN KEY (`id_order`) REFERENCES `orders` (`id_order`),
-  ADD CONSTRAINT `project_assignments_ibfk_2` FOREIGN KEY (`id_worker`) REFERENCES `workers` (`id_worker`),
-  ADD CONSTRAINT `project_assignments_ibfk_3` FOREIGN KEY (`assigned_by`) REFERENCES `admins` (`id_admin`);
 
 --
 -- Constraints for table `workers`
 --
 ALTER TABLE `workers`
+  ADD CONSTRAINT `fk_worker_assigned_order` FOREIGN KEY (`assigned_order_id`) REFERENCES `orders` (`id_order`) ON DELETE SET NULL,
   ADD CONSTRAINT `workers_ibfk_1` FOREIGN KEY (`id_position`) REFERENCES `positions` (`id_position`);
 COMMIT;
 

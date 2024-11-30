@@ -267,10 +267,10 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Order Status</label>
-          <select class="form-control" id="edit_order_status" name="order_status">
+          <select class="form-control" id="edit_status" name="status">
+           <option value="">Select Order Status</option>
            <option value="PENDING">Pending</option>
            <option value="IN_PROGRESS">In Progress</option>
-           <option value="ON_HOLD">On Hold</option>
            <option value="COMPLETED">Completed</option>
            <option value="CANCELLED">Cancelled</option>
           </select>

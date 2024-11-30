@@ -10,7 +10,7 @@ try {
  mysqli_begin_transaction($conn);
 
  // Ensure all required fields are present
- $requiredFields = ['order_id', 'order_name', 'project_manager_id', 'start_date', 'order_status'];
+ $requiredFields = ['order_id', 'order_name', 'project_manager_id', 'start_date', 'status'];
  foreach ($requiredFields as $field) {
   if (!isset($_POST[$field]) || empty($_POST[$field])) {
    throw new Exception("Missing required field: $field");
@@ -22,7 +22,7 @@ try {
  $order_name = mysqli_real_escape_string($conn, $_POST['order_name']);
  $project_manager_id = mysqli_real_escape_string($conn, $_POST['project_manager_id']);
  $start_date = mysqli_real_escape_string($conn, $_POST['start_date']);
- $order_status = mysqli_real_escape_string($conn, $_POST['order_status']);
+ $order_status = mysqli_real_escape_string($conn, $_POST['status']);
 
  // Optional fields
  $description = isset($_POST['description']) ? mysqli_real_escape_string($conn, $_POST['description']) : '';
@@ -39,9 +39,12 @@ try {
 
  $currentStatus = mysqli_fetch_assoc($result)['status'];
 
- // Check if trying to set status to COMPLETED while currently PENDING
+ // Check if trying to set status to COMPLETED or CANCELLED while currently PENDING
  if ($currentStatus === 'PENDING' && $order_status === 'COMPLETED') {
   throw new Exception('Cannot set order status to COMPLETED while it is currently PENDING. Please set it to IN_PROGRESS first.');
+ }
+ if ($currentStatus === 'PENDING' && $order_status === 'CANCELLED') {
+  throw new Exception('Cannot set order status to CANCELLED while it is currently PENDING. Please set it to IN_PROGRESS first or you can delete the order directly.');
  }
 
  // Prepare UPDATE query for orders
@@ -92,7 +95,7 @@ try {
   if (!mysqli_query($conn, $workerUpdateQuery)) {
    throw new Exception('Failed to update worker status: ' . mysqli_error($conn));
   }
- } elseif ($order_status === 'COMPLETED' && $assigned_worker !== NULL) {
+ } else if ($order_status === 'CANCELLED' or $order_status === 'COMPLETED') {
   // Reset any previous worker's assignment and unlink worker from order in one query
   $query = "UPDATE workers 
             LEFT JOIN orders ON workers.assigned_order_id = orders.id_order
@@ -105,7 +108,7 @@ try {
   if (!mysqli_query($conn, $query)) {
    throw new Exception('Failed to update worker status and unlink from order: ' . mysqli_error($conn));
   }
- } elseif ($assigned_worker === 'NULL') {
+ } else if ($assigned_worker === NULL) {
   // If no worker is assigned, reset any previous worker's assignment
   $resetPreviousWorkerQuery = "UPDATE workers 
                                SET 

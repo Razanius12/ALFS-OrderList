@@ -13,23 +13,23 @@ try {
 
   // Prepare comprehensive SQL query
   $query = "SELECT 
-                    o.id_order, 
-                    o.order_name, 
-                    o.description,
-                    o.start_date, 
-                    o.status,
-                    o.project_manager_id,
-                    o.worker_id,
-                    a.name_admin AS project_manager_name,
-                    w.name_worker AS worker_name
-                  FROM 
-                    orders o
-                  LEFT JOIN 
-                    admins a ON o.project_manager_id = a.id_admin
-                  LEFT JOIN 
-                    workers w ON o.worker_id = w.id_worker
-                  WHERE 
-                    o.id_order = '$order_id'";
+             o.id_order, 
+             o.order_name, 
+             o.description,
+             o.start_date, 
+             o.status,
+             o.project_manager_id,
+             o.worker_id,
+             a.name_admin AS project_manager_name,
+             w.name_worker AS worker_name
+            FROM 
+             orders o
+            LEFT JOIN 
+             admins a ON o.project_manager_id = a.id_admin
+            LEFT JOIN 
+             workers w ON o.worker_id = w.id_worker
+            WHERE 
+             o.id_order = '$order_id'";
 
   // Execute query
   $result = mysqli_query($conn, $query);
@@ -42,10 +42,10 @@ try {
    if ($order) {
     // Prepare available workers for dropdown
     $workerQuery = "SELECT 
-                                id_worker, 
-                                name_worker 
-                                FROM workers 
-                                WHERE availability_status = 'AVAILABLE'";
+                    id_worker, 
+                    name_worker 
+                    FROM workers 
+                    WHERE availability_status = 'AVAILABLE'";
     $workerResult = mysqli_query($conn, $workerQuery);
 
     $workerOptions = [];

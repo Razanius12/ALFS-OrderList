@@ -8,42 +8,7 @@ include_once 'head.php';
 <body>
  <div class="wrapper">
   <?php
-
-  // check if "sidebar" has parameter and prevent user from getting knowhere
-  $sidebar = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-
-  // sidebar for each pages
-  switch ($sidebar) {
-   case 'undefined':
-    includePage('main/sidebars/sidebarDashboard.php');
-    break;
-    case 'admins':
-     includePage('main/sidebars/sidebarDefault.php');
-     break;
-   case 'dashboard':
-    includePage('main/sidebars/sidebarDashboard.php');
-    break;
-   case 'orderData':
-    includePage('main/sidebars/sidebarOrderData.php');
-    break;
-   case 'workers':
-    includePage('main/sidebars/sidebarWorkers.php');
-    break;
-   case 'addNewPosition':
-    includePage('main/sidebars/sidebarWorkers.php');
-    break;
-   case 'alfOffices':
-    includePage('main/sidebars/sidebarAlfOffices.php');
-    break;
-   case 'dailyProgress':
-    includePage('main/sidebars/sidebarDailyProgress.php');
-    break;
-
-   default:
-    includePage('main/sidebars/sidebarDashboard.php');
-    break;
-  }
-
+  include_once 'main/bars/sidebar.php';
   ?>
 
   <div class="main-panel">
@@ -58,9 +23,9 @@ include_once 'head.php';
     case 'undefined':
      includePage('main/pages/dashboard.php');
      break;
-     case 'admins':
-      includePage('main/pages/admins.php');
-      break;
+    case 'admins':
+     includePage('main/pages/admins.php');
+     break;
     case 'dashboard':
      includePage('main/pages/dashboard.php');
      break;
