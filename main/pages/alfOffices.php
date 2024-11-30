@@ -1,58 +1,165 @@
- <div class="container">
-  <div class="page-inner">
-   <div class="page-header mb-0">
-    <h3 class="fw-bold mb-3">ALF Offices</h3>
-    <ul class="breadcrumbs mb-3">
-     <li class="nav-home">
-      <a href="./index.php">
-       <i class="icon-home"></i>
-      </a>
-     </li>
-     <li class="separator">
-      <i class="icon-arrow-right"></i>
-     </li>
-     <li class="nav-item">
-      <a href="./index.php?page=alfOffices">ALF Offices</a>
-     </li>
-    </ul>
+<?php
+// Database connection
+require_once 'config/database.php';
+
+// Fetch ALF Offices data with error checking
+$query = "SELECT * FROM gmaps ORDER BY name_city_district";
+$result = mysqli_query($conn, $query);
+
+// Check if the query was successful
+if ($result === false) {
+ // Log the error
+ error_log("Database Query Error: " . mysqli_error($conn));
+
+ // Optionally, you can display a user-friendly error message
+ $error_message = "Unable to retrieve offices. Please try again later.";
+}
+?>
+
+<div class="container">
+ <div class="page-inner">
+  <div class="page-header mb-0">
+   <h3 class="fw-bold mb-3">ALF Offices</h3>
+   <ul class="breadcrumbs mb-3">
+    <li class="nav-home">
+     <a href="./index.php">
+      <i class="icon-home"></i>
+     </a>
+    </li>
+    <li class="separator">
+     <i class="icon-arrow-right"></i>
+    </li>
+    <li class="nav-item">
+     <a href="./index.php?page=alfOffices">ALF Offices</a>
+    </li>
+   </ul>
+   <button type="button" class="btn btn-primary btn-round ms-auto" data-bs-toggle="modal"
+    data-bs-target="#addAlfOffices">
+    <i class="fa fa-plus"></i> Add tambah tempat
+   </button>
+  </div>
+  <div class="page-category">Shows all available ALF Solution offices</div>
+  <div class="row">
+   <?php
+   // Check if there was a query error
+   if (isset($error_message)) {
+    ?>
+    <div class="col-md-12">
+     <div class="alert alert-danger text-center">
+      <?php echo htmlspecialchars($error_message); ?>
+     </div>
+    </div>
+    <?php
+   }
+   // If no error, proceed with displaying results
+   else if ($result && mysqli_num_rows($result) > 0) {
+    // Loop through each office
+    while ($office = mysqli_fetch_assoc($result)) {
+     ?>
+      <div class="col-md-12">
+       <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+         <div class="card-title"><?php echo htmlspecialchars($office['name_city_district']); ?></div>
+         <div class="card-tools">
+          <a href="#" class="btn btn-sm btn-warning edit-office" data-bs-toggle="modal"
+          data-bs-target="#editAlfOffices" data-id="<?php echo $office['id_maps']; ?>"
+           data-city="<?php echo htmlspecialchars($office['name_city_district']); ?>"
+           data-link="<?php echo htmlspecialchars($office['link_embed']); ?>">
+           <i class="fa fa-edit"></i>
+          </a>
+          <a href="#" class="btn btn-sm btn-danger delete-office" data-id="<?php echo $office['id_maps']; ?>">
+           <i class="fa fa-trash"></i>
+          </a>
+         </div>
+        </div>
+        <div class="card-body">
+        <?php echo $office['link_embed']; ?>
+        </div>
+       </div>
+      </div>
+     <?php
+    }
+   } else {
+    ?>
+     <div class="col-md-12">
+      <div class="alert alert-info text-center">
+       No ALF Offices found. Add a new office using the button above.
+      </div>
+     </div>
+   <?php }
+
+   // Close the database connection
+   mysqli_close($conn);
+   ?>
+  </div>
+ </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addAlfOffices" tabindex="-1" role="dialog" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+  <div class="modal-content">
+   <div class="modal-header">
+    <h5 class="modal-title">Add New Admin</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
    </div>
-   <div class="page-category">Shows all available ALF Solution offices</div>
-   <div class="row">
-    <div class="col-md-12">
-     <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-       <div class="card-title">Bandung</div>
-       <button class="btn btn-primary" data-toggle="modal" data-target="#addOfficeModal">Tambah</button>
+   <form id="addAlfOffices" method="POST" action="main/api/addAlfOffices.php">
+    <div class="modal-body">
+     <div class="row mt-3">
+      <div class="col-md-6">
+       <div class="form-group">
+        <label>nama kota</label>
+        <input type="text" class="form-control" name="name_city_district" required>
+       </div>
       </div>
-      <div class="card-body">
-       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.735343559108!2d107.72001217204199!3d-6.922208243794203!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68dcd4f3fa4d39%3A0xce64b9d681e418e3!2sAlfsolution%20Office!5e0!3m2!1sen!2sid!4v1730811639970!5m2!1sen!2sid"
-        width="600" height="450" style="border:0; width:100%" allowfullscreen="" loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
-      </div>
-     </div>
-    </div>
-    <div class="col-md-12">
-     <div class="card">
-      <div class="card-header">
-       <div class="card-title">Garut</div>
-      </div>
-      <div class="card-body">
-       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3958.639651324924!2d107.9477189741453!3d-7.167588770328902!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68b11b8104ff0b%3A0x330b1a00f1a74129!2sKantor%20ALF%20Solution%20Cabang%20Garut!5e0!3m2!1sen!2sid!4v1730812164569!5m2!1sen!2sid"
-        width="600" height="450" style="border:0; width:100%" allowfullscreen="" loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="col-md-6">
+       <div class="form-group">
+        <label>masukan url lokasi </label>
+        <input type="text" class="form-control" name="link_embed" required>
+       </div>
       </div>
      </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Add</button>
+     </div>
     </div>
+   </form>
+  </div>
+ </div>
+</div>
+
+<div class="modal fade" id="editAlfOffices" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h5 class="modal-title">Edit Admin</h5>
+     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="editAlfOffices" method="POST" action="main/api/updateAdmin.php">
+     <div class="modal-body">
+      <div class="row mt-3">
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>nama kota</label>
+         <input type="text" class="form-control" name="nama kota" id="name_city_district" required>
+        </div>
+       </div>
+       <div class="col-md-6">
+        <div class="form-group">
+         <label>masukan Url lokasi </label>
+         <input type="text" class="form-control" name="masukan url lokasi" id="link_embed" required>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+     </div>
+     <input type="hidden" name="name_city_district" id="id_maps">
+    </form>
    </div>
   </div>
  </div>
-
- <!-- Modal -->
- <div class="modal fade" id="addOfficeModal" tabindex="-1" role="dialog" aria-labelledby="addOfficeModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog" role="document">
-   <div class="modal-content">
-    <div class="modal-header">
-     <h5 class="modal-title" id="addOfficeModalLabel">Tambah Kantor
+<script src="main/js/alfOffices.js"></script>
