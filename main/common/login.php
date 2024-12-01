@@ -1,215 +1,49 @@
 <?php
-session_start();
 require_once '../../config/database.php';
-require_once '../../config/session.php';
-
-// Check if already logged in
-if ($auth->isLoggedIn()) {
- header("Location: '../../index.php'");
- exit();
-}
 
 // Handle login error messages
 $error = $_SESSION['login_error'] ?? '';
 unset($_SESSION['login_error']);
+
+// Additional error handling
+$login_attempt_error = $_SESSION['login_attempt_error'] ?? '';
+unset($_SESSION['login_attempt_error']);
 ?>
 
 <!DOCTYPE html>
 <html lang="en" class="h-100">
 
 <head>
+ <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+ <title>ALF Solution Order List</title>
+ <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+ <link rel="icon" href="../img/ALFLogoLightSquareBlack.png" type="image/x-icon" />
 
- <head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>ALF Solution Order List</title>
-  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-  <link rel="icon" href="../img/ALFLogoLightSquareBlack.png" type="image/x-icon" />
+ <!-- Fonts and icons -->
+ <script src="../../assets/js/plugin/webfont/webfont.min.js"></script>
+ <script>
+  WebFont.load({
+   google: { families: ["Public Sans:300,400,500,600,700"] },
+   custom: {
+    families: [
+     "Font Awesome 5 Solid",
+     "Font Awesome 5 Regular",
+     "Font Awesome 5 Brands",
+     "simple-line-icons",
+    ],
+    urls: ["../../assets/css/fonts.min.css"],
+   },
+   active: function () {
+    sessionStorage.fonts = true;
+   },
+  });
+ </script>
 
-  <!-- Fonts and icons -->
-  <script src="../../assets/js/plugin/webfont/webfont.min.js"></script>
-  <script>
-   WebFont.load({
-    google: { families: ["Public Sans:300,400,500,600,700"] },
-    custom: {
-     families: [
-      "Font Awesome 5 Solid",
-      "Font Awesome 5 Regular",
-      "Font Awesome 5 Brands",
-      "simple-line-icons",
-     ],
-     urls: ["../../assets/css/fonts.min.css"],
-    },
-    active: function () {
-     sessionStorage.fonts = true;
-    },
-   });
-  </script>
-
-  <!-- CSS Files -->
-  <link rel="stylesheet" href="../../assets/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="../../assets/css/plugins.min.css" />
-  <link rel="stylesheet" href="../../assets/css/kaiadmin.min.css" />
- </head>
- <style>
-  /* Full-page background with placeholder */
-  html,
-  body {
-   height: 100% !important;
-   margin: 0 !important;
-   background-color: #ffffff !important;
-   background-image: url('../img/DSCF7610.JPG') !important;
-
-   /* Shift to right and zoom */
-   background-position: 0% center !important;
-   background-size: 120% auto !important;
-   /* Slight zoom */
-
-   background-repeat: no-repeat !important;
-   background-attachment: fixed !important;
-
-   /* Smooth transition for zoom and position */
-   transition:
-    background-position 0.5s ease-in-out,
-    background-size 0.5s ease-in-out !important;
-  }
-
-  /* Optional: Responsive adjustments */
-  @media (max-width: 768px) {
-
-   html,
-   body {
-    background-position: center center !important;
-    background-size: cover !important;
-   }
-  }
-
-  /* Preload and placeholder styles */
-  body::before {
-   content: "";
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background-color: #ffffff;
-   /* White background placeholder */
-   z-index: -1;
-   opacity: 1;
-   transition: opacity 0.5s ease-in-out;
-  }
-
-  /* Image preload technique */
-  .preload-background {
-   background-image: url('../img/DSCF7610.JPG');
-   position: absolute;
-   width: 1px;
-   height: 1px;
-   opacity: 0;
-   z-index: -999;
-  }
-
-  /* Loading indicator (optional) */
-  .loading-overlay {
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background-color: #ffffff;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   z-index: 9999;
-   opacity: 1;
-   transition: opacity 0.5s ease-in-out;
-  }
-
-  .loading-spinner {
-   width: 50px;
-   height: 50px;
-   border: 5px solid #f3f3f3;
-   border-top: 5px solid #3498db;
-   border-radius: 50%;
-   animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-   0% {
-    transform: rotate(0deg);
-   }
-
-   100% {
-    transform: rotate(360deg);
-   }
-  }
-
-  .login-container {
-   display: flex !important;
-   justify-content: center !important;
-   align-items: center !important;
-   height: 100vh !important;
-  }
-
-  .login-card {
-   width: 100% !important;
-   max-width: 450px !important;
-   padding: 20px !important;
-   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4) !important;
-   border-radius: 8px !important;
-   background: white !important;
-  }
-
-  .login-header {
-   text-align: center !important;
-   margin-bottom: 20px !important;
-  }
-
-  .login-header h2 {
-   color: #333 !important;
-   font-weight: 600 !important;
-  }
-
-  .form-control:focus {
-   border-color: #007bff !important;
-   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25) !important;
-  }
-
-  .btn-login {
-   width: 100% !important;
-   padding: 10px !important;
-   font-weight: 600 !important;
-  }
-
-  .error-message {
-   color: #dc3545 !important;
-   margin-bottom: 15px !important;
-   text-align: center !important;
-  }
-
-  /* Password toggle */
-  .input-group-text {
-   cursor: pointer !important;
-   transition: background-color 0.3s ease;
-  }
-
-  .toggle-password {
-   background: transparent !important;
-   border: none !important;
-   color: #6c757d !important;
-   transition: color 0.3s ease !important;
-  }
-
-  .toggle-password:hover {
-   color: #007bff !important;
-   background: rgba(0, 123, 255, 0.1) !important;
-   outline: none !important;
-  }
-
-  .toggle-password:focus {
-   outline: none !important;
-   box-shadow: none !important;
-  }
- </style>
+ <!-- CSS Files -->
+ <link rel="stylesheet" href="../../assets/css/bootstrap.min.css" />
+ <link rel="stylesheet" href="../../assets/css/plugins.min.css" />
+ <link rel="stylesheet" href="../../assets/css/kaiadmin.min.css" />
+ <link rel="stylesheet" href="../css/login.css" />
 </head>
 
 <body>
@@ -253,7 +87,7 @@ unset($_SESSION['login_error']);
    </form>
 
    <div class="text-center mt-3">
-    <a href="#" class="text-muted">Forgot Password?</a>
+    <a href="javascript:void(0);" onclick="fetchAdminContacts()" class="text-muted">Forgot Password?</a>
    </div>
   </div>
  </div>
@@ -274,6 +108,200 @@ unset($_SESSION['login_error']);
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script src="../js/login.js"></script>
+<script>
+ function fetchAdminContacts() {
+  fetch('../api/getAdminContacts.php')
+   .then(response => {
+    if (!response.ok) {
+     throw new Error('Network response was not ok');
+    }
+    return response.json();
+   })
+   .then(response => {
+    if (response.success && response.data && response.data.length > 0) {
+     // Construct HTML for admin contacts
+     const contactsHTML = response.data.map(admin =>
+      `<div class="d-flex justify-content-between mb-2">
+         <strong>${admin.name_admin}</strong>
+         <span class="badge bg-primary">${admin.phone_number}</span>
+        </div>`
+     ).join('');
+
+     Swal.fire({
+      title: 'Forgot Password?',
+      html: `
+             <p>Please contact one of the following administrators to reset your password:</p>
+              ${contactsHTML}
+              <hr class="my-3">
+              <small class="text-muted">
+                <strong>Important Notice:</strong> 
+                Password reset assistance is strictly limited to authorized personnel. 
+                Unauthorized individuals attempting to contact administrators may face 
+                legal or administrative consequences.
+              </small>
+            `,
+      icon: 'info',
+      confirmButtonText: 'Close',
+      customClass: {
+       popup: 'swal-wide'
+      }
+     });
+    } else {
+     Swal.fire({
+      title: 'No Contacts Available',
+      text: response.message || 'Unable to retrieve administrator contacts at this time.',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+     });
+    }
+   })
+   .catch(error => {
+    console.error('Error fetching admin contacts:', error);
+    Swal.fire({
+     title: 'Error',
+     text: 'Unable to fetch administrator contacts. Please check your connection and try again.',
+     icon: 'error',
+     confirmButtonText: 'OK'
+    });
+   });
+ }
+ document.addEventListener('DOMContentLoaded', function () {
+  // Hide loading overlay when page is fully loaded
+  const loadingOverlay = document.querySelector('.loading-overlay');
+  const backgroundImage = new Image();
+
+  backgroundImage.onload = function () {
+   loadingOverlay.style.opacity = '0';
+   setTimeout(() => {
+    loadingOverlay.style.display = 'none';
+   }, 500);
+  };
+
+  backgroundImage.onerror = function () {
+   // Fallback to white background if image fails to load
+   document.body.style.backgroundImage = 'none';
+   loadingOverlay.style.opacity = '0';
+   setTimeout(() => {
+    loadingOverlay.style.display = 'none';
+   }, 500);
+  };
+
+  // Preload the background image
+  backgroundImage.src = '../img/DSCF7610.JPG';
+
+  // Prevent default scroll behavior
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+
+  // Optional: Adjust for mobile devices
+  document.body.addEventListener('touchmove', function (e) {
+   e.preventDefault();
+  }, { passive: false });
+
+  $(document).ready(function () {
+   // Password toggle script
+   const passwordToggle = document.querySelector('.toggle-password');
+   const passwordInput = document.getElementById('password');
+
+   passwordToggle.addEventListener('click', function () {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+
+    // Toggle eye icon
+    const eyeIcon = this.querySelector('i');
+    eyeIcon.classList.toggle('fa-eye');
+    eyeIcon.classList.toggle('fa-eye-slash');
+   });
+
+   // Initial error handling from PHP
+   <?php if (!empty($error)): ?>
+    Swal.fire({
+     title: 'Login Error',
+     text: '<?php echo addslashes($error); ?>',
+     icon: 'error',
+     confirmButtonText: 'Try Again'
+    });
+   <?php endif; ?>
+
+   <?php if (!empty($login_attempt_error)): ?>
+    Swal.fire({
+     title: 'Login Attempt Failed',
+     text: '<?php echo addslashes($login_attempt_error); ?>',
+     icon: 'warning',
+     confirmButtonText: 'OK'
+    });
+   <?php endif; ?>
+
+   // Enhanced form submission handling
+   $('#loginForm').on('submit', function (e) {
+    e.preventDefault();
+
+    const username = $('#username').val().trim();
+    const password = $('#password').val().trim();
+
+    if (!username || !password) {
+     Swal.fire({
+      title: 'Invalid Input',
+      text: 'Please enter your username and password',
+      icon: 'warning',
+      confirmButtonText: 'OK'
+     });
+     return;
+    }
+
+    $.ajax({
+     url: '../api/loginProcess.php',
+     method: 'POST',
+     data: $(this).serialize(),
+     dataType: 'json',
+     success: function (response) {
+      if (response.status === 'success') {
+       // Log session data for debugging
+       console.log('Session Data:', response.session_data);
+
+       Swal.fire({
+        title: 'Login Successful',
+        text: 'Redirecting to dashboard',
+        icon: 'success',
+        showConfirmButton: true
+       }).then((result) => {
+        if (result.isConfirmed) {
+         window.location.href = response.redirect;
+        }
+       });
+      } else {
+       Swal.fire({
+        title: 'Login Failed',
+        text: response.message || 'An unexpected error occurred',
+        icon: 'error',
+        confirmButtonText: 'Try Again'
+       });
+      }
+     },
+     error: function (xhr, status, error) {
+      console.error('AJAX Error:', status, error);
+      Swal.fire({
+       title: 'Error',
+       text: 'An unexpected error occurred',
+       icon: 'error',
+       confirmButtonText: 'OK'
+      });
+     }
+    });
+   });
+
+  });
+
+  // Forgot Password Event Listener
+  const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+  if (forgotPasswordLink) {
+   forgotPasswordLink.addEventListener('click', function (e) {
+    e.preventDefault();
+    fetchAdminContacts();
+   });
+  }
+
+ });
+</script>
 
 </html>

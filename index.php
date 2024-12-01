@@ -15,6 +15,9 @@ include_once 'head.php';
    <?php
    include_once 'main/bars/navbar.php';
 
+   // Verify session is working
+   var_dump($_SESSION);    // Check current session contents
+   
    // check if "page" has parameter and prevent user from getting knowhere
    $page = $_GET['page'] ?? 'dashboard';
 

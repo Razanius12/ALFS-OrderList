@@ -116,10 +116,9 @@
        </li>
        <li>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="index.php?page=admins">Manage Admins</a>
-        <a class="dropdown-item" href="#">Account Setting</a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="#" onclick="confirmLogout(); return false;" class="logout-link">Logout</a>
+        <a class="dropdown-item" href="#" onclick="confirmLogout(); return false;" class="logout-link">
+        <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
        </li>
       </div>
      </ul>

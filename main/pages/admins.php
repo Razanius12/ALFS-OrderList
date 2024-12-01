@@ -1,7 +1,6 @@
 <?php
-
 // Database connection
-require_once 'config/database.php';
+require 'config/database.php';
 
 // Fetch admins from database
 $query = "SELECT a.id_admin, a.username, a.name_admin, a.phone_number, a.password,
@@ -120,14 +119,19 @@ function maskPassword($password)
        <div class="col-md-6">
         <div class="form-group">
          <label>Username</label>
-         <input type="text" class="form-control" name="username" required>
+         <div class="input-icon">
+          <span class="input-icon-addon">
+           <i class="fa fa-user"></i>
+          </span>
+          <input type="text" class="form-control" name="username" placeholder="Enter username" required>
+         </div>
         </div>
        </div>
        <div class="col-md-6">
         <div class="form-group">
          <label>Password</label>
          <div class="input-group">
-          <input type="password" class="form-control" name="password" required>
+          <input type="password" class="form-control" name="password" placeholder="Enter password" required>
           <button class="btn btn-outline-secondary toggle-password" type="button">
            <i class="fa fa-eye"></i>
           </button>
@@ -139,7 +143,7 @@ function maskPassword($password)
        <div class="col">
         <div class="form-group">
          <label>Full Name</label>
-         <input type="text" class="form-control" name="name_admin" required>
+         <input type="text" class="form-control" name="name_admin" placeholder="Enter full name" required>
         </div>
        </div>
       </div>
@@ -172,7 +176,7 @@ function maskPassword($password)
        <div class="col-md-6">
         <div class="form-group">
          <label>Phone Number</label>
-         <input type="tel" class="form-control" name="phone_number" required>
+         <input type="tel" class="form-control" name="phone_number" placeholder="Enter phone number" required>
         </div>
        </div>
       </div>
@@ -205,7 +209,7 @@ function maskPassword($password)
        </div>
        <div class="col-md-6">
         <div class="form-group">
-         <label>Password (leave blank to keep current)</label>
+         <label>Password (leave as it is to keep current)</label>
          <div class="input-group">
           <input type="password" class="form-control" name="password" id="edit_password">
           <button class="btn btn-outline-secondary toggle-password" type="button">
@@ -270,40 +274,6 @@ function maskPassword($password)
 </div>
 
 <!-- passwords css -->
-<style>
- .password-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
- }
-
- .password-text {
-  font-family: monospace;
- }
-
- .toggle-password {
-  background: transparent !important;
-  color: #6c757d !important;
-  transition: color 0.3s ease !important;
-  border: var(1px) solid var(#dee2e6) !important;
- }
-
- .toggle-password:hover {
-  color: #007bff !important;
-  background: rgba(0, 123, 255, 0.1) !important;
-  outline: none !important;
- }
-
- .toggle-password:focus {
-  outline: none !important;
-  box-shadow: none !important;
- }
-
- /* For input groups in forms */
- .input-group .toggle-password {
-  border: 1px solid #ced4da;
-  padding: 0.375rem 0.75rem;
- }
-</style>
+<link rel="stylesheet" href="main/css/toggle.css" />
 
 <script src="main/js/admins.js"></script>

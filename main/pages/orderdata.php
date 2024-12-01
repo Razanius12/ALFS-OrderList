@@ -1,6 +1,6 @@
 <?php
 // Database connection
-require_once 'config/database.php';
+require 'config/database.php';
 
 // Existing query to fetch orders
 $query = "SELECT 
@@ -242,7 +242,7 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Project Name</label>
-          <input type="text" class="form-control" id="edit_order_name" name="order_name" required>
+          <input type="text" class="form-control" id="edit_order_name" name="order_name" placeholder="Enter project name" required>
          </div>
         </div>
         <div class="col-md-6">
@@ -294,7 +294,7 @@ function getStatusBadgeClass($status)
         </div>
         <div class="col-md-6">
          <div class="form-group">
-          <label>Project Description</label>
+          <label>Project Description (Optional)</label>
           <textarea class="form-control" id="edit_description" name="description" rows="4"></textarea>
          </div>
         </div>

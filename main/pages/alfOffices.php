@@ -1,6 +1,6 @@
 <?php
 // Database connection
-require_once 'config/database.php';
+require 'config/database.php';
 
 // Fetch ALF Offices data with error checking
 $query = "SELECT * FROM gmaps ORDER BY name_city_district";

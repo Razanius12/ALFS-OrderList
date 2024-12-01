@@ -1,37 +1,12 @@
 <?php
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Start output buffering
-ob_start();
-
-// Include necessary configurations
-require_once '../../config/database.php';
+// Include session management
 require_once '../../config/session.php';
 
-// Logging function for debugging
-function logLogoutAttempt($message)
-{
- error_log(
-  "[LOGOUT] " . $message . " | User: " .
-  ($_SESSION['username'] ?? 'Unknown') .
-  " | Time: " . date('Y-m-d H:i:s')
- );
-}
-
 try {
- // Check if user is logged in before attempting logout
- if ($auth->isLoggedIn()) {
-  // Log the logout attempt
-  logLogoutAttempt("Logout initiated");
-
+ // Check if user is logged in
+ if (isLoggedIn()) {
   // Perform logout
-  $auth->logout();
-
-  // Destroy all session data
-  session_unset();
-  session_destroy();
+  logoutUser();
 
   // Clear session cookie
   if (ini_get("session.use_cookies")) {
@@ -46,24 +21,16 @@ try {
     $params["httponly"]
    );
   }
- } else {
-  // Log if logout attempted without active session
-  logLogoutAttempt("Logout attempted without active session");
  }
 
- // Clear output buffer
- while (ob_get_level()) {
-  ob_end_clean();
- }
-
- // Respond based on request type
+ // Check if it's an AJAX request
  if (
   isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
  ) {
   // AJAX request
   header('Content-Type: application/json');
-  echo json_encode(['status' => 'success']);
+  echo json_encode(['status' => 'success', 'redirect' => 'login.php']);
   exit();
  } else {
   // Regular request
@@ -71,25 +38,24 @@ try {
   exit();
  }
 } catch (Exception $e) {
- // Clear output buffer
- while (ob_get_level()) {
-  ob_end_clean();
- }
+ // Log any errors
+ error_log("Logout Error: " . $e->getMessage());
 
- // Log any unexpected errors
- error_log("[LOGOUT ERROR] " . $e->getMessage());
-
- // Respond with error
+ // Check if it's an AJAX request
  if (
   isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
  ) {
+  // AJAX request
   header('Content-Type: application/json');
   http_response_code(500);
-  echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+  echo json_encode([
+   'status' => 'error',
+   'message' => 'Logout failed'
+  ]);
   exit();
  } else {
-  // Set error message in session
+  // Set error message in session for regular request
   $_SESSION['logout_error'] = "An error occurred during logout. Please try again.";
   header("Location: login.php");
   exit();

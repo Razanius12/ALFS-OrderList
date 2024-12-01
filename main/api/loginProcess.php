@@ -1,44 +1,78 @@
 <?php
+// Ensure this is the FIRST line
 session_start();
-require_once '../../config/database.php';
-require_once '../../config/session.php';
 
-header('Content-Type: application/json');
+// Debug: Output session status
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-try {
- $username = $_POST['username'] ?? '';
- $password = $_POST['password'] ?? '';
- $remember_me = isset($_POST['remember_me']);
+require_once '../../config/database.php'; // Include your database connection
 
- // Validate input
- if (empty($username) || empty($password)) {
-  http_response_code(400);
-  echo json_encode(['message' => 'Username and password are required']);
-  exit();
- }
+// Get username and password from POST request
+$username = mysqli_real_escape_string($conn, $_POST['username']);
+$password = mysqli_real_escape_string($conn, $_POST['password']);
 
- // Attempt login with remember me option
- $loginResult = $auth->login($username, $password, $remember_me);
-
- if ($loginResult) {
-  // Use a clean, relative path
-  $redirect = '../../index.php';
-
-  echo json_encode([
-   'status' => 'success',
-   'redirect' => $redirect
-  ]);
- } else {
-  // Failed login
-  http_response_code(401);
-  echo json_encode(['message' => 'Invalid username or password']);
- }
-} catch (Exception $e) {
- // Handle any unexpected errors
- http_response_code(500);
- echo json_encode(['message' => 'An unexpected error occurred']);
-
- // Log the actual error
- error_log("Login Error: " . $e->getMessage());
+// Check for empty fields
+if (empty($username) || empty($password)) {
+ echo json_encode([
+  'status' => 'error',
+  'message' => 'Username and password are required.'
+ ]);
+ exit();
 }
+
+// Query for admins
+$queryAdmin = mysqli_query($conn, "SELECT * FROM admins WHERE username = '$username' AND password = '$password'");
+
+if (mysqli_num_rows($queryAdmin) == 1) {
+ $user = mysqli_fetch_assoc($queryAdmin);
+
+ // Extensive session setting with debugging
+ $_SESSION['user_id'] = $user['id_admin'];
+ $_SESSION['username'] = $user['username'];
+ $_SESSION['level'] = 'admin';
+ $_SESSION['name_admin'] = $user['name_admin'];
+
+ // Debug: Verify session is set
+ error_log("Admin Session Set: " . print_r($_SESSION, true));
+
+ echo json_encode([
+  'status' => 'success',
+  'redirect' => '../../index.php',
+  'session_data' => $_SESSION // Send session data back for client-side verification
+ ]);
+ exit();
+}
+
+// Query for workers
+$queryWorker = mysqli_query($conn, "SELECT * FROM workers WHERE username = '$username' AND password = '$password'");
+
+if (mysqli_num_rows($queryWorker) == 1) {
+ $user = mysqli_fetch_assoc($queryWorker);
+
+ // Extensive session setting with debugging
+ $_SESSION['user_id'] = $user['id_worker'];
+ $_SESSION['username'] = $user['username'];
+ $_SESSION['level'] = 'worker';
+ $_SESSION['name_worker'] = $user['name_worker'];
+
+ // Debug: Verify session is set
+ error_log("Worker Session Set: " . print_r($_SESSION, true));
+
+ echo json_encode([
+  'status' => 'success',
+  'redirect' => '../../index.php',
+  'session_data' => $_SESSION // Send session data back for client-side verification
+ ]);
+ exit();
+}
+
+// If no match found in both tables, return error
+echo json_encode([
+ 'status' => 'error',
+ 'message' => 'Invalid username or password.'
+]);
+
+// Close the database connection
+mysqli_close($conn);
 ?>

@@ -1,6 +1,6 @@
 <?php
 // Database connection
-require_once 'config/database.php';
+require 'config/database.php';
 
 // Handle form submission for adding a new position
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
