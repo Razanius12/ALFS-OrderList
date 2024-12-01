@@ -13,7 +13,7 @@ include_once 'head.php';
 
   <div class="main-panel">
    <?php
-   include_once 'navbar.php';
+   include_once 'main/bars/navbar.php';
 
    // check if "page" has parameter and prevent user from getting knowhere
    $page = $_GET['page'] ?? 'dashboard';

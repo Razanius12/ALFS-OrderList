@@ -282,14 +282,21 @@ function maskPassword($password)
  }
 
  .toggle-password {
-  padding: 0;
-  color: #666;
-  background: none;
-  border: none;
+  background: transparent !important;
+  color: #6c757d !important;
+  transition: color 0.3s ease !important;
+  border: var(1px) solid var(#dee2e6) !important;
  }
 
  .toggle-password:hover {
-  color: #333;
+  color: #007bff !important;
+  background: rgba(0, 123, 255, 0.1) !important;
+  outline: none !important;
+ }
+
+ .toggle-password:focus {
+  outline: none !important;
+  box-shadow: none !important;
  }
 
  /* For input groups in forms */

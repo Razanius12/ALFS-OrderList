@@ -119,7 +119,7 @@
         <a class="dropdown-item" href="index.php?page=admins">Manage Admins</a>
         <a class="dropdown-item" href="#">Account Setting</a>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="#">Logout</a>
+        <a class="dropdown-item" href="#" onclick="confirmLogout(); return false;" class="logout-link">Logout</a>
        </li>
       </div>
      </ul>
@@ -129,3 +129,5 @@
  </nav>
  <!-- End Navbar -->
 </div>
+
+<script src="main/js/logout.js"></script>
