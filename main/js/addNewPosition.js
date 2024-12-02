@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
+ if ($.fn.DataTable) {
+  $('#table-positions').DataTable({
+   "pageLength": 10,
+   "order": [[2, "desc"]],
+   responsive: true,
+   language: {
+    search: "_INPUT_",
+    searchPlaceholder: "Search positions...",
+    lengthMenu: "Show _MENU_ entries"
+   }
+  });
+ }
+
  const form = document.querySelector('form[method="POST"]');
 
  $(form).on('submit', function (event) {

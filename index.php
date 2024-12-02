@@ -2,6 +2,7 @@
 <html lang="en">
 
 <?php
+session_start();
 include_once 'head.php';
 ?>
 
@@ -14,9 +15,6 @@ include_once 'head.php';
   <div class="main-panel">
    <?php
    include_once 'main/bars/navbar.php';
-
-   // Verify session is working
-   var_dump($_SESSION);    // Check current session contents
    
    // check if "page" has parameter and prevent user from getting knowhere
    $page = $_GET['page'] ?? 'dashboard';
@@ -32,6 +30,9 @@ include_once 'head.php';
     case 'dashboard':
      includePage('main/pages/dashboard.php');
      break;
+     case 'task':
+      includePage('main/pages/task.php');
+      break;
     case 'orderData':
      includePage('main/pages/orderData.php');
      break;

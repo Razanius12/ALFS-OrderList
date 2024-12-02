@@ -57,176 +57,188 @@ try {
 } catch (Exception $e) {
  $fetch_error = "Error fetching positions: " . $e->getMessage();
 }
-?>
 
-<div class="container">
- <div class="page-inner">
-  <div class="page-header mb-0">
-   <h3 class="fw-bold mb-3">Workers</h3>
-   <ul class="breadcrumbs mb-3">
-    <li class="nav-home">
-     <a href="index.php">
-      <i class="icon-home"></i>
-     </a>
-    </li>
-    <li class="separator">
-     <i class="icon-arrow-right"></i>
-    </li>
-    <li class="nav-item">
-     <a href="index.php?page=workers">Workers</a>
-    </li>
-    <li class="separator">
-     <i class="icon-arrow-right"></i>
-    </li>
-    <li class="nav-item">
-     <a href="index.php?page=addNewPosition">Add New Position</a>
-    </li>
-   </ul>
-  </div>
+require 'main/common/allowedRoles.php';
+try {
+ adminOnlyPage();
 
-  <div class="row">
-   <div class="col-md-12">
-    <div class="card">
-     <div class="card-header">
-      <h4 class="card-title">Add New Position</h4>
-     </div>
-     <div class="card-body">
-      <!-- Display any errors -->
-      <?php if (!empty($errors)): ?>
-       <div class="alert alert-danger">
-        <ul class="mb-0">
-         <?php foreach ($errors as $error): ?>
-          <li><?= htmlspecialchars($error) ?></li>
-         <?php endforeach; ?>
-        </ul>
-       </div>
-      <?php endif; ?>
+ // Get current user details
+ $currentUser = getCurrentUserDetails();
+ ?>
 
-      <!-- Display success message -->
-      <?php if (isset($success)): ?>
-       <div class="alert alert-success">
-        <?= htmlspecialchars($success) ?>
-       </div>
-      <?php endif; ?>
+ <div class="container">
+  <div class="page-inner">
+   <div class="page-header mb-0">
+    <h3 class="fw-bold mb-3">Workers</h3>
+    <ul class="breadcrumbs mb-3">
+     <li class="nav-home">
+      <a href="index.php">
+       <i class="icon-home"></i>
+      </a>
+     </li>
+     <li class="separator">
+      <i class="icon-arrow-right"></i>
+     </li>
+     <li class="nav-item">
+      <a href="index.php?page=workers">Workers</a>
+     </li>
+     <li class="separator">
+      <i class="icon-arrow-right"></i>
+     </li>
+     <li class="nav-item">
+      <a href="index.php?page=addNewPosition">Add New Position</a>
+     </li>
+    </ul>
+   </div>
 
-      <!-- Add New Position Form -->
-      <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>?page=addNewPosition">
-       <div class="row">
-        <div class="col-md-6">
-         <div class="form-group">
-          <label for="position_name">Position Name</label>
-          <input type="text" class="form-control" id="position_name" name="position_name" maxlength="32" required
-           value="<?= isset($success) ? '' : htmlspecialchars($_POST['position_name'] ?? '') ?>">
+   <div class="row">
+    <div class="col-md-12">
+     <div class="card">
+      <div class="card-header">
+       <h4 class="card-title">Add New Position</h4>
+      </div>
+      <div class="card-body">
+       <!-- Display any errors -->
+       <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+         <ul class="mb-0">
+          <?php foreach ($errors as $error): ?>
+           <li><?= htmlspecialchars($error) ?></li>
+          <?php endforeach; ?>
+         </ul>
+        </div>
+       <?php endif; ?>
+
+       <!-- Display success message -->
+       <?php if (isset($success)): ?>
+        <div class="alert alert-success">
+         <?= htmlspecialchars($success) ?>
+        </div>
+       <?php endif; ?>
+
+       <!-- Add New Position Form -->
+       <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>?page=addNewPosition">
+        <div class="row">
+         <div class="col-md-6">
+          <div class="form-group">
+           <label for="position_name">Position Name</label>
+           <input type="text" class="form-control" id="position_name" name="position_name" maxlength="32" required
+            value="<?= isset($success) ? '' : htmlspecialchars($_POST['position_name'] ?? '') ?>">
+          </div>
+         </div>
+         <div class="col-md-6">
+          <div class="form-group">
+           <label for="department">Department</label>
+           <select class="form-control" id="department" name="department" required>
+            <option value="">Select Department</option>
+            <option value="ADMIN" <?= (isset($success) ? '' : (isset($_POST['department']) && $_POST['department'] === 'ADMIN' ? 'selected' : '')) ?>>Admin</option>
+            <option value="WORKER" <?= (isset($success) ? '' : (isset($_POST['department']) && $_POST['department'] === 'WORKER' ? 'selected' : '')) ?>>Worker</option>
+           </select>
+          </div>
          </div>
         </div>
-        <div class="col-md-6">
-         <div class="form-group">
-          <label for="department">Department</label>
-          <select class="form-control" id="department" name="department" required>
-           <option value="">Select Department</option>
-           <option value="ADMIN" <?= (isset($success) ? '' : (isset($_POST['department']) && $_POST['department'] === 'ADMIN' ? 'selected' : '')) ?>>Admin</option>
-           <option value="WORKER" <?= (isset($success) ? '' : (isset($_POST['department']) && $_POST['department'] === 'WORKER' ? 'selected' : '')) ?>>Worker</option>
-          </select>
-         </div>
+        <div class="card-footer">
+         <a href="index.php?page=workers" class="btn btn-secondary">Back</a>
+         <button type="submit" class="btn btn-primary">Add Position</button>
         </div>
-       </div>
-       <div class="card-footer">
-        <a href="index.php?page=workers" class="btn btn-secondary">Back</a>
-        <button type="submit" class="btn btn-primary">Add Position</button>
-       </div>
-      </form>
+       </form>
+      </div>
      </div>
-    </div>
 
-    <!-- Positions Table -->
-    <div class="card mt-4">
-     <div class="card-header">
-      <h4 class="card-title">Existing Positions</h4>
-     </div>
-     <div class="card-body">
-      <?php if (isset($fetch_error)): ?>
-       <div class="alert alert-danger">
-        <?= htmlspecialchars($fetch_error) ?>
-       </div>
-      <?php else: ?>
-       <div class="table-responsive">
-        <table id="multi-filter-select" class="display table table-striped table-hover">
-         <thead>
-          <tr>
-           <th>Position Name</th>
-           <th>Department</th>
-           <th>Created At</th>
-           <th>Actions</th>
-          </tr>
-         </thead>
-         <tbody>
-          <?php while ($position = $result->fetch_assoc()): ?>
+     <!-- Positions Table -->
+     <div class="card mt-4">
+      <div class="card-header">
+       <h4 class="card-title">Existing Positions</h4>
+      </div>
+      <div class="card-body">
+       <?php if (isset($fetch_error)): ?>
+        <div class="alert alert-danger">
+         <?= htmlspecialchars($fetch_error) ?>
+        </div>
+       <?php else: ?>
+        <div class="table-responsive">
+         <table id="table-positions" class="display table table-striped table-hover">
+          <thead>
            <tr>
-            <td><?= htmlspecialchars($position['position_name']) ?></td>
-            <td><?= htmlspecialchars($position['department']) ?></td>
-            <td><?= htmlspecialchars($position['created_at']) ?></td>
-            <td>
-             <div class="form-button-action">
-              <button type="button" class="btn btn-link btn-primary btn-lg" data-toggle="modal"
-               data-target="#editPositionModal" data-position-id="<?php echo $position['id_position']; ?>"
-               data-position-name="<?php echo htmlspecialchars($position['position_name']); ?>"
-               data-department="<?php echo htmlspecialchars($position['department']); ?>">
-               <i class="fa fa-edit"></i>
-              </button>
-              <button type="button" class="btn btn-link btn-danger"
-               onclick="deletePosition(<?= $position['id_position'] ?>)">
-               <i class="fa fa-times"></i>
-              </button>
-             </div>
-            </td>
+            <th>Position Name</th>
+            <th>Department</th>
+            <th>Created At</th>
+            <th>Actions</th>
            </tr>
-          <?php endwhile; ?>
-         </tbody>
-        </table>
-       </div>
-      <?php endif; ?>
+          </thead>
+          <tbody>
+           <?php while ($position = $result->fetch_assoc()): ?>
+            <tr>
+             <td><?= htmlspecialchars($position['position_name']) ?></td>
+             <td><?= htmlspecialchars($position['department']) ?></td>
+             <td><?= htmlspecialchars($position['created_at']) ?></td>
+             <td>
+              <div class="form-button-action">
+               <button type="button" class="btn btn-link btn-primary btn-lg" data-toggle="modal"
+                data-target="#editPositionModal" data-position-id="<?php echo $position['id_position']; ?>"
+                data-position-name="<?php echo htmlspecialchars($position['position_name']); ?>"
+                data-department="<?php echo htmlspecialchars($position['department']); ?>">
+                <i class="fa fa-edit"></i>
+               </button>
+               <button type="button" class="btn btn-link btn-danger"
+                onclick="deletePosition(<?= $position['id_position'] ?>)">
+                <i class="fa fa-times"></i>
+               </button>
+              </div>
+             </td>
+            </tr>
+           <?php endwhile; ?>
+          </tbody>
+         </table>
+        </div>
+       <?php endif; ?>
+      </div>
      </div>
     </div>
    </div>
   </div>
  </div>
-</div>
 
-<!-- Edit Position Modal -->
-<div class="modal fade" id="editPositionModal" tabindex="-1" role="dialog" aria-labelledby="editPositionModalLabel"
- aria-hidden="true">
- <div class="modal-dialog">
-  <div class="modal-content">
-   <div class="modal-header">
-    <h5 class="modal-title" id="editPositionModalLabel">Edit Position</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+ <!-- Edit Position Modal -->
+ <div class="modal fade" id="editPositionModal" tabindex="-1" role="dialog" aria-labelledby="editPositionModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+   <div class="modal-content">
+    <div class="modal-header">
+     <h5 class="modal-title" id="editPositionModalLabel">Edit Position</h5>
+     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="editPositionForm">
+     <div class="modal-body">
+      <div id="editPositionErrorContainer" class="alert alert-danger" style="display:none;"></div>
+
+      <input type="hidden" name="id_position" id="editPositionId">
+
+      <div class="form-group">
+       <label for="editPositionName">Position Name</label>
+       <input type="text" class="form-control" id="editPositionName" name="position_name" maxlength="32" required>
+      </div>
+
+      <div class="form-group">
+       <label for="editPositionDepartment">Department</label>
+       <select class="form-control" id="editPositionDepartment" name="department" required>
+        <option value="ADMIN">Admin</option>
+        <option value="WORKER">Worker</option>
+       </select>
+      </div>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+     </div>
+    </form>
    </div>
-   <form id="editPositionForm">
-    <div class="modal-body">
-     <div id="editPositionErrorContainer" class="alert alert-danger" style="display:none;"></div>
-
-     <input type="hidden" name="id_position" id="editPositionId">
-
-     <div class="form-group">
-      <label for="editPositionName">Position Name</label>
-      <input type="text" class="form-control" id="editPositionName" name="position_name" maxlength="32" required>
-     </div>
-
-     <div class="form-group">
-      <label for="editPositionDepartment">Department</label>
-      <select class="form-control" id="editPositionDepartment" name="department" required>
-       <option value="ADMIN">Admin</option>
-       <option value="WORKER">Worker</option>
-      </select>
-     </div>
-    </div>
-    <div class="modal-footer">
-     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-     <button type="submit" class="btn btn-primary">Save Changes</button>
-    </div>
-   </form>
   </div>
  </div>
-</div>
 
-<script src="main/js/addNewPosition.js"></script>
+ <script src="main/js/addNewPosition.js"></script>
+ <?php
+} catch (Exception $e) {
+ // Handle any unexpected errors
+}
+?>

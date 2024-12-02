@@ -1,4 +1,22 @@
 document.addEventListener('DOMContentLoaded', function () {
+ if ($.fn.DataTable) {
+  $('#order-data-table').DataTable({
+   "pageLength": 10,
+   "order": [[0, "desc"]],
+   responsive: true,
+   language: {
+    search: "_INPUT_",
+    searchPlaceholder: "Search orders...",
+    lengthMenu: "Show _MENU_ entries"
+   },
+   columnDefs: [
+    {
+     targets: 0,
+     visible: false
+    }
+   ]
+  });
+ }
  $(document).ready(function () {
 
   // Function to set current date and time

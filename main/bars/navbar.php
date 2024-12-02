@@ -1,3 +1,10 @@
+<?php
+require_once 'main/common/allowedRoles.php';
+
+// Get current user details
+$currentUser = getCurrentUserDetails();
+?>
+
 <div class="main-header">
  <div class="main-header-logo">
   <!-- Logo Header -->
@@ -93,23 +100,24 @@
     <li class="nav-item topbar-user dropdown hidden-caret">
      <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
       <div class="avatar-sm">
-       <img src="main/img/alf.png" alt="..." class="avatar-img rounded-circle" />
+       <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+        <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
+       </div>
       </div>
-      <span class="profile-username">
-       <span class="op-7">Hi,</span>
-       <span class="fw-bold">Razan</span>
-      </span>
      </a>
      <ul class="dropdown-menu dropdown-user animated fadeIn">
       <div class="dropdown-user-scroll scrollbar-outer">
        <li>
         <div class="user-box">
-         <div class="avatar-lg">
-          <img src="main/img/alf.png" alt="image profile" class="avatar-img rounded" />
+         <div class="avatar-sm">
+          <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+           <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
+          </div>
          </div>
          <div class="u-text">
-          <h4>Razan</h4>
-          <p class="text-muted">razanius12@gmail.com</p>
+           <span class="op-7">Hi,</span>
+           <span class="fw-bold"><?= htmlspecialchars($currentUser['name'] ?? 'User') ?></span>
+          <p class="text-muted"><?= htmlspecialchars($currentUser['username'] ?? 'N/A') ?></p>
           <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
          </div>
         </div>
@@ -117,7 +125,7 @@
        <li>
         <div class="dropdown-divider"></div>
         <a class="dropdown-item" href="#" onclick="confirmLogout(); return false;" class="logout-link">
-        <i class="fas fa-sign-out-alt"></i> Logout
+         <i class="fas fa-sign-out-alt"></i> Logout
         </a>
        </li>
       </div>

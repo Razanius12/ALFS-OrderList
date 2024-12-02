@@ -1,37 +1,39 @@
 document.addEventListener('DOMContentLoaded', function () {
+
  $(document).ready(function () {
-  // Toggle password visibility for both static table and modal forms
-  $(document).on('click', '.toggle-password', function () {
-   const $container = $(this).closest('.password-container, .input-group');
-   const $passwordInput = $container.find('input, .password-text');
-   const $eyeIcon = $(this).find('i');
-
-   // Check if it's an input or a span
-   if ($passwordInput.is('input')) {
-    // For input fields
-    if ($passwordInput.attr('type') === 'password') {
-     $passwordInput.attr('type', 'text');
-     $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+  if ($.fn.DataTable) {
+   $('#admin-table').DataTable({
+    "pageLength": 10,
+    "order": [[0, "desc"]],
+    responsive: true,
+    language: {
+     search: "_INPUT_",
+     searchPlaceholder: "Search admins...",
+     lengthMenu: "Show _MENU_ entries"
+    },
+    columnDefs: [
+     {
+      targets: 0,
+      visible: false
+     }
+    ]
+   });
+ 
+   // Password toggle functionality
+   $('.toggle-password').on('click', function () {
+    const passwordText = $(this).siblings('.password-text');
+    const currentPassword = passwordText.attr('data-password');
+    const isHidden = passwordText.text().includes('*');
+ 
+    if (isHidden) {
+     passwordText.text(currentPassword);
+     $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
     } else {
-     $passwordInput.attr('type', 'password');
-     $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+     passwordText.text(maskPassword(currentPassword));
+     $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
     }
-   } else if ($passwordInput.hasClass('password-text')) {
-    // For span elements with masked passwords
-    const currentText = $passwordInput.text();
-    const actualPassword = $passwordInput.attr('data-password');
-
-    if (currentText === actualPassword) {
-     // Currently showing password, hide it
-     $passwordInput.text(maskPassword(actualPassword));
-     $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
-    } else {
-     // Currently masked, show password
-     $passwordInput.text(actualPassword);
-     $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
-    }
-   }
-  });
+   });
+  }
 
   // Helper function to mask password
   function maskPassword(password) {
@@ -242,6 +244,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
    });
   });
-  
+
  });
 });

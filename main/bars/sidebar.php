@@ -1,18 +1,25 @@
 <?php
+require 'main/common/allowedRoles.php';
+
+// Get current user details
+$currentUser = getCurrentUserDetails();
+
 // Determine the current page
 $currentPage = $_GET['page'] ?? 'dashboard';
 
-// Define sidebar menu items
+// Define sidebar menu items with role-based access
 $mainSidebarItems = [
  'dashboard' => [
   'icon' => 'fas fa-home',
   'label' => 'Dashboard',
-  'url' => './index.php?page=dashboard'
+  'url' => './index.php?page=dashboard',
+  'roles' => ['admin', 'worker']
  ],
  'admins' => [
   'icon' => 'fas fa-users-cog',
   'label' => 'Admins',
-  'url' => 'index.php?page=admins'
+  'url' => 'index.php?page=admins',
+  'roles' => ['admin']
  ]
 ];
 
@@ -21,35 +28,53 @@ $contentSidebarItems = [
   'icon' => 'fas fa-pen-square',
   'label' => 'Workers',
   'url' => 'index.php?page=workers',
+  'roles' => ['admin'],
   'submenu' => ($currentPage === 'addNewPosition') ? [
    'addNewPosition' => [
     'icon' => 'fas fa-plus-circle',
     'label' => 'Add New Position',
-    'url' => 'index.php?page=addNewPosition'
+    'url' => 'index.php?page=addNewPosition',
+    'roles' => ['admin']
    ]
   ] : []
+ ],
+ 'task' => [
+  'icon' => 'fas fa-tasks',
+  'label' => 'My Tasks',
+  'url' => 'index.php?page=task',
+  'roles' => ['worker']
  ],
  'orderData' => [
   'icon' => 'fas fa-table',
   'label' => 'Order Data',
-  'url' => 'index.php?page=orderData'
+  'url' => 'index.php?page=orderData',
+  'roles' => ['admin']
  ],
  'alfOffices' => [
   'icon' => 'fas fa-map-marker-alt',
   'label' => 'ALF Offices',
-  'url' => 'index.php?page=alfOffices'
+  'url' => 'index.php?page=alfOffices',
+  'roles' => ['admin', 'worker']
  ],
  'dailyProgress' => [
   'icon' => 'far fa-chart-bar',
   'label' => 'Daily Progress',
-  'url' => 'index.php?page=dailyProgress'
+  'url' => 'index.php?page=dailyProgress',
+  'roles' => ['admin']
  ]
 ];
 
-// Function to render sidebar items with optional submenu
-function renderSidebarItems($items, $currentPage)
+// Function to render sidebar items with optional submenu and role-based visibility
+function renderSidebarItems($items, $currentPage, $currentUser)
 {
  foreach ($items as $page => $item) {
+  // Check if user has required role to see this item
+  $hasAccess = isset($item['roles']) &&
+   in_array($currentUser['role'], $item['roles']);
+
+  if (!$hasAccess)
+   continue;
+
   $isActive = ($currentPage === $page);
   $hasSubmenu = isset($item['submenu']) && !empty($item['submenu']);
   ?>
@@ -67,19 +92,30 @@ function renderSidebarItems($items, $currentPage)
     <div class="collapse <?= ($currentPage === $page ||
      array_key_exists($currentPage, $item['submenu'])) ? 'show' : '' ?>" id="<?= $page ?>Submenu">
      <ul class="nav nav-collapse">
-      <?php foreach ($item['submenu'] as $subPage => $subItem): ?>
-       <li class="<?= ($currentPage === $subPage) ? 'active' : '' ?>">
-        <a href="<?= $subItem['url'] ?>" style="
+      <?php
+      if (isset($item['submenu'])) {
+       foreach ($item['submenu'] as $subPage => $subItem):
+        // Check submenu item role access
+        $hasSubAccess = isset($subItem['roles']) &&
+         in_array($currentUser['role'], $subItem['roles']);
+        if (!$hasSubAccess)
+         continue;
+        ?>
+        <li class="<?= ($currentPage === $subPage) ? 'active' : '' ?>">
+         <a href="<?= $subItem['url'] ?>" style="
          padding-top: 0px !important;
          padding-right: 0px !important;
          padding-bottom: 0px !important;
          padding-left: 25px !important;
          margin-bottom: -10px !important;">
-         <i class="<?= $subItem['icon'] ?>" style="margin-left: 25px;"></i>
-         <p><?= $subItem['label'] ?></p>
-        </a>
-       </li>
-      <?php endforeach; ?>
+          <i class="<?= $subItem['icon'] ?>" style="margin-left: 25px;"></i>
+          <p><?= $subItem['label'] ?></p>
+         </a>
+        </li>
+        <?php
+       endforeach;
+      }
+      ?>
      </ul>
     </div>
    <?php else: ?>
@@ -102,7 +138,7 @@ function renderSidebarItems($items, $currentPage)
   <div class="sidebar-content">
    <ul class="nav nav-secondary">
     <!-- Main Sidebar Items -->
-    <?php renderSidebarItems($mainSidebarItems, $currentPage); ?>
+    <?php renderSidebarItems($mainSidebarItems, $currentPage, $currentUser); ?>
 
     <!-- Contents Section -->
     <li class="nav-section">
@@ -111,7 +147,7 @@ function renderSidebarItems($items, $currentPage)
      </span>
      <h4 class="text-section">Contents</h4>
     </li>
-    <?php renderSidebarItems($contentSidebarItems, $currentPage); ?>
+    <?php renderSidebarItems($contentSidebarItems, $currentPage, $currentUser); ?>
 
     <!-- Additional Links Section -->
     <li class="nav-section">
