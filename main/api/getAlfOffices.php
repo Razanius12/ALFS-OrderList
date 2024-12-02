@@ -5,105 +5,53 @@ header('Content-Type: application/json');
 // Include database connection
 require_once '../../config/database.php';
 
-try {
- // Check if id_maps is provided (optional - for single office retrieval)
- if (isset($_GET['id_maps'])) {
-  // Sanitize input
-  $id_maps = mysqli_real_escape_string($conn, $_GET['id_maps']);
+// Initialize response array
+$response = array();
 
-  // Prepare comprehensive SQL query for single office
-  $query = "SELECT 
-             id_maps, 
-             name_city_district, 
-             link_embed
-            FROM 
-             gmaps
-            WHERE 
-             id_maps = '$id_maps'";
+// Check if the request method is GET
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Check database connection
+    if (!$conn) {
+        $response['success'] = false;
+        $response['message'] = "Database connection failed.";
+        echo json_encode($response);
+        exit;
+    }
 
-  // Execute query
-  $result = mysqli_query($conn, $query);
+    // Prepare an SQL statement to select data
+    $stmt = $conn->prepare("SELECT id_maps, name_city_district, link_embed FROM gmaps");
+    
+    // Execute the statement
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $offices = array();
 
-  // Check if query was successful
-  if ($result) {
-   // Fetch office data
-   $office = mysqli_fetch_assoc($result);
+        // Check how many rows were returned
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $offices[] = $row;
+            }
+            $response['success'] = true;
+            $response['data'] = $offices;
+        } else {
+            $response['success'] = false;
+            $response['message'] = "No offices found.";
+        }
+    } else {
+        $response['success'] = false;
+        $response['message'] = "Failed to retrieve offices: " . $stmt->error;
+    }
 
-   if ($office) {
-    // Return office data as JSON
-    echo json_encode([
-     'success' => true,
-     'data' => $office
-    ]);
-   } else {
-    // Office not found
-    echo json_encode([
-     'success' => false,
-     'message' => 'Office not found'
-    ]);
-   }
-
-   // Free result set
-   mysqli_free_result($result);
-  } else {
-   // Query failed
-   echo json_encode([
-    'success' => false,
-    'message' => 'Error executing query: ' . mysqli_error($conn)
-   ]);
-  }
- } else {
-  // No specific ID - retrieve all offices
-  $query = "SELECT 
-             id_maps, 
-             name_city_district, 
-             link_embed
-            FROM 
-             gmaps";
-
-  // Execute query
-  $result = mysqli_query($conn, $query);
-
-  // Check if query was successful
-  if ($result) {
-   // Fetch all offices
-   $offices = [];
-   while ($office = mysqli_fetch_assoc($result)) {
-    $offices[] = $office;
-   }
-
-   // Prepare additional data for potential UI needs
-   $additionalData = [
-    'total_offices' => count($offices),
-    'last_updated' => date('Y-m-d H:i:s')
-   ];
-
-   // Return offices data as JSON
-   echo json_encode([
-    'success' => true,
-    'data' => $offices,
-    'meta' => $additionalData
-   ]);
-
-   // Free result set
-   mysqli_free_result($result);
-  } else {
-   // Query failed
-   echo json_encode([
-    'success' => false,
-    'message' => 'Error executing query: ' . mysqli_error($conn)
-   ]);
-  }
- }
-} catch (Exception $e) {
- echo json_encode([
-  'success' => false,
-  'message' => $e->getMessage()
- ]);
-} finally {
- // Close database connection
- if (isset($conn)) {
-  mysqli_close($conn);
- }
+    // Close the statement
+    $stmt->close();
+} else {
+    $response['success'] = false;
+    $response['message'] = "Invalid request method.";
 }
+
+// Close the database connection
+$conn->close();
+
+// Return the response as JSON
+echo json_encode($response);
 ?>

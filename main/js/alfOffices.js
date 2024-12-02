@@ -1,213 +1,179 @@
 document.addEventListener('DOMContentLoaded', function () {
  $(document).ready(function () {
-  // Change the selector to use the form's ID specifically
-  $('form#addAlfOffices').on('submit', function (e) {
-   e.preventDefault();
+     // Handler untuk menambahkan kantor baru
+     $('#addAlfOffices form').on('submit', function (event) {
+         event.preventDefault(); // Mencegah pengiriman form secara default
 
-   // Ensure we're using the actual form element
-   var form = $(this)[0]; // Get the DOM element
-   var formData = new FormData(form);
+         const nameCityDistrict = $('input[name="name_city_district"]').val();
+         const linkEmbed = $('input[name="link_embed"]').val();
 
-   Swal.fire({
-    title: 'Adding Map Entry...',
-    allowOutsideClick: false,
-    didOpen: () => {
-     Swal.showLoading();
-    }
-   });
+         // Validasi input
+         if (!nameCityDistrict || !linkEmbed) {
+             Swal.fire({
+                 icon: 'warning',
+                 title: 'Warning',
+                 text: 'All fields are required!'
+             });
+             return;
+         }
 
-   $.ajax({
-    url: $(this).attr('action'),
-    type: 'POST',
-    data: formData,
-    processData: false,
-    contentType: false,
-    dataType: 'json',
-    success: function (data) {
-     if (data.success) {
-      Swal.fire({
-       icon: 'success',
-       title: 'Success',
-       text: data.message || 'Map entry added successfully'
-      }).then(() => {
-       location.reload();
-      });
-     } else {
-      Swal.fire({
-       icon: 'error',
-       title: 'Error',
-       text: data.message || 'Failed to add map entry'
-      });
-     }
-    },
-    error: function (xhr, status, error) {
-     console.error('AJAX Error:', status, error);
-     console.error('Response Text:', xhr.responseText);
-
-     try {
-      var errorResponse = JSON.parse(xhr.responseText);
-      Swal.fire({
-       icon: 'error',
-       title: 'Error',
-       text: errorResponse.message || 'Failed to add map entry'
-      });
-     } catch (e) {
-      Swal.fire({
-       icon: 'error',
-       title: 'Error',
-       text: xhr.responseText || 'Failed to add map entry'
-      });
-     }
-    }
-   });
-  });
-
-  // Edit ALF Office Modal Handler
-  $('#editAlfOffices').on('show.bs.modal', function (e) {
-   const button = $(e.relatedTarget);
-   const officeId = button.data('id_maps');
-
-   // Show loading state
-   Swal.fire({
-    title: 'Loading Office Details...',
-    allowOutsideClick: false,
-    didOpen: () => {
-     Swal.showLoading();
-    }
-   });
-
-   // Fetch office data
-   $.ajax({
-    url: 'main/api/getAlfOffices.php', // Modify to accept specific office ID
-    type: 'GET',
-    data: { id_maps: officeId },
-    dataType: 'json',
-    success: function (response) {
-     if (response.success) {
-      const data = response.data;
-
-      // Populate form fields
-      $('#id_maps').val(data.id_maps);
-      $('#name_city_district').val(data.name_city_district);
-      $('#link_embed').val(data.link_embed);
-
-      Swal.close();
-     } else {
-      Swal.fire({
-       icon: 'error',
-       title: 'Error',
-       text: response.message || 'Failed to fetch office data'
-      });
-     }
-    },
-    error: function (xhr, status, error) {
-     Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Failed to fetch office data: ' + error
+         // Kirim data untuk menambahkan kantor baru
+         $.ajax({
+             url: 'main/api/addAlfOffices.php', // URL endpoint untuk menambahkan data kantor
+             type: 'POST',
+             data: {
+                 name_city_district: nameCityDistrict,
+                 link_embed: linkEmbed
+             },
+             dataType: 'json',
+             success: function (response) {
+                 if (response.success) {
+                     Swal.fire({
+                         icon: 'success',
+                         title: 'Success',
+                         text: 'Office added successfully!'
+                     }).then(() => {
+                         location.reload(); // Reload halaman setelah menambahkan kantor
+                     });
+                 } else {
+                     Swal.fire({
+                         icon: 'error',
+                         title: 'Error',
+                         text: response.message
+                     });
+                 }
+             },
+             error: function (xhr, status, error) {
+                 Swal.fire({
+                     icon: 'error',
+                     title: 'Error',
+                     text: 'Failed to add office: ' + error
+                 });
+             }
+         });
      });
-    }
-   });
-  });
 
-  // Form Submission Handler
-  $('#editAlfOffices').on('submit', function (e) {
-   e.preventDefault();
+     // Handler untuk menyimpan perubahan saat mengedit kantor
+     $('#editAlfOffices form').on('submit', function (event) {
+         event.preventDefault(); // Mencegah pengiriman form secara default
 
-   const embedLink = $('#edit_link_embed').val().trim();
+         const idMaps = $('#edit_id_maps').val();
+         const nameCityDistrict = $('#edit_name_city_district').val();
+         const linkEmbed = $('#edit_link_embed').val();
 
-   if (!validateGoogleMapsEmbedLink(embedLink)) {
-    Swal.fire({
-     icon: 'error',
-     title: 'Invalid Embed Link',
-     text: 'Please use a valid Google Maps embed link'
-    });
-    return;
-   }
+         // Validasi input
+         if (!idMaps || !nameCityDistrict || !linkEmbed) {
+             Swal.fire({
+                 icon: 'warning',
+                 title: 'Warning',
+                 text: 'All fields are required!'
+             });
+             return;
+         }
 
-   $.ajax({
-    url: 'main/api/updateAlfOffices.php',
-    type: 'POST',
-    data: $(this).serialize(),
-    dataType: 'json',
-    success: function (response) {
-     if (response.success) {
-      Swal.fire({
-       icon: 'success',
-       title: 'Updated',
-       text: response.message
-      }).then(() => {
-       $('#editOfficeModal').modal('hide');
-       // Optional: Refresh office list
-       loadAlfOffices();
-      });
-     } else {
-      Swal.fire({
-       icon: 'error',
-       title: 'Error',
-       text: response.message
-      });
-     }
-    },
-    error: function (xhr, status, error) {
-     Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Failed to update office: ' + error
+         // Kirim data yang diperbarui ke server
+         $.ajax({
+             url: 'main/api/updateAlfOffices.php', // URL endpoint untuk memperbarui data kantor
+             type: 'POST',
+             data: {
+                 id_maps: idMaps,
+                 name_city_district: nameCityDistrict,
+                 link_embed: linkEmbed
+             },
+             dataType: 'json',
+             success: function (response) {
+                 if (response.success) {
+                     Swal.fire({
+                         icon: 'success',
+                         title: 'Success',
+                         text: 'Office updated successfully!'
+                     }).then(() => {
+                         location.reload(); // Reload halaman setelah memperbarui kantor
+                     });
+                 } else {
+                     Swal.fire({
+                         icon: 'error',
+                         title: 'Error',
+                         text: response.message
+                     });
+                 }
+             },
+             error: function (xhr, status, error) {
+                 Swal.fire({
+                     icon: 'error',
+                     title: 'Error',
+                     text: 'Failed to update office: ' + error
+                 });
+             }
+         });
      });
-    }
-   });
-  });
 
-  // Delete Office Handler
-  $('.delete-office').on('click', function (e) {
-   e.preventDefault();
+     // Mengisi modal edit dengan data yang ada
+     document.querySelectorAll('.edit-office').forEach(button => {
+         button.addEventListener('click', function () {
+             // Ambil data dari atribut
+             const id = this.getAttribute('data-id');
+             const city = this.getAttribute('data-city');
+             const link = this.getAttribute('data-link');
 
-   const id = $(this).data('id');
+             // Set nilai dalam modal
+             document.getElementById('edit_id_maps').value = id;
+             document.getElementById('edit_name_city_district').value = city;
+             document.getElementById('edit_link_embed').value = link;
+         });
+     });
 
-   Swal.fire({
-    title: 'Are you sure?',
-    text: 'Do you want to delete this ALF Office?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it!'
-   }).then((result) => {
-    if (result.isConfirmed) {
-     $.ajax({
-      url: 'main/api/deleteAlfOffices.php',
-      method: 'POST',
-      data: { id_maps: id },  // Note the change to id_maps
-      dataType: 'json',
-      success: function (response) {
-       if (response.success) {
-        Swal.fire({
-         icon: 'success',
-         title: 'Deleted!',
-         text: response.message
-        }).then(() => {
-         location.reload();
-        });
-       } else {
-        Swal.fire({
-         icon: 'error',
-         title: 'Error',
-         text: response.message
-        });
-       }
-      },
-      error: function () {
-       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Something went wrong!'
+     // Handler untuk menghapus kantor
+     document.querySelectorAll('.delete-office').forEach(button => {
+         button.addEventListener('click', function () {
+             const idMaps = this.getAttribute('data-id');
+
+             // Konfirmasi penghapusan
+             Swal.fire({
+                 title: 'Are you sure?',
+                 text: 'This action cannot be undone!',
+                 icon: 'warning',
+                 showCancelButton: true,
+                 confirmButtonText: 'Yes, delete it!',
+                 cancelButtonText: 'No, cancel!'
+             }).then((result) => {
+              if (result.isConfirmed) {
+               // Kirim permintaan hapus ke server
+               $.ajax({
+                   url: 'main/api/deleteAlfOffices.php', // Endpoint untuk menghapus kantor
+                   type: 'POST',
+                   data: {
+                       id_maps: idMaps
+                   },
+                   dataType: 'json',
+                   success: function (response) {
+                       if (response.success) {
+                           Swal.fire({
+                               icon: 'success',
+                               title: 'Deleted!',
+                               text: response.message
+                           }).then(() => {
+                               location.reload(); // Reload halaman setelah menghapus kantor
+                           });
+                       } else {
+                           Swal.fire({
+                               icon: 'error',
+                               title: 'Error',
+                               text: response.message
+                           });
+                       }
+                   },
+                   error: function (xhr, status, error) {
+                       Swal.fire({
+                           icon: 'error',
+                           title: 'Error',
+                           text: 'Failed to delete office: ' + error
+                       });
+                   }
+               });
+           }
        });
-      }
-     });
-    }
    });
-  });
-
- });
+});
+});
 });

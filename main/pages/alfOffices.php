@@ -30,7 +30,8 @@ if ($result === false) {
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=alfOffices">ALF Offices</a>
+     <a href="./index.php?page=alfOffices">AL
+      <a href="./index.php?page=alfOffices">ALF Offices</a>
     </li>
    </ul>
    <button type="button" class="btn btn-primary btn-round ms-auto" data-bs-toggle="modal"
@@ -61,8 +62,8 @@ if ($result === false) {
         <div class="card-header d-flex justify-content-between align-items-center">
          <div class="card-title"><?php echo htmlspecialchars($office['name_city_district']); ?></div>
          <div class="card-tools">
-          <a href="#" class="btn btn-sm btn-warning edit-office" data-bs-toggle="modal"
-          data-bs-target="#editAlfOffices" data-id="<?php echo $office['id_maps']; ?>"
+          <a href="#" class="btn btn-sm btn-warning edit-office" data-bs-toggle="modal" data-bs-target="#editAlfOffices"
+           data-id="<?php echo $office['id_maps']; ?>"
            data-city="<?php echo htmlspecialchars($office['name_city_district']); ?>"
            data-link="<?php echo htmlspecialchars($office['link_embed']); ?>">
            <i class="fa fa-edit"></i>
@@ -73,7 +74,7 @@ if ($result === false) {
          </div>
         </div>
         <div class="card-body">
-        <?php echo $office['link_embed']; ?>
+        <?php echo htmlspecialchars($office['link_embed']); ?>
         </div>
        </div>
       </div>
@@ -86,7 +87,8 @@ if ($result === false) {
        No ALF Offices found. Add a new office using the button above.
       </div>
      </div>
-   <?php }
+    <?php
+   }
 
    // Close the database connection
    mysqli_close($conn);
@@ -95,12 +97,12 @@ if ($result === false) {
  </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal for Adding New Office -->
 <div class="modal fade" id="addAlfOffices" tabindex="-1" role="dialog" aria-hidden="true">
  <div class="modal-dialog modal-lg">
   <div class="modal-content">
    <div class="modal-header">
-    <h5 class="modal-title">Add New Admin</h5>
+    <h5 class="modal-title">Add New Office</h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
    </div>
    <form id="addAlfOffices" method="POST" action="main/api/addAlfOffices.php">
@@ -108,58 +110,60 @@ if ($result === false) {
      <div class="row mt-3">
       <div class="col-md-6">
        <div class="form-group">
-        <label>nama kota</label>
+        <label>Masukkan namatempat</label>
         <input type="text" class="form-control" name="name_city_district" required>
        </div>
       </div>
       <div class="col-md-6">
        <div class="form-group">
-        <label>masukan url lokasi </label>
+        <label>Masukkan URL Lokasi</label>
         <input type="text" class="form-control" name="link_embed" required>
        </div>
       </div>
      </div>
-     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-      <button type="submit" class="btn btn-primary">Add</button>
-     </div>
+    </div>
+    <div class="modal-footer">
+     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+     <button type="submit" class="btn btn-primary">Add</button>
     </div>
    </form>
   </div>
  </div>
 </div>
 
+<!-- Modal for Editing Office -->
 <div class="modal fade" id="editAlfOffices" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-   <div class="modal-content">
-    <div class="modal-header">
-     <h5 class="modal-title">Edit Admin</h5>
-     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <form id="editAlfOffices" method="POST" action="main/api/updateAdmin.php">
-     <div class="modal-body">
-      <div class="row mt-3">
-       <div class="col-md-6">
-        <div class="form-group">
-         <label>nama kota</label>
-         <input type="text" class="form-control" name="nama kota" id="name_city_district" required>
-        </div>
+ <div class="modal-dialog modal-lg">
+  <div class="modal-content">
+   <div class="modal-header">
+    <h5 class="modal-title">Edit Office</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+   </div>
+   <form id="editAlfOffices" method="POST" action="main/api/updateAlfOffices.php">
+    <div class="modal-body">
+     <div class="row mt-3">
+      <div class="col-md-6">
+       <div class="form-group">
+        <label>Nama Kota</label>
+        <input type="text" class="form-control" name="name_city_district" id="edit_name_city_district" required>
        </div>
-       <div class="col-md-6">
-        <div class="form-group">
-         <label>masukan Url lokasi </label>
-         <input type="text" class="form-control" name="masukan url lokasi" id="link_embed" required>
-        </div>
+      </div>
+      <div class="col-md-6">
+       <div class="form-group">
+        <label>Masukkan URL Lokasi</label>
+        <input type="text" class="form-control" name="link_embed" id="edit_link_embed" required>
        </div>
       </div>
      </div>
-     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-     </div>
-     <input type="hidden" name="name_city_district" id="id_maps">
-    </form>
-   </div>
+    </div>
+    <div class="modal-footer">
+     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+     <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+    <input type="hidden" name="id_maps" id="edit_id_maps">
+   </form>
   </div>
  </div>
+</div>
+
 <script src="main/js/alfOffices.js"></script>
