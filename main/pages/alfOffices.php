@@ -30,8 +30,7 @@ if ($result === false) {
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="./index.php?page=alfOffices">AL
-      <a href="./index.php?page=alfOffices">ALF Offices</a>
+     <a href="./index.php?page=alfOffices">ALF Offices</a>
     </li>
    </ul>
    <button type="button" class="btn btn-primary btn-round ms-auto" data-bs-toggle="modal"
@@ -51,9 +50,7 @@ if ($result === false) {
      </div>
     </div>
     <?php
-   }
-   // If no error, proceed with displaying results
-   else if ($result && mysqli_num_rows($result) > 0) {
+   } else if ($result && mysqli_num_rows($result) > 0) {
     // Loop through each office
     while ($office = mysqli_fetch_assoc($result)) {
      ?>
@@ -74,7 +71,8 @@ if ($result === false) {
          </div>
         </div>
         <div class="card-body">
-        <?php echo htmlspecialchars($office['link_embed']); ?>
+         <iframe src="<?php echo htmlspecialchars($office['link_embed']); ?>" style="width:100%; height:300px;"
+          frameborder="0"></iframe>
         </div>
        </div>
       </div>
@@ -110,7 +108,7 @@ if ($result === false) {
      <div class="row mt-3">
       <div class="col-md-6">
        <div class="form-group">
-        <label>Masukkan namatempat</label>
+        <label>Masukkan Nama Tempat</label>
         <input type="text" class="form-control" name="name_city_district" required>
        </div>
       </div>
@@ -123,8 +121,8 @@ if ($result === false) {
      </div>
     </div>
     <div class="modal-footer">
-     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-     <button type="submit" class="btn btn-primary">Add</button>
+     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+     <button type="submit" class="btn btn-primary">Tambah</button>
     </div>
    </form>
   </div>
@@ -155,10 +153,20 @@ if ($result === false) {
        </div>
       </div>
      </div>
+     <div class="row mt-3">
+      <div class="col-md-12">
+       <div class="form-group">
+        <label>Preview Gambar</label>
+        <div id="imagePreviewContainer">
+         <img id="imagePreview" src="" alt="Preview" style="width: 100%; height: auto; display: none;">
+        </div>
+       </div>
+      </div>
+     </div>
     </div>
     <div class="modal-footer">
-     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-     <button type="submit" class="btn btn-primary">Save Changes</button>
+     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+     <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
     </div>
     <input type="hidden" name="id_maps" id="edit_id_maps">
    </form>
@@ -167,3 +175,33 @@ if ($result === false) {
 </div>
 
 <script src="main/js/alfOffices.js"></script>
+
+<script>
+ // JavaScript untuk menangani modal edit
+ document.addEventListener('DOMContentLoaded', function () {
+  const editOfficeButtons = document.querySelectorAll('.edit-office');
+  editOfficeButtons.forEach(button => {
+   button.addEventListener('click', function () {
+    const city = button.getAttribute('data-city');
+    const link = button.getAttribute('data-link');
+    const id = button.getAttribute('data-id');
+
+    // Set nilai di modal edit
+    document.getElementById('edit_name_city_district').value = city;
+    document.getElementById('edit_id_maps').value = id;
+
+    // Tampilkan peta Google Maps
+    const imagePreview = document.getElementById('imagePreview');
+    const iframe = document.createElement('iframe');
+    iframe.src = link; // Asumsi link adalah URL embed Google Maps
+    iframe.width = "600"; // Atur lebar iframe
+    iframe.height = "450"; // Atur tinggi iframe
+    iframe.style.border = "0"; // Hapus border
+    iframe.allowFullscreen = true; // Izinkan fullscreen
+    iframe.loading = "lazy"; // Lazy loading
+    imagePreview.innerHTML = ""; // Kosongkan isi sebelumnya
+    imagePreview.appendChild(iframe); // Tambahkan iframe ke dalam elemen preview
+   });
+  });
+ }); i
+</script>
