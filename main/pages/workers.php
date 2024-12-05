@@ -346,7 +346,7 @@ try {
  <!-- passwords css -->
  <link rel="stylesheet" href="main/css/toggle.css" />
 
- <script src="main/js/workers.js"></script>
+ <script src="main/js/worker.js"></script>
  <?php
 } catch (Exception $e) {
  // Handle any unexpected errors

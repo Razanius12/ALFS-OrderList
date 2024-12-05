@@ -28,7 +28,7 @@ try {
  mysqli_begin_transaction($conn);
 
  // Check current order status
- $checkStatusQuery = "SELECT status FROM orders WHERE id_order = ? AND worker_id IS NULL";
+ $checkStatusQuery = "SELECT status FROM orders WHERE id_order = ? AND worker_id";
  $stmt = mysqli_prepare($conn, $checkStatusQuery);
  mysqli_stmt_bind_param($stmt, "i", $taskId);
  mysqli_stmt_execute($stmt);

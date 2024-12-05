@@ -1,38 +1,46 @@
 document.addEventListener('DOMContentLoaded', function () {
- if ($.fn.DataTable) {
-  $('#workers-table').DataTable({
-   "pageLength": 10,
-   "order": [[0, "desc"]],
-   responsive: true,
-   language: {
-    search: "_INPUT_",
-    searchPlaceholder: "Search workers...",
-    lengthMenu: "Show _MENU_ entries"
-   },
-   columnDefs: [
-    {
-     targets: 0,
-     visible: false
-    }
-   ]
-  });
 
-  // Password toggle functionality
-  $('.toggle-password').on('click', function () {
-   const passwordText = $(this).siblings('.password-text');
-   const currentPassword = passwordText.attr('data-password');
-   const isHidden = passwordText.text().includes('*');
-
-   if (isHidden) {
-    passwordText.text(currentPassword);
-    $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
-   } else {
-    passwordText.text(maskPassword(currentPassword));
-    $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
-   }
-  });
- }
  $(document).ready(function () {
+  if ($.fn.DataTable) {
+   $('#workers-table').DataTable({
+    "pageLength": 10,
+    "order": [[0, "desc"]],
+    responsive: true,
+    language: {
+     search: "_INPUT_",
+     searchPlaceholder: "Search workers...",
+     lengthMenu: "Show _MENU_ entries"
+    },
+    columnDefs: [
+     {
+      targets: 0,
+      visible: false
+     }
+    ],
+    // Callback function to initialize password toggle after DataTable is created
+    initComplete: function () {
+     initializePasswordToggle();
+    }
+   });
+
+   // Initialize password toggle functionality
+   function initializePasswordToggle() {
+    // Password toggle functionality
+    $('#workers-table').on('click', '.toggle-password', function () {
+     const passwordText = $(this).siblings('.password-text');
+     const currentPassword = passwordText.attr('data-password');
+     const isHidden = passwordText.text().includes('•');
+
+     if (isHidden) {
+      passwordText.text(currentPassword);
+      $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+     } else {
+      passwordText.text(maskPassword(currentPassword));
+      $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+     }
+    });
+   }
+  }
 
   // Helper function to mask password
   function maskPassword(password) {

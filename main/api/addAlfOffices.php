@@ -1,66 +1,80 @@
 <?php
-// Required headers
 header('Content-Type: application/json');
 
-// Database connection
 require_once '../../config/database.php';
 
-// Initialize response array
 $response = [
-    'success' => false,
-    'message' => '',
-    'data' => null
+ 'success' => false,
+ 'message' => '',
+ 'data' => null
 ];
 
 try {
-    // Check if request method is POST
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Invalid request method');
-    }
+ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+  throw new Exception('Invalid request method');
+ }
 
-    // Validate required fields
-    $required_fields = ['name_city_district', 'link_embed'];
-    foreach ($required_fields as $field) {
-        if (!isset($_POST[$field]) || empty($_POST[$field])) {
-            throw new Exception("$field is required");
-        }
-    }
+ // Validate required fields
+ $required_fields = ['name_city_district', 'link_embed'];
+ foreach ($required_fields as $field) {
+  if (!isset($_POST[$field]) || empty($_POST[$field])) {
+   throw new Exception("$field is required");
+  }
+ }
 
-    // Sanitize and validate input
-    $name_city_district = mysqli_real_escape_string($conn, $_POST['name_city_district']);
-    $link_embed = mysqli_real_escape_string($conn, $_POST['link_embed']);
+ // Clean and prepare the input
+ $name_city_district = trim($_POST['name_city_district']);
+ $link_embed = trim($_POST['link_embed']);
 
-    // Insert new map entry
-    $insert_query = "INSERT INTO gmaps (name_city_district, link_embed) VALUES (?, ?)";
-    $stmt = mysqli_prepare($conn, $insert_query);
-    mysqli_stmt_bind_param($stmt, "ss", $name_city_district, $link_embed);
+ // Normalize the iframe HTML
+ // Remove any existing escaped quotes or backslashes
+ $link_embed = stripslashes($link_embed);
 
-    if (mysqli_stmt_execute($stmt)) {
-        $response['success'] = true;
-        $response['message'] = 'Map entry added successfully';
-        $response['data'] = [
-            'id_maps' => mysqli_insert_id($conn),
-            'name_city_district' => $name_city_district,
-            'link_embed' => $link_embed
-        ];
-    } else {
-        throw new Exception('Failed to add map entry: ' . mysqli_error($conn));
-    }
+ // Remove any surrounding quotes
+ $link_embed = trim($link_embed, '"\'');
 
-    mysqli_stmt_close($stmt);
+ // If it's a URL, convert to iframe
+ if (filter_var($link_embed, FILTER_VALIDATE_URL)) {
+  $link_embed = sprintf(
+   '<iframe src="%s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+   htmlspecialchars($link_embed)
+  );
+ }
+
+ // Ensure it's a valid iframe
+ if (strpos($link_embed, '<iframe') === false) {
+  throw new Exception('Invalid embed link format');
+ }
+
+ // Prepare the statement
+ $stmt = $conn->prepare("INSERT INTO gmaps (name_city_district, link_embed) VALUES (?, ?)");
+ $stmt->bind_param("ss", $name_city_district, $link_embed);
+
+ if ($stmt->execute()) {
+  $response['success'] = true;
+  $response['message'] = 'Map entry added successfully';
+  $response['data'] = [
+   'id_maps' => $stmt->insert_id,
+   'name_city_district' => $name_city_district,
+   'link_embed' => $link_embed
+  ];
+ } else {
+  throw new Exception('Failed to add map entry: ' . $stmt->error);
+ }
+
+ $stmt->close();
 
 } catch (Exception $e) {
-    $response['success'] = false;
-    $response['message'] = $e->getMessage();
+ $response['success'] = false;
+ $response['message'] = $e->getMessage();
 
-    // Debug: Log the full exception
-    error_log("Exception: " . $e->getMessage());
-    error_log("Trace: " . $e->getTraceAsString());
+ // Log the error
+ error_log("Exception in addAlfOffices: " . $e->getMessage());
 } finally {
-    mysqli_close($conn);
+ $conn->close();
 
-    // Ensure JSON is properly encoded
-    echo json_encode($response, JSON_PRETTY_PRINT);
-    exit; // Add exit to prevent any additional output
+ // Output JSON response
+ echo json_encode($response, JSON_PRETTY_PRINT);
+ exit;
 }
 ?>

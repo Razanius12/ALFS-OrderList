@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2024 at 09:47 AM
+-- Generation Time: Dec 03, 2024 at 01:47 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -28,11 +28,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `admins` (
-  `id_admin` int(4) NOT NULL,
+  `id_admin` int(11) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `name_admin` varchar(255) NOT NULL,
-  `id_position` int(4) NOT NULL,
+  `id_position` int(11) NOT NULL,
   `phone_number` varchar(16) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -44,7 +44,8 @@ CREATE TABLE `admins` (
 
 INSERT INTO `admins` (`id_admin`, `username`, `password`, `name_admin`, `id_position`, `phone_number`, `created_at`, `updated_at`) VALUES
 (1, 'theMostPowerfulAdmin', 'realsheeesh', 'Powerful Admin', 41, '6281234567878', '2024-11-27 06:22:26', '2024-11-28 09:08:33'),
-(3, 'gnjr4PRI', 'apriyanto2222', 'Ganjar Apriyanto', 40, '6285624634849', '2024-11-28 09:10:03', '2024-11-28 09:10:03');
+(3, 'gnjr4PRI', 'apriyanto2222', 'Ganjar Apriyanto', 40, '6285624634849', '2024-11-28 09:10:03', '2024-11-28 09:10:03'),
+(5, 'asdasdasd', 'asdasddasd', 'asdasdasd', 41, 'asddasdasd', '2024-12-01 13:20:48', '2024-12-01 13:20:48');
 
 -- --------------------------------------------------------
 
@@ -53,7 +54,7 @@ INSERT INTO `admins` (`id_admin`, `username`, `password`, `name_admin`, `id_posi
 --
 
 CREATE TABLE `daily_earnings` (
-  `id_earning` int(4) NOT NULL,
+  `id_earning` int(11) NOT NULL,
   `date` date NOT NULL,
   `total_orders` int(4) NOT NULL DEFAULT 0,
   `total_earnings` decimal(10,2) NOT NULL DEFAULT 0.00,
@@ -68,7 +69,7 @@ CREATE TABLE `daily_earnings` (
 --
 
 CREATE TABLE `gmaps` (
-  `id_maps` int(4) NOT NULL,
+  `id_maps` int(11) NOT NULL,
   `name_city_district` varchar(32) NOT NULL,
   `link_embed` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -80,8 +81,8 @@ CREATE TABLE `gmaps` (
 --
 
 CREATE TABLE `orders` (
-  `id_order` int(4) NOT NULL,
-  `project_manager_id` int(4) DEFAULT NULL,
+  `id_order` int(11) NOT NULL,
+  `project_manager_id` int(11) DEFAULT NULL,
   `worker_id` int(11) DEFAULT NULL,
   `order_name` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
@@ -106,7 +107,7 @@ INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name
 --
 
 CREATE TABLE `positions` (
-  `id_position` int(4) NOT NULL,
+  `id_position` int(11) NOT NULL,
   `position_name` varchar(32) NOT NULL,
   `department` enum('ADMIN','WORKER') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -145,27 +146,27 @@ CREATE TABLE `remember_tokens` (
 --
 
 CREATE TABLE `workers` (
-  `id_worker` int(4) NOT NULL,
+  `id_worker` int(11) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `name_worker` varchar(255) NOT NULL,
-  `id_position` int(4) NOT NULL,
+  `id_position` int(11) NOT NULL,
   `gender_worker` enum('MALE','FEMALE','OTHER') NOT NULL,
   `phone_number` varchar(16) NOT NULL,
   `availability_status` enum('AVAILABLE','TASKED') NOT NULL DEFAULT 'AVAILABLE',
+  `assigned_order_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `assigned_order_id` int(4) DEFAULT NULL
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `workers`
 --
 
-INSERT INTO `workers` (`id_worker`, `username`, `password`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `created_at`, `updated_at`, `assigned_order_id`) VALUES
-(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'TASKED', '2024-11-26 07:14:02', '2024-11-30 03:03:18', 6),
-(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', '2024-11-29 10:01:30', '2024-11-30 03:55:15', NULL),
-(11, 'vivi', 'prettiestgurls', 'Evelyna Cristina Ziovaj', 18, 'FEMALE', '6281238314426', 'AVAILABLE', '2024-11-29 12:12:42', '2024-11-29 15:15:52', NULL);
+INSERT INTO `workers` (`id_worker`, `username`, `password`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `assigned_order_id`, `created_at`, `updated_at`) VALUES
+(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'TASKED', 6, '2024-11-26 07:14:02', '2024-11-30 03:03:18'),
+(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', NULL, '2024-11-29 10:01:30', '2024-11-30 03:55:15'),
+(11, 'vivi', 'prettiestgurls', 'Evelyna Cristina Ziovaj', 18, 'FEMALE', '6281238314426', 'AVAILABLE', NULL, '2024-11-29 12:12:42', '2024-12-03 01:10:21');
 
 --
 -- Indexes for dumped tables
@@ -230,31 +231,31 @@ ALTER TABLE `workers`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id_admin` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `daily_earnings`
 --
 ALTER TABLE `daily_earnings`
-  MODIFY `id_earning` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_earning` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `gmaps`
 --
 ALTER TABLE `gmaps`
-  MODIFY `id_maps` int(4) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_maps` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `id_position` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id_position` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `remember_tokens`
@@ -266,7 +267,7 @@ ALTER TABLE `remember_tokens`
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id_worker` int(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_worker` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Constraints for dumped tables

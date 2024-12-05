@@ -16,23 +16,30 @@ document.addEventListener('DOMContentLoaded', function () {
       targets: 0,
       visible: false
      }
-    ]
-   });
- 
-   // Password toggle functionality
-   $('.toggle-password').on('click', function () {
-    const passwordText = $(this).siblings('.password-text');
-    const currentPassword = passwordText.attr('data-password');
-    const isHidden = passwordText.text().includes('*');
- 
-    if (isHidden) {
-     passwordText.text(currentPassword);
-     $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
-    } else {
-     passwordText.text(maskPassword(currentPassword));
-     $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+    ],
+    // Callback function to initialize password toggle after DataTable is created
+    initComplete: function () {
+     initializePasswordToggle();
     }
    });
+
+   // Initialize password toggle functionality
+   function initializePasswordToggle() {
+    // Password toggle functionality
+    $('#admin-table').on('click', '.toggle-password', function () {
+     const passwordText = $(this).siblings('.password-text');
+     const currentPassword = passwordText.attr('data-password');
+     const isHidden = passwordText.text().includes('•');
+
+     if (isHidden) {
+      passwordText.text(currentPassword);
+      $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+     } else {
+      passwordText.text(maskPassword(currentPassword));
+      $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+     }
+    });
+   }
   }
 
   // Helper function to mask password

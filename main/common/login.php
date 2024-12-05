@@ -261,7 +261,7 @@ unset($_SESSION['login_attempt_error']);
 
        Swal.fire({
         title: 'Login Successful',
-        text: 'Redirecting to dashboard',
+        text: 'Click OK to Continue to Dashboard',
         icon: 'success',
         showConfirmButton: true
        }).then((result) => {

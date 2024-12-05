@@ -105,33 +105,40 @@ function markTaskComplete(taskId) {
     headers: {
      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: `task_id=${taskId}&status=COMPLETED`
+    body: new URLSearchParams({
+     task_id: taskId,
+     status: 'COMPLETED'
+    })
    })
-    .then(response => response.json())
+    .then(response => {
+     // Check if the response is OK (status in 200-299 range)
+     if (!response.ok) {
+      // If not OK, try to parse error message from response
+      return response.json().then(errorData => {
+       throw new Error(errorData.message || 'Server error');
+      });
+     }
+     return response.json();
+    })
     .then(data => {
      if (data.success) {
       Swal.fire({
        title: 'Task Completed!',
-       text: 'The task has been successfully marked as completed.',
+       text: 'The task has been successfully marked as completed. You will not see the task again when it\'s completed.',
        icon: 'success',
        confirmButtonText: 'OK'
       }).then(() => {
        location.reload();
       });
      } else {
-      Swal.fire({
-       title: 'Error',
-       text: data.message || 'Failed to update task status',
-       icon: 'error',
-       confirmButtonText: 'OK'
-      });
+      throw new Error(data.message || 'Failed to update task status');
      }
     })
     .catch(error => {
      console.error('Error:', error);
      Swal.fire({
-      title: 'Network Error',
-      text: 'An error occurred while updating the task status.',
+      title: 'Error',
+      text: error.message || 'An error occurred while updating the task status.',
       icon: 'error',
       confirmButtonText: 'OK'
      });

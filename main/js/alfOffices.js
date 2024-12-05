@@ -1,57 +1,51 @@
 document.addEventListener('DOMContentLoaded', function () {
- $(document).ready(function () {
-  // Handler untuk menambahkan kantor baru
-  $('#addAlfOffices form').on('submit', function (event) {
-   event.preventDefault(); // Mencegah pengiriman form secara default
 
-   const nameCityDistrict = $('input[name="name_city_district"]').val();
-   const linkEmbed = $('input[name="link_embed"]').val();
+ const addAlfOfficesForm = document.getElementById('addAlfOfficesForm');
 
-   // Validasi input
-   if (!nameCityDistrict || !linkEmbed) {
-    Swal.fire({
-     icon: 'warning',
-     title: 'Warning',
-     text: 'All fields are required!'
-    });
-    return;
-   }
+ if (addAlfOfficesForm) {
+  addAlfOfficesForm.addEventListener('submit', function (e) {
+   e.preventDefault();
 
-   // Kirim data untuk menambahkan kantor baru
-   $.ajax({
-    url: 'main/api/addAlfOffices.php', // URL endpoint untuk menambahkan data kantor
-    type: 'POST',
-    data: {
-     name_city_district: nameCityDistrict,
-     link_embed: linkEmbed
-    },
-    dataType: 'json',
-    success: function (response) {
-     if (response.success) {
+   const formData = new FormData(this);
+
+   fetch('main/api/addAlfOffices.php', {
+    method: 'POST',
+    body: formData
+   })
+    .then(response => response.json())
+    .then(data => {
+     if (data.success) {
+      // Success handling
       Swal.fire({
        icon: 'success',
-       title: 'Success',
-       text: 'Office added successfully!'
+       title: 'Success!',
+       text: data.message,
+       timer: 1500
       }).then(() => {
-       location.reload(); // Reload halaman setelah menambahkan kantor
+       // Reload the page or dynamically add the new office
+       location.reload();
       });
      } else {
+      // Error handling
       Swal.fire({
        icon: 'error',
-       title: 'Error',
-       text: response.message
+       title: 'Error!',
+       text: data.message
       });
      }
-    },
-    error: function (xhr, status, error) {
+    })
+    .catch(error => {
+     console.error('Error:', error);
      Swal.fire({
       icon: 'error',
-      title: 'Error',
-      text: 'Failed to add office: ' + error
+      title: 'Network Error',
+      text: 'Could not complete the request'
      });
-    }
-   });
+    });
   });
+ }
+
+ $(document).ready(function () {
 
   // Handler untuk menyimpan perubahan saat mengedit kantor
   $('#editAlfOffices form').on('submit', function (event) {
