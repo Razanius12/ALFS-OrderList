@@ -36,8 +36,15 @@ try {
  // If it's a URL, convert to iframe
  if (filter_var($link_embed, FILTER_VALIDATE_URL)) {
   $link_embed = sprintf(
-   '<iframe src="%s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+   '<iframe src="%s" width="100%%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
    htmlspecialchars($link_embed)
+  );
+ } else {
+  // If already an iframe, ensure width is 100%
+  $link_embed = preg_replace(
+   ['/(width=["\']\d+%?["\'])/i', '/(width=\d+)/i'],
+   ['width="100%"', 'width="100%"'],
+   $link_embed
   );
  }
 

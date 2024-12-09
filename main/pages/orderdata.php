@@ -130,7 +130,7 @@ try {
             </td>
             <td><?= htmlspecialchars($order['project_manager'] ?? 'N/A') ?></td>
             <td>
-             <?= $order['assigned_worker'] ? htmlspecialchars($order['assigned_worker']) : 'No one' ?>
+             <?= $order['assigned_worker'] ? htmlspecialchars($order['assigned_worker']) : 'None' ?>
             </td>
             <td>
              <span class="badge bg-<?= getStatusBadgeClass($order['status']) ?>">

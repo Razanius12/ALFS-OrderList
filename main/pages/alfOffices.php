@@ -27,7 +27,7 @@ try {
     <h3 class="fw-bold mb-3">ALF Offices</h3>
     <ul class="breadcrumbs mb-3">
      <li class="nav-home">
-      <a href="./index.php">
+      <a href="index.php">
        <i class="icon-home"></i>
       </a>
      </li>
@@ -35,7 +35,7 @@ try {
       <i class="icon-arrow-right"></i>
      </li>
      <li class="nav-item">
-      <a href="./index.php?page=alfOffices">ALF Offices</a>
+      <a href="index.php?page=alfOffices">ALF Offices</a>
      </li>
     </ul>
     <?php if ($currentUser['role'] === 'admin'): ?>
@@ -65,24 +65,29 @@ try {
         <div class="card">
          <div class="card-header d-flex justify-content-between align-items-center">
           <div class="card-title"><?php echo htmlspecialchars($office['name_city_district']); ?></div>
-          <?php if ($currentUser['role'] === 'admin'): ?>
-          <div class="card-tools">
-           <a href="#" class="btn btn-sm btn-warning edit-office" data-bs-toggle="modal" data-bs-target="#editAlfOffices"
-            data-id="<?php echo $office['id_maps']; ?>"
-            data-city="<?php echo htmlspecialchars($office['name_city_district']); ?>"
-            data-link="<?php echo htmlspecialchars($office['link_embed']); ?>">
-            <i class="fa fa-edit"></i>
-           </a>
-           <a href="#" class="btn btn-sm btn-danger delete-office" data-id="<?php echo $office['id_maps']; ?>">
-            <i class="fa fa-trash"></i>
-           </a>
-          </div>
-          <?php endif; ?>
+         <?php if ($currentUser['role'] === 'admin'): ?>
+           <div class="card-tools">
+            <a href="#" class="btn btn-sm btn-warning edit-office" data-bs-toggle="modal" data-bs-target="#editAlfOffices"
+             data-id="<?php echo $office['id_maps']; ?>"
+             data-city="<?php echo htmlspecialchars($office['name_city_district']); ?>"
+             data-link="<?php echo htmlspecialchars($office['link_embed']); ?>">
+             <i class="fa fa-edit"></i>
+            </a>
+            <a href="#" class="btn btn-sm btn-danger delete-office" data-id="<?php echo $office['id_maps']; ?>">
+             <i class="fa fa-trash"></i>
+            </a>
+           </div>
+         <?php endif; ?>
          </div>
          <div class="card-body">
           <?php
-          // Safely decode and display the embedded map
-          echo preg_replace('/\\\"/', '"', $office['link_embed']);
+          // Ensure iframe is 100% width
+          $embedMap = preg_replace(
+           ['/(width=["\']\d+%?["\'])/i', '/(width=\d+)/i'],
+           ['width="100%"', 'width="100%"'],
+           $office['link_embed']
+          );
+          echo $embedMap;
           ?>
          </div>
         </div>
@@ -128,7 +133,7 @@ try {
          <label>Link Embed</label>
          <input type="text" class="form-control" name="link_embed" required>
          <small class="form-text text-muted">
-          Enter full Google Maps embed iframe or URL
+          Enter full Google Maps embed iframe
          </small>
         </div>
        </div>
@@ -207,7 +212,7 @@ try {
      imagePreview.appendChild(iframe); // Tambahkan iframe ke dalam elemen preview
     });
    });
-  }); i
+  });
  </script>
 
  <?php

@@ -125,11 +125,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Konfirmasi penghapusan
     Swal.fire({
      title: 'Are you sure?',
-     text: 'This action cannot be undone!',
+     text: "You won't be able to revert this!",
      icon: 'warning',
      showCancelButton: true,
-     confirmButtonText: 'Yes, delete it!',
-     cancelButtonText: 'No, cancel!'
+     confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
      if (result.isConfirmed) {
       // Kirim permintaan hapus ke server

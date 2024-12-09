@@ -77,7 +77,7 @@ unset($_SESSION['login_attempt_error']);
     </div>
 
     <div class="mb-3 form-check">
-     <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
+     <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me" checked>
      <label class="form-check-label" for="rememberMe">Remember me</label>
     </div>
 

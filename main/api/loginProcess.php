@@ -1,5 +1,4 @@
 <?php
-// Ensure this is the FIRST line
 session_start();
 
 // Debug: Output session status
