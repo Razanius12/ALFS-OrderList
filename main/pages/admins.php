@@ -276,7 +276,6 @@ try {
     </div>
    </div>
   </div>
-
  </div>
 
  <!-- passwords css -->

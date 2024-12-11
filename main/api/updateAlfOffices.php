@@ -6,7 +6,6 @@ header('Content-Type: application/json');
 require_once '../../config/database.php';
 
 // Initialize response array
-$response = array();
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,6 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode($response);
             exit;
         }
+        $response = array();
+if (filter_var($link_embed, FILTER_VALIDATE_URL)) 
+    $link_embed = sprintf(
+     '<iframe src="%s" width="100%%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+     htmlspecialchars($link_embed)
+    );
 
         // Prepare an SQL statement to prevent SQL injection
         $stmt = $conn->prepare("UPDATE gmaps SET name_city_district = ?, link_embed = ? WHERE id_maps = ?");
