@@ -5,63 +5,67 @@ header('Content-Type: application/json');
 // Include database connection
 require_once '../../config/database.php';
 
-// Initialize response array
+try {
+ // Ensure all required fields are present
+ $requiredFields = ['id_maps', 'name_city_district', 'link_embed'];
+ foreach ($requiredFields as $field) {
+  if (!isset($_POST[$field]) || empty($_POST[$field])) {
+   throw new Exception("Missing required field: $field");
+  }
+ }
 
-// Check if the request method is POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the data from the POST request
-    $id_maps = isset($_POST['id_maps']) ? $_POST['id_maps'] : null;
-    $name_city_district = isset($_POST['name_city_district']) ? $_POST['name_city_district'] : null;
-    $link_embed = isset($_POST['link_embed']) ? $_POST['link_embed'] : null;
+ // Sanitize inputs
+ $id_maps = mysqli_real_escape_string($conn, $_POST['id_maps']);
+ $name_city_district = mysqli_real_escape_string($conn, $_POST['name_city_district']);
+ $link_embed = mysqli_real_escape_string($conn, $_POST['link_embed']);
 
-    // Validate inputs
-    if ($id_maps && $name_city_district && $link_embed) {
-        // Validate ID
-        if (filter_var($id_maps, FILTER_VALIDATE_INT) === false) {
-            $response['success'] = false;
-            $response['message'] = "Invalid ID.";
-            echo json_encode($response);
-            exit;
-        }
-        $response = array();
-if (filter_var($link_embed, FILTER_VALIDATE_URL)) 
-    $link_embed = sprintf(
-     '<iframe src="%s" width="100%%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
-     htmlspecialchars($link_embed)
-    );
+ // Validate ID
+ if (filter_var($id_maps, FILTER_VALIDATE_INT) === false) {
+  throw new Exception("Invalid ID.");
+ }
 
-        // Prepare an SQL statement to prevent SQL injection
-        $stmt = $conn->prepare("UPDATE gmaps SET name_city_district = ?, link_embed = ? WHERE id_maps = ?");
-        $stmt->bind_param("ssi", $name_city_district, $link_embed, $id_maps);
+ // Prepare the link_embed (only wrap in iframe if it's not already an iframe)
+ if (strpos($link_embed, '<iframe') === false) {
+  if (filter_var($link_embed, FILTER_VALIDATE_URL)) {
+   $link_embed = sprintf(
+    '<iframe src="%s" width="100%%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+    htmlspecialchars($link_embed)
+   );
+  } else {
+   throw new Exception("Invalid URL format for link_embed.");
+  }
+ }
 
-        // Execute the statement
-        if ($stmt->execute()) {
-            if ($stmt->affected_rows > 0) {
-                $response['success'] = true;
-                $response['message'] = "Office updated successfully.";
-            } else {
-                $response['success'] = false;
-                $response['message'] = "No changes made. The office might not exist.";
-            }
-        } else {
-            $response['success'] = false;
-            $response['message'] = "Failed to update office: " . $stmt->error;
-        }
+ // Prepare UPDATE query
+ $query = "UPDATE gmaps 
+           SET name_city_district = '$name_city_district', 
+            link_embed = '$link_embed' 
+           WHERE id_maps = '$id_maps'";
 
-                // Close the statement
-                $stmt->close();
-            } else {
-                $response['success'] = false;
-                $response['message'] = "All fields are required.";
-            }
-        } else {
-            $response['success'] = false;
-            $response['message'] = "Invalid request method.";
-        }
-        
-        // Close the database connection
-        $conn->close();
-        
-        // Return the response as JSON
-        echo json_encode($response);
-        ?>
+ // Execute query
+ if (mysqli_query($conn, $query)) {
+  if (mysqli_affected_rows($conn) > 0) {
+   echo json_encode([
+    'success' => true,
+    'message' => 'Office updated successfully'
+   ]);
+  } else {
+   echo json_encode([
+    'success' => true,
+    'message' => 'No changes made. The office details might be the same.'
+   ]);
+  }
+ } else {
+  throw new Exception('Failed to update office: ' . mysqli_error($conn));
+ }
+} catch (Exception $e) {
+ // Error handling
+ echo json_encode([
+  'success' => false,
+  'message' => $e->getMessage()
+ ]);
+}
+
+// Close connection
+mysqli_close($conn);
+?>
