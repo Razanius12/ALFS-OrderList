@@ -169,6 +169,9 @@ try {
         <div class="form-group">
          <label>Link Embed</label>
          <input type="text" class="form-control" name="link_embed" id="edit_link_embed" required>
+         <small class="form-text text-muted">
+          Enter full Google Maps embed iframe
+         </small>
         </div>
        </div>
       </div>
