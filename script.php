@@ -12,6 +12,6 @@
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Chart JS -->
-<script src="assets/js/plugin/chart.js/chart.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Custom JS -->
 <script src="main/customJS.js"></script>

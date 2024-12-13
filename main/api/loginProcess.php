@@ -1,15 +1,15 @@
 <?php
 session_start();
 
-// Debug: Output session status
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-require_once '../../config/database.php'; // Include your database connection
+require_once '../../config/database.php';
+require_once '../../config/session.php'; // Include the session functions
 
 // Get username and password from POST request
 $username = mysqli_real_escape_string($conn, $_POST['username']);
 $password = mysqli_real_escape_string($conn, $_POST['password']);
+
+// Check for remember me
+$remember_me = isset($_POST['remember_me']) && $_POST['remember_me'] == '1';
 
 // Check for empty fields
 if (empty($username) || empty($password)) {
@@ -20,49 +20,79 @@ if (empty($username) || empty($password)) {
  exit();
 }
 
-// Query for admins
-$queryAdmin = mysqli_query($conn, "SELECT * FROM admins WHERE username = '$username' AND password = '$password'");
+// Function to handle successful login
+function handleSuccessfulLogin($conn, $user, $user_type, $remember_me = false)
+{
+ // Clear any existing session data
+ $_SESSION = array();
 
-if (mysqli_num_rows($queryAdmin) == 1) {
- $user = mysqli_fetch_assoc($queryAdmin);
-
- // Extensive session setting with debugging
- $_SESSION['user_id'] = $user['id_admin'];
+ // Set new session variables
+ $_SESSION['user_id'] = $user_type == 'admin' ? $user['id_admin'] : $user['id_worker'];
  $_SESSION['username'] = $user['username'];
- $_SESSION['level'] = 'admin';
- $_SESSION['name_admin'] = $user['name_admin'];
+ $_SESSION['level'] = $user_type;
 
- // Debug: Verify session is set
- error_log("Admin Session Set: " . print_r($_SESSION, true));
+ // Set name based on user type with explicit naming
+ if ($user_type == 'admin') {
+  $_SESSION['name_admin'] = $user['name_admin'];
+  $_SESSION['name'] = $user['name_admin']; // Add this line
+ } else {
+  $_SESSION['name_worker'] = $user['name_worker'];
+  $_SESSION['name'] = $user['name_worker']; // Add this line
+ }
 
- echo json_encode([
+ // Debug logging
+ error_log("Login Session Set: " . print_r($_SESSION, true));
+
+ // Handle remember me functionality
+ if ($remember_me) {
+  createRememberMeToken(
+   $_SESSION['user_id'],
+   $user_type
+  );
+ }
+
+ // Return login success response
+ return [
   'status' => 'success',
   'redirect' => '../../index.php',
-  'session_data' => $_SESSION // Send session data back for client-side verification
- ]);
+  'session_data' => $_SESSION
+ ];
+}
+
+// Improved authentication function
+function authenticateUser($conn, $username, $password, $table, $user_type)
+{
+ // Use prepared statement to prevent SQL injection
+ $stmt = $conn->prepare("SELECT * FROM $table WHERE username = ? AND password = ?");
+ $stmt->bind_param("ss", $username, $password);
+ $stmt->execute();
+ $result = $stmt->get_result();
+
+ if ($result->num_rows == 1) {
+  $user = $result->fetch_assoc();
+
+  // Debug logging
+  error_log("$user_type User Found: " . print_r($user, true));
+
+  return $user;
+ }
+
+ return null;
+}
+
+// Try to authenticate as admin
+$adminUser = authenticateUser($conn, $username, $password, 'admins', 'Admin');
+if ($adminUser) {
+ $response = handleSuccessfulLogin($conn, $adminUser, 'admin', $remember_me);
+ echo json_encode($response);
  exit();
 }
 
-// Query for workers
-$queryWorker = mysqli_query($conn, "SELECT * FROM workers WHERE username = '$username' AND password = '$password'");
-
-if (mysqli_num_rows($queryWorker) == 1) {
- $user = mysqli_fetch_assoc($queryWorker);
-
- // Extensive session setting with debugging
- $_SESSION['user_id'] = $user['id_worker'];
- $_SESSION['username'] = $user['username'];
- $_SESSION['level'] = 'worker';
- $_SESSION['name_worker'] = $user['name_worker'];
-
- // Debug: Verify session is set
- error_log("Worker Session Set: " . print_r($_SESSION, true));
-
- echo json_encode([
-  'status' => 'success',
-  'redirect' => '../../index.php',
-  'session_data' => $_SESSION // Send session data back for client-side verification
- ]);
+// Try to authenticate as worker
+$workerUser = authenticateUser($conn, $username, $password, 'workers', 'Worker');
+if ($workerUser) {
+ $response = handleSuccessfulLogin($conn, $workerUser, 'worker', $remember_me);
+ echo json_encode($response);
  exit();
 }
 

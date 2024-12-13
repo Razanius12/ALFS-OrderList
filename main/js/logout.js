@@ -9,39 +9,49 @@ function confirmLogout() {
   confirmButtonText: 'Yes, log out'
  }).then((result) => {
   if (result.isConfirmed) {
-   // Clear local storage and session storage
+   // Comprehensive storage clearing
    localStorage.clear();
    sessionStorage.clear();
+
+   // Clear all cookies
+   document.cookie.split(";").forEach(function (c) {
+    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+   });
 
    // Use AJAX to handle logout
    fetch('main/common/logout.php', {
     method: 'POST',
-    credentials: 'same-origin'
+    credentials: 'same-origin',
+    headers: {
+     'X-Requested-With': 'XMLHttpRequest'
+    }
    })
     .then(response => {
-     if (response.ok) {
+     if (!response.ok) {
+      throw new Error('Logout failed');
+     }
+     return response.json();
+    })
+    .then(data => {
+     if (data.status === 'success') {
       Swal.fire({
        title: 'Logged Out',
        text: 'You have been successfully logged out.',
        icon: 'success',
        confirmButtonText: 'OK'
       }).then(() => {
-       // Redirect to login page
-       window.location.href = 'main/common/login.php';
+       // Force full page reload and redirect
+       window.location.href = data.redirect || 'main/common/login.php';
       });
      } else {
-      Swal.fire({
-       title: 'Logout Error',
-       text: 'An error occurred during logout.',
-       icon: 'error'
-      });
+      throw new Error(data.message || 'Logout failed');
      }
     })
     .catch(error => {
      console.error('Logout error:', error);
      Swal.fire({
       title: 'Logout Error',
-      text: 'An unexpected error occurred.',
+      text: error.message || 'An unexpected error occurred.',
       icon: 'error'
      });
     });

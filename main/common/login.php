@@ -1,5 +1,40 @@
 <?php
-require_once '../../config/database.php';
+require '../../config/database.php';
+require '../../config/session.php';
+
+// More aggressive session and cookie clearing
+if (session_status() == PHP_SESSION_ACTIVE) {
+ // Remove all session variables
+ $_SESSION = array();
+
+ // Destroy the session
+ session_destroy();
+
+ // Clear all cookies
+ if (ini_get("session.use_cookies")) {
+  $params = session_get_cookie_params();
+  setcookie(
+   session_name(),
+   '',
+   time() - 42000,
+   $params["path"],
+   $params["domain"],
+   $params["secure"],
+   $params["httponly"]
+  );
+ }
+
+ // Clear remember me cookie
+ if (isset($_COOKIE['remember_me'])) {
+  setcookie('remember_me', '', time() - 3600, '/', '', true, true);
+  setcookie('remember_me', '', time() - 3600, '/', $_SERVER['HTTP_HOST'], true, true);
+  unset($_COOKIE['remember_me']);
+ }
+}
+
+// Start a fresh session
+session_start();
+session_regenerate_id(true);
 
 // Handle login error messages
 $error = $_SESSION['login_error'] ?? '';
@@ -238,6 +273,8 @@ unset($_SESSION['login_attempt_error']);
 
     const username = $('#username').val().trim();
     const password = $('#password').val().trim();
+    // Get remember me checkbox state
+    const rememberMe = $('#rememberMe').is(':checked') ? 1 : 0;
 
     if (!username || !password) {
      Swal.fire({
@@ -252,7 +289,11 @@ unset($_SESSION['login_attempt_error']);
     $.ajax({
      url: '../api/loginProcess.php',
      method: 'POST',
-     data: $(this).serialize(),
+     data: {
+      username: username,
+      password: password,
+      remember_me: rememberMe  // Add remember me flag
+     },
      dataType: 'json',
      success: function (response) {
       if (response.status === 'success') {

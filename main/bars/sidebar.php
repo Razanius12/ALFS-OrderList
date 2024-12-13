@@ -1,9 +1,4 @@
 <?php
-require 'main/common/allowedRoles.php';
-
-// Get current user details
-$currentUser = getCurrentUserDetails();
-
 // Determine the current page
 $currentPage = $_GET['page'] ?? 'dashboard';
 

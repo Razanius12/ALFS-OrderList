@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 01, 2024 at 05:47 PM
+-- Generation Time: Dec 13, 2024 at 05:08 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -37,6 +37,14 @@ CREATE TABLE `remember_tokens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `remember_tokens`
+--
+
+INSERT INTO `remember_tokens` (`id`, `user_id`, `user_type`, `token`, `expiry`, `created_at`) VALUES
+(3, 3, 'admin', '3a8736d5426737b9c05a3a6c295693c0dc9597f3aedb653f8c9699c10d83d05a', 1736654589, '2024-12-13 04:02:08'),
+(4, 10, 'worker', '5b04d58b1107443613965a6f2a74e4ea7de8440e142f58198c3a4b788ec5c121', 1736654819, '2024-12-13 04:03:25');
+
+--
 -- Indexes for dumped tables
 --
 
@@ -55,7 +63,7 @@ ALTER TABLE `remember_tokens`
 -- AUTO_INCREMENT for table `remember_tokens`
 --
 ALTER TABLE `remember_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,8 +1,8 @@
 <?php
-require_once 'main/common/allowedRoles.php';
-
 // Get current user details
 $currentUser = getCurrentUserDetails();
+// Debug logging
+error_log("Navbar Current User: " . print_r($currentUser, true));
 ?>
 
 <div class="main-header">
@@ -97,6 +97,11 @@ $currentUser = getCurrentUserDetails();
      </div>
     </li>
 
+    <script>
+     console.log('Current User Details:', <?php echo json_encode($currentUser); ?>);
+     console.log('Full Session Details:', <?php echo json_encode($_SESSION); ?>);
+    </script>
+
     <li class="nav-item topbar-user dropdown hidden-caret">
      <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
       <div class="avatar-sm">
@@ -115,8 +120,8 @@ $currentUser = getCurrentUserDetails();
           </div>
          </div>
          <div class="u-text">
-           <span class="op-7">Hi,</span>
-           <span class="fw-bold"><?= htmlspecialchars($currentUser['name'] ?? 'User') ?></span>
+          <span class="op-7">Hi,</span>
+          <span class="fw-bold"><?= htmlspecialchars($currentUser['name'] ?? 'User') ?></span>
           <p class="text-muted"><?= htmlspecialchars($currentUser['username'] ?? 'N/A') ?></p>
           <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
          </div>
