@@ -369,7 +369,7 @@ function getCurrentUserDetails()
  ];
 }
 
-// Optional: Additional security check
+// Additional security check
 function isUserAuthenticated()
 {
  return isset($_SESSION['user_id']) &&

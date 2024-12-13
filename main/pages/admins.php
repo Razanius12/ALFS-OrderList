@@ -2,6 +2,7 @@
 
 adminOnlyPage();
 $currentUser = getCurrentUserDetails();
+checkPageAccess();
 
 // Database connection
 require 'config/database.php';
@@ -17,7 +18,7 @@ $result = mysqli_query($conn, $query);
 if ($result === false) {
  // Log the error
  error_log("Database Query Error: " . mysqli_error($conn));
- $error_message = "Unable to retrieve offices. Please try again later.";
+ $error_message = "Unable to retrieve admins. Please try again later.";
 }
 
 // Helper function to mask password

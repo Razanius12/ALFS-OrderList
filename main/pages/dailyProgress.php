@@ -2,6 +2,7 @@
 
 adminOnlyPage();
 $currentUser = getCurrentUserDetails();
+checkPageAccess();
 
 ?>
 

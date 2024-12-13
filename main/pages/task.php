@@ -2,6 +2,7 @@
 
 workerOnlyPage();
 $currentUser = getCurrentUserDetails();
+checkPageAccess();
 
 // Database connection
 require 'config/database.php';
@@ -40,7 +41,7 @@ $result = mysqli_stmt_get_result($stmt);
 if ($result === false) {
  // Log the error
  error_log("Database Query Error: " . mysqli_error($conn));
- $error_message = "Unable to retrieve offices. Please try again later.";
+ $error_message = "Unable to retrieve tasks. Please try again later.";
 }
 
 // Helper function to determine badge class based on status
