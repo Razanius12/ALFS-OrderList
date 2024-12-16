@@ -26,10 +26,10 @@ try {
   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
  ) {
   header('Content-Type: application/json');
-  echo json_encode(['status' => 'success', 'redirect' => 'login.php']);
+  echo json_encode(['status' => 'success', 'redirect' => 'main/common/login.php']);
   exit();
  } else {
-  header("Location: login.php");
+  header("Location: main/common/login.php");
   exit();
  }
 } catch (Exception $e) {
@@ -48,7 +48,7 @@ try {
   exit();
  } else {
   $_SESSION['logout_error'] = "An error occurred during logout. Please try again.";
-  header("Location: login.php");
+  header("Location: main/common/login.php");
   exit();
  }
 }
