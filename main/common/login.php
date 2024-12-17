@@ -345,4 +345,9 @@ unset($_SESSION['login_attempt_error']);
  });
 </script>
 
+
+<script>
+ console.log('Full Session Details:', <?php echo json_encode($_SESSION); ?>);
+</script>
+
 </html>

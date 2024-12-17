@@ -10,7 +10,7 @@ try {
  mysqli_begin_transaction($conn);
 
  // Ensure all required fields are present
- $requiredFields = ['order_id', 'order_name', 'project_manager_id', 'start_date', 'status'];
+ $requiredFields = ['order_id', 'order_name', 'project_manager_id', 'start_date', 'status',];
  foreach ($requiredFields as $field) {
   if (!isset($_POST[$field]) || empty($_POST[$field])) {
    throw new Exception("Missing required field: $field");
@@ -26,6 +26,7 @@ try {
 
  // Optional fields
  $description = isset($_POST['description']) ? mysqli_real_escape_string($conn, $_POST['description']) : '';
+ $order_price = isset($_POST['order_price']) ? mysqli_real_escape_string($conn, $_POST['order_price']) : '';
  $assigned_worker = isset($_POST['assigned_worker']) && !empty($_POST['assigned_worker'])
   ? mysqli_real_escape_string($conn, $_POST['assigned_worker'])
   : 'NULL';
@@ -60,6 +61,11 @@ try {
   $orderQuery .= ", description = '$description'";
  }
 
+ // Add order price
+ if (!empty($order_price)) {
+  $orderQuery .= ", order_price = '$order_price'";
+ }
+
  // Add worker assignment if provided
  if ($assigned_worker !== 'NULL') {
   $orderQuery .= ", worker_id = '$assigned_worker'";
@@ -68,6 +74,7 @@ try {
  }
 
  $orderQuery .= " WHERE id_order = '$order_id'";
+
 
  // Execute order update
  if (!mysqli_query($conn, $orderQuery)) {

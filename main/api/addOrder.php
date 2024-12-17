@@ -39,6 +39,7 @@ try {
   ? (int) $_POST['assigned_worker']
   : NULL;
  $description = isset($_POST['description']) ? mysqli_real_escape_string($conn, $_POST['description']) : NULL;
+ $order_price = isset($_POST['order_price']) ? mysqli_real_escape_string($conn, $_POST['order_price']) : NULL;
 
  // Validate project manager ID
  $check_manager_query = "SELECT id_admin FROM admins WHERE id_admin = ?";
@@ -68,25 +69,35 @@ try {
 
  // Insert new order with worker_id directly in orders table
  $insert_query = "INSERT INTO orders (
-                  order_name, 
-                  start_date, 
-                  project_manager_id, 
-                  worker_id,
-                  description,
-                  status
-                  ) VALUES (?, ?, ?, ?, ?, ?)";
+  order_name, 
+  start_date, 
+  project_manager_id, 
+  worker_id,
+  description,
+  status,
+  order_price
+ ) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
  $default_status = 'PENDING';
+
+ // Ensure order price is an integer
+ if (!empty($order_price) && !is_numeric($order_price)) {
+  throw new Exception('Order price must be a valid number');
+ }
+
+ $order_price = intval($order_price); // Convert to integer
+
  $stmt = mysqli_prepare($conn, $insert_query);
  mysqli_stmt_bind_param(
   $stmt,
-  "ssisss",
-  $order_name,
-  $start_date,
-  $project_manager_id,
-  $worker_id,
-  $description,
-  $default_status
+  "ssisssi", 
+  $order_name,    // s
+  $start_date,   // s
+  $project_manager_id,  // i
+  $worker_id,           // i (nullable)
+  $description,         // s (nullable)
+  $default_status,      // s
+  $order_price          // i
  );
 
  if (mysqli_stmt_execute($stmt)) {

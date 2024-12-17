@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#edit_order_id').val(data.id_order);
       $('#edit_order_name').val(data.order_name);
       $('#edit_description').val(data.description);
+      $('#edit_order_price').val(data.order_price);
 
       // Format and set the start date
       if (data.start_date) {

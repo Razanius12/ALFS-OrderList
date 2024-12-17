@@ -7,17 +7,6 @@ try {
  if (isLoggedIn()) {
   // Perform logout with more aggressive cookie and session clearing
   logoutUser();
-
-  // Additional cookie clearing
-  $cookies = $_COOKIE;
-  foreach ($cookies as $name => $value) {
-   setcookie($name, '', time() - 3600, '/');
-   setcookie($name, '', time() - 3600, '/', $_SERVER['HTTP_HOST']);
-   unset($_COOKIE[$name]);
-  }
-
-  // Regenerate session ID
-  session_regenerate_id(true);
  }
 
  // Check if it's an AJAX request

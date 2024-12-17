@@ -56,9 +56,9 @@ include_once 'head.php';
     case 'dailyProgress':
      includePage('main/pages/dailyProgress.php');
      break;
-     case 'profile':
-      includePage('main/pages/profile.php');
-      break;
+    case 'profile':
+     includePage('main/pages/profile.php');
+     break;
 
     default:
      includePage('main/pages/dashboard.php');

@@ -153,19 +153,12 @@ function renderSidebarItems($items, $currentPage, $currentUser)
     </li>
 
     <li class="nav-item">
-     <a href="widgets.html">
-      <i class="fas fa-desktop"></i>
-      <p>Widgets</p>
-      <span class="badge badge-success">4</span>
+     <a href="#">
+      <i class="fas fa-question"></i>
+      <p>Help</p>
      </a>
     </li>
-    <li class="nav-item">
-     <a href="documentation/index.html">
-      <i class="fas fa-file"></i>
-      <p>Documentation</p>
-      <span class="badge badge-secondary">1</span>
-     </a>
-    </li>
+
    </ul>
   </div>
  </div>

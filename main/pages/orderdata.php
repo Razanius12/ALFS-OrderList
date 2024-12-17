@@ -13,6 +13,7 @@ $query = "SELECT
            o.order_name, 
            o.status, 
            o.start_date,
+           o.order_price,
            a.name_admin AS project_manager,
            w.name_worker AS assigned_worker,
            w.availability_status AS worker_availability
@@ -107,7 +108,8 @@ function getStatusBadgeClass($status)
           <th>Start Date</th>
           <th>Project Manager</th>
           <th>Assigned Workers</th>
-          <th>Order Status</th>
+          <th>Status</th>
+          <th>Price</th>
           <th style="width: 10%">Action</th>
          </tr>
         </thead>
@@ -133,6 +135,7 @@ function getStatusBadgeClass($status)
              <?= htmlspecialchars($order['status']) ?>
             </span>
            </td>
+           <td>$ <?= number_format($order['order_price']) ?></td>
            <td>
             <div class="form-button-action">
              <button type="button" class="btn btn-link btn-primary btn-lg" data-bs-toggle="modal"
@@ -205,6 +208,19 @@ function getStatusBadgeClass($status)
             </option>
            <?php endwhile; ?>
           </select>
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-12">
+         <div class="form-group">
+          <label>Order Price</label>
+          <div class="input-icon">
+           <span class="input-icon-addon">
+            <i class="fas fa-dollar-sign"></i>
+           </span>
+           <input type="number" class="form-control" name="order_price">
+          </div>
          </div>
         </div>
        </div>
@@ -298,6 +314,19 @@ function getStatusBadgeClass($status)
         </div>
         <div class="col-md-6">
          <div class="form-group">
+          <label>Order Price</label>
+          <div class="input-icon">
+           <span class="input-icon-addon">
+            <i class="fas fa-dollar-sign"></i>
+           </span>
+           <input type="number" class="form-control" id="edit_order_price" name="order_price">
+          </div>
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-12">
+         <div class="form-group">
           <label>Project Description (Optional)</label>
           <textarea class="form-control" id="edit_description" name="description" rows="4"></textarea>
          </div>
@@ -317,4 +346,4 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/orderData.js"></script>
+<script src="main/js/orderDatas.js"></script>

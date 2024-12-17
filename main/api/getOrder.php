@@ -18,6 +18,7 @@ try {
              o.description,
              o.start_date, 
              o.status,
+             o.order_price,
              o.project_manager_id,
              o.worker_id,
              a.name_admin AS project_manager_name,

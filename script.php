@@ -11,7 +11,5 @@
 <script src="assets/js/plugin/datatables/datatables.min.js"></script>
 <!-- Sweet Alert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Chart JS -->
- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Custom JS -->
 <script src="main/customJS.js"></script>
