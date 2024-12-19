@@ -66,7 +66,7 @@ $years = range($currentYear - 5, $currentYear + 5);
   </div>
 
   <div class="row">
-   <div class="col-md-12 col-lg-8">
+   <div class="col-md-12 col-lg">
     <div class="card">
      <div class="card-header">
       <div class="d-flex align-items-center">
