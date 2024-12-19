@@ -89,9 +89,6 @@
       </div>
      </div>
     </li>
-    <script>
-     console.log('Full Session Details:', <?php echo json_encode($_SESSION); ?>);
-    </script>
     <li class="nav-item topbar-user dropdown hidden-caret">
      <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
       <div class="avatar-sm">

@@ -297,8 +297,6 @@ unset($_SESSION['login_attempt_error']);
      dataType: 'json',
      success: function (response) {
       if (response.status === 'success') {
-       // Log session data for debugging
-       console.log('Session Data:', response.session_data);
 
        Swal.fire({
         title: 'Login Successful',
@@ -344,10 +342,4 @@ unset($_SESSION['login_attempt_error']);
 
  });
 </script>
-
-
-<script>
- console.log('Full Session Details:', <?php echo json_encode($_SESSION); ?>);
-</script>
-
 </html>

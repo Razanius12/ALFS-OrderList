@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 17, 2024 at 05:38 AM
+-- Generation Time: Dec 19, 2024 at 04:52 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -44,7 +44,8 @@ CREATE TABLE `admins` (
 
 INSERT INTO `admins` (`id_admin`, `username`, `password`, `name_admin`, `id_position`, `phone_number`, `created_at`, `updated_at`) VALUES
 (1, 'theMostPowerfulAdmin', 'realsheeesh', 'Powerful Admin', 41, '6281234567878', '2024-11-27 06:22:26', '2024-11-28 09:08:33'),
-(3, 'gnjr4PRI', 'apriyanto2222', 'Ganjar Apriyanto', 40, '6285624634849', '2024-11-28 09:10:03', '2024-12-17 01:51:31');
+(3, 'gnjr4PRI', 'apriyanto222', 'Ganjar Apriyanto', 43, '6285624634849', '2024-11-28 09:10:03', '2024-12-19 03:25:08'),
+(6, 'OPMzzzz', 'zakiyesyes', 'Opik Muhammad Zaki', 40, '6281238314426', '2024-12-19 03:24:23', '2024-12-19 03:24:23');
 
 -- --------------------------------------------------------
 
@@ -88,10 +89,6 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `status`, `order_price`) VALUES
-(3, 3, 10, 'DA', 'pengennya gini dan gitu', '2024-11-23 23:56:00', 'PENDING', 15),
-(6, 3, 6, 'DA - 20241122', 'awokaowkoawkaw', '2024-11-21 08:40:00', 'IN_PROGRESS', 25),
-(8, 1, NULL, 'test', 'asssssssssssss', '2024-11-28 18:28:00', 'COMPLETED', 20),
-(9, 1, NULL, 'DA - 20241129', '', '2024-11-29 18:57:00', 'CANCELLED', 60),
 (19, 1, NULL, 'atest1', NULL, '2024-12-17 10:38:00', 'COMPLETED', 40),
 (20, 1, NULL, 'atest2', NULL, '2024-12-18 10:39:00', 'COMPLETED', 50),
 (21, 1, NULL, 'atest3', NULL, '2024-12-19 10:39:00', 'COMPLETED', 30),
@@ -138,20 +135,10 @@ INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name
 (62, 1, NULL, 'atest44', NULL, '2025-01-29 10:41:00', 'COMPLETED', 45),
 (63, 1, NULL, 'atest45', NULL, '2025-01-30 10:41:00', 'COMPLETED', 60),
 (64, 1, NULL, 'atest46', NULL, '2025-01-31 10:41:00', 'COMPLETED', 50),
-(65, 1, NULL, 'atest47', NULL, '2025-02-01 10:41:00', 'COMPLETED', 55),
-(66, 1, NULL, 'atest48', NULL, '2025-02-02 10:41:00', 'COMPLETED', 40),
-(67, 1, NULL, 'atest49', NULL, '2025-02-03 10:41:00', 'COMPLETED', 70),
-(68, 1, NULL, 'atest50', NULL, '2025-02-04 10:41:00', 'COMPLETED', 45),
-(69, 1, NULL, 'atest51', NULL, '2025-02-05 10:41:00', 'COMPLETED', 60),
-(70, 1, NULL, 'atest52', NULL, '2025-02-06 10:41:00', 'COMPLETED', 50),
-(71, 1, NULL, 'atest53', NULL, '2025-02-07 10:41:00', 'COMPLETED', 55),
-(72, 1, NULL, 'atest54', NULL, '2025-02-08 10:41:00', 'COMPLETED', 40),
-(73, 1, NULL, 'atest55', NULL, '2025-02-09 10:41:00', 'COMPLETED', 65),
-(74, 1, NULL, 'atest56', NULL, '2025-02-10 10:41:00', 'COMPLETED', 45),
-(75, 1, NULL, 'atest57', NULL, '2025-02-11 10:41:00', 'COMPLETED', 60),
-(76, 1, NULL, 'atest58', NULL, '2025-02-12 10:41:00', 'COMPLETED', 50),
-(77, 1, NULL, 'atest59', NULL, '2025-02-13 10:41:00', 'COMPLETED', 55),
-(78, 1, NULL, 'atest60', NULL, '2025-02-14 10:41:00', 'COMPLETED', 40);
+(79, 3, 6, 'DA - 4085197', 'Logo Design Brief\\r\\nLooking for a High End General Contractor Company logo for a new startup in Florida, USA. I think a graphic with a shell or something like that might look nice too. Thank you for your help!\\r\\n\\r\\nLogo Text\\r\\nShell Coast Construction LLC', '2025-02-01 09:31:00', 'PENDING', 10),
+(80, 3, 10, 'DA - 4084837', 'Logo Design Brief\r\nLooking for a clean and simple logo for my new gourmet mushroom farm, located in Texas.\r\n\"Prosporeus Mushrooms\"\r\nGourmet mushrooms are my business.\r\nIm looking for the \"Prosporeus\" to have a subtle standout on the \"spore\" section. It should look like one word, but be able to see the word \"spore\" inside the entire word \"Prosporeus \". Something simple and clean with a mushroom influence. Maybe Texas influence. Not looking for a colorful logo. 3 solid colors maximum.\r\n\r\nTarget Market(s)\r\nRestaurants, general public\r\n\r\nIndustry/Entity Type\r\nMushroom Cultivation and Sales\r\n\r\nLogo Text\r\nProsporeus Mushrooms\r\n\r\nMust have\r\nSlight highlight to \"spore\" inside \"Prosporeus \". Mushroom influence\r\nNice to have\r\nSimple and clean. Mushroom design integrated into logo. Not a gimmicky Alice in wounderland mushroom... more interested in edible gourmet mushrooms like oyster, morel, chestnut. Maybe even a spore print design.\r\nShould not have\r\nNo fades or graduated colors. No more than 3 colors total', '2025-02-02 09:32:00', 'IN_PROGRESS', 20),
+(81, 3, NULL, 'DA - 4084880', 'Logo Design Brief\r\nI need a logo design for a new natural and holistic cosmetic brand. Our cosmetics are designed not only to have an impact on skin but also to have an impact on mental health.\r\nAll of our bottles are amber glass, and we will need a second project for the label design.\r\nThe design should comunicate calm and hope\r\n\r\nLogo Text\r\nHealing', '2025-02-03 10:08:00', 'CANCELLED', 8),
+(82, 3, NULL, 'DA - 4084742', 'Logo Design Brief\r\nMy brother and I need a logo for our new real estate company. I like some of the examples that were used in your teaser email including a lion/tiger/eagle and scrolling. We both like astronomy, are open to any design, we place extreme value in our last name \"Cassell\". We like the idea of \"CB\" or \"CBV interlocking letters as part of the emblem.\r\n\r\nTarget Market(s)\r\nReal Estate in the Piney Woods of East Texas\r\n\r\nIndustry/Entity Type\r\nReal Estate\r\n\r\nLogo Text\r\nCassell Brothers Ventures\r\n\r\nMust have\r\nCassell Brother Ventures or CBV\r\nNice to have\r\nSome sort of design that would fit and wear good on a hat or pullover shit or polo shirt', '2025-02-04 10:09:00', 'COMPLETED', 13);
 
 -- --------------------------------------------------------
 
@@ -175,7 +162,8 @@ INSERT INTO `positions` (`id_position`, `position_name`, `department`, `created_
 (17, 'Designer', 'WORKER', '2024-11-24 07:40:15'),
 (18, 'Live Host', 'WORKER', '2024-11-24 07:42:36'),
 (40, 'Project Manager', 'ADMIN', '2024-11-27 05:03:40'),
-(41, 'CEO', 'ADMIN', '2024-11-27 05:03:48');
+(41, 'CEO', 'ADMIN', '2024-11-27 05:03:48'),
+(43, 'CHRO', 'ADMIN', '2024-12-19 03:24:51');
 
 -- --------------------------------------------------------
 
@@ -198,9 +186,10 @@ CREATE TABLE `remember_tokens` (
 
 INSERT INTO `remember_tokens` (`id`, `user_id`, `user_type`, `token`, `expiry`, `created_at`) VALUES
 (9, 11, 'worker', '30b878188892d6f50d6096ecf9355007df76cc8f30539de139067a00133e21c3', 1736901461, '2024-12-16 00:34:41'),
-(16, 10, 'worker', '5edc38d793123522ed6275e020dd654c416ef945bbaaae21968f2d7769781f5e', 1736994206, '2024-12-17 02:02:44'),
-(18, 3, 'admin', 'a7b654d2752eeb9ebbd1531279eaf3b8638427a3461efc731f54cb74b5d0329b', 1737001025, '2024-12-17 03:06:08'),
-(19, 1, 'admin', 'e8716f7c03f635f8f47499d0b9802d601e7383ee45773ff8ba6db65ba4763d9b', 1737001026, '2024-12-17 04:17:05');
+(19, 1, 'admin', '384fbc072c089f0422aa0a13b80a3560ebe1cec77c8aed61e3897df8fd66d061', 1737011590, '2024-12-17 04:17:05'),
+(36, 10, 'worker', '56f5a5684bb94b3b980ce616677ec96cc78eecdcb76227c20a55425e355d586f', 1737169220, '2024-12-19 02:36:26'),
+(37, 3, 'admin', '3c7c370824b85d4135f7fbb040b83e137bf65cd08bd2423a00a8cf253a6119fe', 1737171251, '2024-12-19 03:00:20'),
+(38, 6, 'worker', '7f5659577c4ec2b75064dddcf02006efdfc9b1f37c160522b19effaefa163ff4', 1737171452, '2024-12-19 03:34:11');
 
 -- --------------------------------------------------------
 
@@ -227,9 +216,9 @@ CREATE TABLE `workers` (
 --
 
 INSERT INTO `workers` (`id_worker`, `username`, `password`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `assigned_order_id`, `created_at`, `updated_at`) VALUES
-(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'TASKED', 6, '2024-11-26 07:14:02', '2024-12-17 04:30:38'),
-(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', NULL, '2024-11-29 10:01:30', '2024-11-30 03:55:15'),
-(11, 'vivi', 'prettiestgurls', 'Evelyna Cristina Ziovaj', 18, 'FEMALE', '6281238314426', 'AVAILABLE', NULL, '2024-11-29 12:12:42', '2024-12-03 01:10:21');
+(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'AVAILABLE', NULL, '2024-11-26 07:14:02', '2024-12-19 02:16:46'),
+(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'TASKED', 80, '2024-11-29 10:01:30', '2024-12-19 03:03:24'),
+(14, 'langs', 'yangaslinyanih', 'Erlangga', 13, 'MALE', '62895320087774', 'AVAILABLE', NULL, '2024-12-17 05:10:30', '2024-12-17 05:10:30');
 
 --
 -- Indexes for dumped tables
@@ -287,7 +276,7 @@ ALTER TABLE `workers`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `gmaps`
@@ -299,25 +288,25 @@ ALTER TABLE `gmaps`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `id_position` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id_position` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `remember_tokens`
 --
 ALTER TABLE `remember_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id_worker` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_worker` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables
