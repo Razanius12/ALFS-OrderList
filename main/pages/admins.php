@@ -119,7 +119,7 @@ function maskPassword($password)
 
  <!-- Add Admin Modal -->
  <div class="modal fade" id="addAdminModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
    <div class="modal-content">
     <div class="modal-header">
      <h5 class="modal-title">Add New Admin</h5>
@@ -204,7 +204,7 @@ function maskPassword($password)
 
  <!-- Edit Admin Modal -->
  <div class="modal fade" id="editAdminModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
    <div class="modal-content">
     <div class="modal-header">
      <h5 class="modal-title">Edit Admin</h5>

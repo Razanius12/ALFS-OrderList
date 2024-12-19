@@ -30,21 +30,21 @@ try {
  // Remove any existing escaped quotes or backslashes
  $link_embed = stripslashes($link_embed);
 
- // Remove any surrounding quotes
- $link_embed = trim($link_embed, '"\'');
+ // If it's a Google Maps Share Link, convert to an embed URL
+ if (preg_match('/https:\/\/maps\.app\.goo\.gl\/.+/', $link_embed)) {
+  $response['message'] = 'Google Maps share links are not directly embeddable. Please use an embed link.';
+  throw new Exception($response['message']);
+ }
 
- // If it's a URL, convert to iframe
+ // If it's a plain URL (not iframe), convert to iframe
  if (filter_var($link_embed, FILTER_VALIDATE_URL)) {
+  if (strpos($link_embed, 'google.com/maps') !== false) {
+   // Convert Google Maps URL to embed URL format
+   $link_embed = str_replace('/maps/', '/maps/embed?', $link_embed);
+  }
   $link_embed = sprintf(
    '<iframe src="%s" width="100%%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
    htmlspecialchars($link_embed)
-  );
- } else {
-  // If already an iframe, ensure width is 100%
-  $link_embed = preg_replace(
-   ['/(width=["\']\d+%?["\'])/i', '/(width=\d+)/i'],
-   ['width="100%"', 'width="100%"'],
-   $link_embed
   );
  }
 
@@ -70,7 +70,6 @@ try {
  }
 
  $stmt->close();
-
 } catch (Exception $e) {
  $response['success'] = false;
  $response['message'] = $e->getMessage();

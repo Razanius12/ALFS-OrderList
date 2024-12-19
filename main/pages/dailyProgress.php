@@ -66,7 +66,7 @@ $years = range($currentYear - 5, $currentYear + 5);
   </div>
 
   <div class="row">
-   <div class="col-md-12">
+   <div class="col-md-12 col-lg-8">
     <div class="card">
      <div class="card-header">
       <div class="d-flex align-items-center">
@@ -80,7 +80,7 @@ $years = range($currentYear - 5, $currentYear + 5);
       </div>
      </div>
      <div class="card-body">
-      <div class="chart-container">
+      <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
        <canvas id="dailyProgressBarChart"></canvas>
       </div>
      </div>
@@ -93,7 +93,7 @@ $years = range($currentYear - 5, $currentYear + 5);
 <!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel"
  aria-hidden="true">
- <div class="modal-dialog" role="document">
+ <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
   <div class="modal-content">
    <div class="modal-header">
     <h5 class="modal-title" id="filterModalLabel">Filter Daily Progress</h5>
@@ -177,6 +177,7 @@ $years = range($currentYear - 5, $currentYear + 5);
    },
    options: {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
      y: {
       beginAtZero: true,
@@ -196,3 +197,21 @@ $years = range($currentYear - 5, $currentYear + 5);
   });
  });
 </script>
+
+
+<style>
+ @media (max-width: 767px) {
+  .card-title {
+   font-size: 16px !important;
+  }
+
+  .btn-round {
+   font-size: 14px !important;
+  }
+
+  .chart-container {
+   padding-left: 0 !important;
+   padding-right: 0 !important;
+  }
+ }
+</style>

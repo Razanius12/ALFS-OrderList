@@ -37,10 +37,11 @@ if ($result === false) {
     </li>
    </ul>
    <?php if ($currentUser['role'] === 'admin'): ?>
-    <button type="button" class="btn btn-primary btn-round ms-auto" data-bs-toggle="modal"
-     data-bs-target="#addAlfOffices">
-     <i class="fa fa-plus"></i> Add Office
-    </button>
+    <div class="ms-md-auto py-2 py-md-0 mb-2">
+     <button type="button" class="btn btn-primary btn-round" data-bs-toggle="modal" data-bs-target="#addAlfOffices">
+      <i class="fa fa-plus"></i> Add Office
+     </button>
+    </div>
    <?php endif; ?>
   </div>
   <div class="page-category">Shows all available ALF Solution Offices</div>
@@ -131,7 +132,7 @@ if ($result === false) {
         <label>Link Embed</label>
         <input type="text" class="form-control" name="link_embed" required>
         <small class="form-text text-muted">
-         Enter full Google Maps embed iframe
+         Enter a valid Google Maps embed iframe <br> (e.g., &lt;iframe ...&gt;&lt;/iframe&gt;).
         </small>
        </div>
       </div>
@@ -168,7 +169,7 @@ if ($result === false) {
         <label>Link Embed</label>
         <input type="text" class="form-control" name="link_embed" id="edit_link_embed" required>
         <small class="form-text text-muted">
-         Enter full Google Maps embed iframe
+         Enter a valid Google Maps embed iframe <br> (e.g., &lt;iframe ...&gt;&lt;/iframe&gt;).
         </small>
        </div>
       </div>
@@ -184,7 +185,7 @@ if ($result === false) {
  </div>
 </div>
 
-<script src="main/js/alfOffices.js"></script>
+<script src="main/js/alfOffice.js"></script>
 
 <script>
  // JavaScript untuk menangani modal edit

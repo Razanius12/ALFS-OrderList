@@ -1,9 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
- // Helper function to mask password
- function maskPassword(password) {
-  return password.replace(/./g, '•');
- }
-
  // Initialize password toggle for the profile form
  function initializePasswordToggle() {
   document.querySelectorAll('.toggle-password').forEach(toggle => {
@@ -32,4 +27,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
  // Initialize the password toggle
  initializePasswordToggle();
+
+ // Add confirmation prompt for the Save button
+ const saveButton = document.querySelector('form#editProfile button[type="submit"]');
+ saveButton.addEventListener('click', function (event) {
+  event.preventDefault(); // Prevent the form from submitting immediately
+
+  Swal.fire({
+   title: 'Are you sure?',
+   text: 'Do you want to save the changes to your profile?',
+   icon: 'question',
+   showCancelButton: true,
+   confirmButtonText: 'Yes, save it!',
+   cancelButtonText: 'Cancel'
+  }).then((result) => {
+   if (result.isConfirmed) {
+    // Submit the form if the user confirms
+    document.getElementById('editProfile').submit();
+   }
+  });
+ });
 });

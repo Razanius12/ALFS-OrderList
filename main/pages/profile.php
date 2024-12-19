@@ -123,8 +123,13 @@ $conn->close();
         <div class="col">
          <div class="form-group">
           <label>Username</label>
-          <input type="text" class="form-control" name="username" id="edit_username"
-           value="<?= htmlspecialchars($userData['username']) ?>" required>
+          <div class="input-icon">
+           <span class="input-icon-addon">
+            <i class="fa fa-user"></i>
+           </span>
+           <input type="text" class="form-control" name="username" id="edit_username"
+            value="<?= htmlspecialchars($userData['username']) ?>" required>
+          </div>
          </div>
         </div>
        </div>
@@ -139,7 +144,6 @@ $conn->close();
             <i class="fa fa-eye"></i>
            </button>
           </div>
-
          </div>
         </div>
        </div>
@@ -147,8 +151,13 @@ $conn->close();
         <div class="col">
          <div class="form-group">
           <label>Full Name</label>
-          <input type="text" class="form-control" name="name_worker" id="edit_name_worker"
-           value="<?= htmlspecialchars($userData['name_worker'] ?? $userData['name_admin']) ?>" required>
+          <div class="input-icon">
+           <span class="input-icon-addon">
+            <i class="fa fa-user-circle"></i>
+           </span>
+           <input type="text" class="form-control" name="name_worker" id="edit_name_worker"
+            value="<?= htmlspecialchars($userData['name_worker'] ?? $userData['name_admin']) ?>" required>
+          </div>
          </div>
         </div>
        </div>
@@ -170,8 +179,13 @@ $conn->close();
         <div class="col">
          <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" class="form-control" name="phone_number" id="edit_phone_number"
-           value="<?= htmlspecialchars($userData['phone_number']) ?>" required>
+          <div class="input-icon">
+           <span class="input-icon-addon">
+            <i class="fa fa-phone"></i>
+           </span>
+           <input type="tel" class="form-control" name="phone_number" id="edit_phone_number"
+            value="<?= htmlspecialchars($userData['phone_number']) ?>" required>
+          </div>
          </div>
         </div>
        </div>
@@ -189,4 +203,4 @@ $conn->close();
 <!-- passwords css -->
 <link rel="stylesheet" href="main/css/toggle.css" />
 
-<script src="main/js/profile.js"></script>
+<script src="main/js/profiles.js"></script>

@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-
  const addAlfOfficesForm = document.getElementById('addAlfOfficesForm');
 
  if (addAlfOfficesForm) {
@@ -7,30 +6,42 @@ document.addEventListener('DOMContentLoaded', function () {
    e.preventDefault();
 
    const formData = new FormData(this);
+   const linkEmbed = formData.get('link_embed');
 
+   // Regular expression for validating iframe tag
+   const iframeRegex = /^<iframe[^>]*src=["']https?:\/\/[^"']+["'][^>]*><\/iframe>$/;
+
+   // Regular expression for validating URLs
+   const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$/;
+
+   // Check if input matches the iframe format or a valid URL
+   if (!linkEmbed || (!iframeRegex.test(linkEmbed) && !urlRegex.test(linkEmbed))) {
+    Swal.fire({
+     icon: 'error',
+     title: 'Invalid Input',
+     text: 'The Link Embed field must contain a valid iframe or URL.',
+    });
+    return; // Stop form submission
+   }
+
+   // Submit data to the API
    fetch('main/api/addAlfOffices.php', {
     method: 'POST',
-    body: formData
+    body: formData,
    })
     .then(response => response.json())
     .then(data => {
      if (data.success) {
-      // Success handling
       Swal.fire({
        icon: 'success',
        title: 'Success!',
        text: data.message,
-       timer: 1500
-      }).then(() => {
-       // Reload the page or dynamically add the new office
-       location.reload();
-      });
+      }).then(() => location.reload()); // Reload the page on success
      } else {
-      // Error handling
       Swal.fire({
        icon: 'error',
        title: 'Error!',
-       text: data.message
+       text: data.message,
       });
      }
     })
@@ -39,35 +50,63 @@ document.addEventListener('DOMContentLoaded', function () {
      Swal.fire({
       icon: 'error',
       title: 'Network Error',
-      text: 'Could not complete the request'
+      text: 'Could not complete the request.',
      });
     });
   });
+ }
+
+ /**
+  * Helper function to validate a URL
+  */
+ function isValidURL(string) {
+  try {
+   new URL(string);
+   return true;
+  } catch (_) {
+   return false;
+  }
  }
 
  $(document).ready(function () {
 
   // Handler untuk menyimpan perubahan saat mengedit kantor
   $('#editAlfOffices form').on('submit', function (event) {
-   event.preventDefault(); // Mencegah pengiriman form secara default
+   event.preventDefault(); // Prevent default form submission
 
    const idMaps = $('#edit_id_maps').val();
    const nameCityDistrict = $('#edit_name_city_district').val();
-   const linkEmbed = $('#edit_link_embed').val();
+   const linkEmbed = $('#edit_link_embed').val().trim();
 
-   // Validasi input
-   if (!idMaps || !nameCityDistrict || !linkEmbed) {
+   // Regular expression for validating iframe tag
+   const iframeRegex = /^<iframe[^>]*src=["']https?:\/\/[^"']+["'][^>]*><\/iframe>$/;
+
+   // Regular expression for validating Google Maps share links and general URLs
+   const googleMapsShareLinkRegex = /^https:\/\/maps\.app\.goo\.gl\/.+$/;
+   const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$/;
+
+   // Validation logic
+   if (!linkEmbed) {
     Swal.fire({
-     icon: 'warning',
-     title: 'Warning',
-     text: 'All fields are required!'
+     icon: 'error',
+     title: 'Invalid Input',
+     text: 'The Link Embed field cannot be empty.',
     });
-    return;
+    return; // Stop submission
    }
 
-   // Kirim data yang diperbarui ke server
+   if (!iframeRegex.test(linkEmbed) && !googleMapsShareLinkRegex.test(linkEmbed) && !urlRegex.test(linkEmbed)) {
+    Swal.fire({
+     icon: 'error',
+     title: 'Invalid Input',
+     text: 'The Link Embed field must contain a valid iframe, Google Maps share link, or URL.',
+    });
+    return; // Stop submission
+   }
+
+   // Send the updated data to the server
    $.ajax({
-    url: 'main/api/updateAlfOffices.php', // URL endpoint untuk memperbarui data kantor
+    url: 'main/api/updateAlfOffices.php', // Endpoint for updating office
     type: 'POST',
     data: {
      id_maps: idMaps,
@@ -80,9 +119,9 @@ document.addEventListener('DOMContentLoaded', function () {
       Swal.fire({
        icon: 'success',
        title: 'Success',
-       text: 'Office updated successfully!'
+       text: response.message
       }).then(() => {
-       location.reload(); // Reload halaman setelah memperbarui kantor
+       location.reload(); // Reload the page after updating office
       });
      } else {
       Swal.fire({
@@ -101,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
    });
   });
+
 
   // Mengisi modal edit dengan data yang ada
   document.querySelectorAll('.edit-office').forEach(button => {
@@ -169,4 +209,5 @@ document.addEventListener('DOMContentLoaded', function () {
    });
   });
  });
+
 });

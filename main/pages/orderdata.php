@@ -158,7 +158,7 @@ function getStatusBadgeClass($status)
 
   <!-- Add Order Modal -->
   <div class="modal fade" id="addOrderModal" tabindex="-1" role="dialog" aria-hidden="true">
-   <div class="modal-dialog modal-lg">
+   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
      <div class="modal-header">
       <h5 class="modal-title">Add New Order</h5>
@@ -247,7 +247,7 @@ function getStatusBadgeClass($status)
   mysqli_data_seek($workerOptions, 0);
   ?>
   <div class="modal fade" id="editOrderModal" tabindex="-1" role="dialog" aria-hidden="true">
-   <div class="modal-dialog modal-lg">
+   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
      <div class="modal-header">
       <h5 class="modal-title">Edit Order</h5>

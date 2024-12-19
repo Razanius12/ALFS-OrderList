@@ -198,40 +198,46 @@ try {
 </div>
 
 <!-- Edit Position Modal -->
-<div class="modal fade" id="editPositionModal" tabindex="-1" role="dialog" aria-labelledby="editPositionModalLabel"
- aria-hidden="true">
- <div class="modal-dialog">
+<div class="modal fade" id="editPositionModal" tabindex="-1" role="dialog" aria-hidden="true">
+ <div class="modal-dialog modal-dialog-centered modal-lg">
   <div class="modal-content">
    <div class="modal-header">
-    <h5 class="modal-title" id="editPositionModalLabel">Edit Position</h5>
+    <h5 class="modal-title">Edit Position</h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
    </div>
-   <form id="editPositionForm">
+   <form id="editPositionForm" method="POST" action="main/api/updatePosition.php">
     <div class="modal-body">
-     <div id="editPositionErrorContainer" class="alert alert-danger" style="display:none;"></div>
-
-     <input type="hidden" name="id_position" id="editPositionId">
-
-     <div class="form-group">
-      <label for="editPositionName">Position Name</label>
-      <input type="text" class="form-control" id="editPositionName" name="position_name" maxlength="32" required>
-     </div>
-
-     <div class="form-group">
-      <label for="editPositionDepartment">Department</label>
-      <select class="form-control" id="editPositionDepartment" name="department" required>
-       <option value="ADMIN">Admin</option>
-       <option value="WORKER">Worker</option>
-      </select>
+     <div class="row mt-3">
+      <div class="col-md-6">
+       <div class="form-group">
+        <label>Position Name</label>
+        <div class="input-icon">
+         <span class="input-icon-addon">
+          <i class="fa fa-briefcase"></i>
+         </span>
+         <input type="text" class="form-control" name="position_name" id="editPositionName" required>
+        </div>
+       </div>
+      </div>
+      <div class="col-md-6">
+       <div class="form-group">
+        <label>Department</label>
+        <select class="form-control" id="editPositionDepartment" name="department" required>
+         <option value="ADMIN">Admin</option>
+         <option value="WORKER">Worker</option>
+        </select>
+       </div>
+      </div>
      </div>
     </div>
     <div class="modal-footer">
      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
      <button type="submit" class="btn btn-primary">Save Changes</button>
     </div>
+    <input type="hidden" name="id_position" id="editPositionId">
    </form>
   </div>
  </div>
 </div>
 
-<script src="main/js/addNewPosition.js"></script>
+<script src="main/js/addNewPositions.js"></script>
