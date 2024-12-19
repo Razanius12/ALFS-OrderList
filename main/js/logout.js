@@ -27,25 +27,12 @@ function confirmLogout() {
     }
    })
     .then(response => {
+     // Check if the response is OK
      if (!response.ok) {
       throw new Error('Logout failed');
      }
-     return response.json();
-    })
-    .then(data => {
-     if (data.status === 'success') {
-      Swal.fire({
-       title: 'Logged Out',
-       text: 'You have been successfully logged out.',
-       icon: 'success',
-       confirmButtonText: 'OK'
-      }).then(() => {
-       // Force full page reload and redirect
-       window.location.href = data.redirect || 'main/common/login.php';
-      });
-     } else {
-      throw new Error(data.message || 'Logout failed');
-     }
+     // Redirect directly without checking JSON
+     window.location.href = 'main/common/login.php';
     })
     .catch(error => {
      console.error('Logout error:', error);

@@ -7,6 +7,11 @@ try {
  if (isLoggedIn()) {
   // Perform logout with more aggressive cookie and session clearing
   logoutUser();
+ } else {
+  header('Content-Type: application/json');
+  echo json_encode(['status' => 'error', 'message' => 'User  not logged in']);
+  exit();
+
  }
 
  // Check if it's an AJAX request
