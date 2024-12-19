@@ -42,15 +42,47 @@ document.addEventListener('DOMContentLoaded', function () {
    }
   }
 
-  // Helper function to mask password
+  // Function to explicitly mask a password field
   function maskPassword(password) {
    return password.replace(/./g, '•');
   }
+
+  // Function to toggle password visibility
+  function togglePassword(inputField, icon) {
+   if (inputField.attr('type') === 'password') {
+    inputField.attr('type', 'text');
+    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+   } else {
+    inputField.attr('type', 'password');
+    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+   }
+  }
+
+  // Initialize password toggle for modals
+  function initializePasswordToggleInModals() {
+   $('.toggle-password').off('click').on('click', function () {
+    const inputField = $(this).siblings('input');
+    const icon = $(this).find('i');
+    togglePassword(inputField, icon);
+   });
+  }
+
+  // Add Worker Modal: Mask the password field when opened
+  $('#addWorkerModal').on('show.bs.modal', function () {
+   const passwordField = $('#addWorkerForm input[name="password"]');
+   passwordField.val(''); // Clear the password field
+   passwordField.attr('type', 'password'); // Ensure type is password
+   initializePasswordToggleInModals();
+  });
 
   // Edit Worker Modal Handler
   $('#editWorkerModal').on('show.bs.modal', function (e) {
    const button = $(e.relatedTarget);
    const workerId = button.data('worker-id');
+   const passwordField = $('#addWorkerForm input[name="password"]');
+   passwordField.val('');
+   passwordField.attr('type', 'password');
+   initializePasswordToggleInModals();
 
    // Show loading state
    Swal.fire({
@@ -79,9 +111,10 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#edit_gender').val(data.gender_worker);
       $('#edit_phone_number').val(data.phone_number);
 
-      // Populate password field if applicable
-      // SECURITY WARNING: Be very careful about handling passwords
-      $('#edit_password').val(data.password);
+      // Mask password
+      const passwordField = $('#editWorkerForm input[name="password"]');
+      passwordField.val(data.password || ''); // Populate if password exists
+      passwordField.attr('type', 'password'); // Ensure type is password
 
       // Set the selected position
       $('#edit_position').val(data.id_position);
@@ -89,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Add order assignment population
       $('#edit_assigned_order').val(data.assigned_order_id || '');
 
+      initializePasswordToggleInModals();
       Swal.close();
      } else {
       Swal.fire({

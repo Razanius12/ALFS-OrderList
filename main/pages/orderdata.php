@@ -38,8 +38,7 @@ $workerQuery = "SELECT
                 id_worker, 
                 name_worker, 
                 availability_status 
-                FROM workers 
-                WHERE availability_status = 'AVAILABLE'";
+                FROM workers";
 $workerOptions = mysqli_query($conn, $workerQuery);
 
 // Project managers dropdown
@@ -346,4 +345,4 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/orderDatas.js"></script>
+<script src="main/js/orderDat.js"></script>

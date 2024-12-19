@@ -41,6 +41,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // Call the function when the page loads
   setCurrentDateTime();
 
+  // Function to calculate the number of rows based on the number of lines in the text
+  function calculateRows(text) {
+   const lines = text.split('\n').length; // Count the number of lines
+   return lines; // Return the number of lines as the number of rows
+  }
+
   // Edit Order Modal Handler
   $('#editOrderModal').on('show.bs.modal', function (e) {
    const button = $(e.relatedTarget);
@@ -69,7 +75,18 @@ document.addEventListener('DOMContentLoaded', function () {
       // Populate form fields
       $('#edit_order_id').val(data.id_order);
       $('#edit_order_name').val(data.order_name);
-      $('#edit_description').val(data.description);
+
+      // Format description
+      const formattedDescription = data.description
+       .replace(/\\r\\n|\\r|\\n/g, '\n') // Replace line breaks for textarea
+       .replace(/\\"/g, '"'); // Replace escaped quotes
+
+      $('#edit_description').val(formattedDescription);
+
+      // Calculate and set the number of rows based on the description length
+      const rows = calculateRows(formattedDescription);
+      $('#edit_description').attr('rows', rows);
+
       $('#edit_order_price').val(data.order_price);
 
       // Format and set the start date
@@ -101,8 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
       if (data.worker_id) {
        workerDropdown.append(
         `<option value="${data.worker_id}" selected>
-         ${data.worker_name}
-         </option>`
+       ${data.worker_name}
+       </option>`
        );
       }
 
@@ -110,8 +127,8 @@ document.addEventListener('DOMContentLoaded', function () {
       workers.forEach(function (worker) {
        workerDropdown.append(
         `<option value="${worker.id_worker}">
-        ${worker.name_worker}
-       </option>`
+      ${worker.name_worker}
+     </option>`
        );
       });
 

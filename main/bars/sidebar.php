@@ -144,21 +144,6 @@ function renderSidebarItems($items, $currentPage, $currentUser)
     </li>
     <?php renderSidebarItems($contentSidebarItems, $currentPage, $currentUser); ?>
 
-    <!-- Additional Links Section -->
-    <li class="nav-section">
-     <span class="sidebar-mini-icon">
-      <i class="fa fa-ellipsis-h"></i>
-     </span>
-     <h4 class="text-section">Additional Links</h4>
-    </li>
-
-    <li class="nav-item">
-     <a href="#">
-      <i class="fas fa-question"></i>
-      <p>Help</p>
-     </a>
-    </li>
-
    </ul>
   </div>
  </div>

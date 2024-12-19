@@ -25,11 +25,17 @@ function showTaskDetails(button) {
  const taskDescription = button.getAttribute('data-task-description') || 'No description available';
  const taskStatus = button.getAttribute('data-task-status');
 
+ // Replace \r and \n with <br> for HTML formatting
+ // Also replace escaped quotes with regular quotes
+ const formattedDescription = taskDescription
+  .replace(/\\r\\n|\\r|\\n/g, '<br>') // Replace line breaks
+  .replace(/\\"/g, '"'); // Replace escaped quotes
+
  Swal.fire({
   title: taskName,
   html: `
          <div class="text-start">
-          <p><strong>Description:</strong> ${taskDescription}</p>
+          <p><strong>Description:</strong> ${formattedDescription}</p>
           <p><strong>Status:</strong> <span class="badge bg-${getStatusBadgeClass(taskStatus)}">${taskStatus}</span></p>
          </div>
         `,

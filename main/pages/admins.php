@@ -287,4 +287,4 @@ function maskPassword($password)
 <!-- passwords css -->
 <link rel="stylesheet" href="main/css/toggle.css" />
 
-<script src="main/js/admin.js"></script>
+<script src="main/js/admins.js"></script>

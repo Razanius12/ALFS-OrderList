@@ -119,19 +119,6 @@ $conn->close();
       <input type="hidden" name="id" id="editId" value="<?= htmlspecialchars($userId) ?>">
 
       <div class="card-body">
-       <div class="row mt-3 justify-content-center">
-        <div class="col">
-         <div class="form-group">
-          <label class="d-block mb-2">Profile Picture</label>
-          <div class="avatar avatar-xl mx-auto">
-           <div
-            class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
-            <?= strtoupper(substr($userData['name_worker'] ?? $userData['name_admin'] ?? 'U', 0, 1)) ?>
-           </div>
-          </div>
-         </div>
-        </div>
-       </div>
        <div class="row mt-3">
         <div class="col">
          <div class="form-group">
@@ -152,6 +139,7 @@ $conn->close();
             <i class="fa fa-eye"></i>
            </button>
           </div>
+
          </div>
         </div>
        </div>
@@ -197,3 +185,8 @@ $conn->close();
   </div>
  </div>
 </div>
+
+<!-- passwords css -->
+<link rel="stylesheet" href="main/css/toggle.css" />
+
+<script src="main/js/profile.js"></script>
