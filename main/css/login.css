@@ -1,189 +1,113 @@
-  /* Full-page background with placeholder */
-  html,
-  body {
-   height: 100% !important;
-   margin: 0 !important;
-   background-color: #ffffff !important;
-   background-image: url('../img/DSCF7610.JPG') !important;
-   overflow: hidden !important;
+/* Full-page background with placeholder */
+html,
+body {
+ height: 100% !important;
+ margin: 0 !important;
+ background-color: #ffffff !important;
+ overflow: hidden !important;
 
-   /* Shift to right and zoom */
-   background-position: 0% center !important;
-   background-size: 120% auto !important;
-   /* Slight zoom */
+ background-position: center center !important;
+ background-size: cover !important;
+ background-repeat: no-repeat !important;
+ background-attachment: fixed !important;
+ transition: background-position 0.5s ease-in-out, background-size 0.5s ease-in-out !important;
+}
 
-   background-repeat: no-repeat !important;
-   background-attachment: fixed !important;
+.login-container {
+ display: flex !important;
+ justify-content: center !important;
+ align-items: center !important;
+ height: 100vh !important;
+ overflow: hidden !important;
+}
 
-   /* Smooth transition for zoom and position */
-   transition:
-    background-position 0.5s ease-in-out,
-    background-size 0.5s ease-in-out !important;
-  }
+.login-card {
+ width: 100% !important;
+ max-width: 450px !important;
+ padding: 20px !important;
+ box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4) !important;
+ border-radius: 8px !important;
+ background: white !important;
+}
 
-  .swal2-container {
-   display: flex !important;
-   justify-content: center !important;
-   align-items: center !important;
-   height: 100vh !important;
-   overflow: hidden !important;
-  }
+.login-header {
+ text-align: center !important;
+ margin-bottom: 20px !important;
+}
 
-  .login-container {
-   display: flex !important;
-   justify-content: center !important;
-   align-items: center !important;
-   height: 100vh !important;
-   overflow: hidden !important;
-  }
+.login-header h2 {
+ color: #333 !important;
+ font-weight: 600 !important;
+}
 
-  .login-card {
-   width: 100% !important;
-   max-width: 450px !important;
-   padding: 20px !important;
-   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4) !important;
-   border-radius: 8px !important;
-   background: white !important;
-  }
+.form-control:focus {
+ border-color: #007bff !important;
+ box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25) !important;
+}
 
-  .login-header {
-   text-align: center !important;
-   margin-bottom: 20px !important;
-  }
+.btn-login {
+ width: 100% !important;
+ padding: 10px !important;
+ font-weight: 600 !important;
+}
 
-  .login-header h2 {
-   color: #333 !important;
-   font-weight: 600 !important;
-  }
+.error-message {
+ color: #dc3545 !important;
+ margin-bottom: 15px !important;
+ text-align: center !important;
+}
 
-  .form-control:focus {
-   border-color: #007bff !important;
-   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25) !important;
-  }
+/* Password toggle */
+.input-group-text {
+ cursor: pointer !important;
+ transition: background-color 0.3s ease;
+}
 
-  .btn-login {
-   width: 100% !important;
-   padding: 10px !important;
-   font-weight: 600 !important;
-  }
+.toggle-password {
+ background: transparent !important;
+ color: #6c757d !important;
+ transition: color 0.3s ease !important;
+ border: 1px solid #dee2e6 !important;
+}
 
-  .error-message {
-   color: #dc3545 !important;
-   margin-bottom: 15px !important;
-   text-align: center !important;
-  }
+.toggle-password:hover {
+ color: #007bff !important;
+ background: rgba(0, 123, 255, 0.1) !important;
+ outline: none !important;
+}
 
-  /* Password toggle */
-  .input-group-text {
-   cursor: pointer !important;
-   transition: background-color 0.3s ease;
-  }
+.toggle-password:focus {
+ outline: none !important;
+ box-shadow: none !important;
+}
 
-  .toggle-password {
-   background: transparent !important;
-   color: #6c757d !important;
-   transition: color 0.3s ease !important;
-   border: 1px solid #dee2e6 !important;
-  }
+/* Remember Me Checkbox Styling */
+.form-check-input {
+ border: 1px solid rgba(0, 0, 0, 0.4) !important;
+}
 
-  .toggle-password:hover {
-   color: #007bff !important;
-   background: rgba(0, 123, 255, 0.1) !important;
-   outline: none !important;
-  }
+.form-check-input:checked {
+ background-color: #007bff !important;
+ border-color: #007bff !important;
+}
 
-  .toggle-password:focus {
-   outline: none !important;
-   box-shadow: none !important;
-  }
+.form-check-input:focus {
+ border-color: #007bff !important;
+ box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
 
-  /* Remember Me Checkbox Styling */
-  .form-check-input {
-  border: 1px solid rgba(0, 0, 0, 0.4) !important;
-  }
+.form-check-label {
+ user-select: none !important;
+ cursor: pointer !important;
+ color: #6c757d !important;
+}
 
-  .form-check-input:checked {
-   background-color: #007bff !important;
-   border-color: #007bff !important;
-  }
+/* Responsive adjustments */
+@media (max-width: 768px) {
 
-  .form-check-input:focus {
-   border-color: #007bff !important;
-   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
-  }
-
-  .form-check-label {
-   user-select: none !important;
-   cursor: pointer !important;
-   color: #6c757d !important;
-  }
-
-  /* Preload and placeholder styles */
-  body::before {
-   content: "";
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background-color: #ffffff;
-   /* White background placeholder */
-   z-index: -1;
-   opacity: 1;
-   transition: opacity 0.5s ease-in-out;
-  }
-
-  /* Image preload technique */
-  .preload-background {
-   background-image: url('../img/DSCF7610.JPG');
-   position: absolute;
-   width: 1px;
-   height: 1px;
-   opacity: 0;
-   z-index: -999;
-  }
-
-  /* Loading indicator */
-  .loading-overlay {
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background-color: #ffffff;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   z-index: 9999;
-   opacity: 1;
-   transition: opacity 0.5s ease-in-out;
-  }
-
-  .loading-spinner {
-   width: 50px;
-   height: 50px;
-   border: 5px solid #f3f3f3;
-   border-top: 5px solid #3498db;
-   border-radius: 50%;
-   animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-   0% {
-    transform: rotate(0deg);
-   }
-
-   100% {
-    transform: rotate(360deg);
-   }
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-
-   html,
-   body {
-    background-position: center center !important;
-    background-size: cover !important;
-   }
-  }
+ html,
+ body {
+  background-position: center center !important;
+  background-size: cover !important;
+ }
+}

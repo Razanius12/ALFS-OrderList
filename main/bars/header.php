@@ -1,7 +1,7 @@
 <div class="sidebar-logo">
  <div class="logo-header" data-background-color="dark">
   <a href="index.php" class="logo">
-   <img src="main/img/ALFLogoLightLandscape.png" alt="navbar brand" class="navbar-brand" height="20" />
+   <img src="main/img/ALFLogoLightLandscape.webp" alt="navbar brand" class="navbar-brand" height="20" />
   </a>
   <div class="nav-toggle d-flex align-items-center">
    <button class="btn btn-toggle toggle-sidebar p-2 me-1 btn-no-outline">

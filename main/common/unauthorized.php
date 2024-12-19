@@ -4,12 +4,6 @@ if (session_status() == PHP_SESSION_NONE) {
  session_start();
 }
 
-// Capture reason
-$reason = isset($_SESSION['unauthorized_reason'])
- ? $_SESSION['unauthorized_reason']
- : "Access Denied";
-unset($_SESSION['unauthorized_reason']);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +11,7 @@ unset($_SESSION['unauthorized_reason']);
 <head>
  <meta charset="UTF-8">
  <title>Unauthorized Access</title>
- <link rel="icon" href="../img/ALFLogoLightSquareBlack.png" type="image/x-icon" />
+ <link rel="icon" href="../img/ALFLogoLightSquareBlack.webp" type="image/x-icon" />
 
  <!-- Fonts and icons -->
  <script src="../../assets/js/plugin/webfont/webfont.min.js"></script>
@@ -38,32 +32,12 @@ unset($_SESSION['unauthorized_reason']);
    },
   });
  </script>
-
- <!-- CSS Files -->
- <link rel="stylesheet" href="../../assets/css/bootstrap.min.css" />
- <link rel="stylesheet" href="../../assets/css/plugins.min.css" />
- <link rel="stylesheet" href="../../assets/css/kaiadmin.min.css" />
-
-
- <!-- Sweet Alert -->
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
  <script>
-  document.addEventListener('DOMContentLoaded', function () {
-   Swal.fire({
-    title: 'Unauthorized Access',
-    text: '<?php echo addslashes($reason); ?>',
-    icon: 'warning',
-    confirmButtonText: 'Logout',
-    allowOutsideClick: false,
-    allowEscapeKey: false
-   }).then(() => {
-    // Redirect to login
-    window.location.href = 'login.php';
-   });
-  });
+  // Redirect to login
+  window.location.href = 'login.php';
  </script>
 </body>
 

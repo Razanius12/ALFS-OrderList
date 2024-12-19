@@ -9,6 +9,17 @@ function confirmLogout() {
   confirmButtonText: 'Yes, log out'
  }).then((result) => {
   if (result.isConfirmed) {
+   // Show loading alert
+   Swal.fire({
+    title: 'Logging Out...',
+    text: 'Please wait while we log you out.',
+    allowOutsideClick: false,
+    showConfirmButton: false, // Remove the OK button
+    didOpen: () => {
+     Swal.showLoading(); // Show loading spinner
+    }
+   });
+
    // Comprehensive storage clearing
    localStorage.clear();
    sessionStorage.clear();
@@ -31,10 +42,14 @@ function confirmLogout() {
      if (!response.ok) {
       throw new Error('Logout failed');
      }
+     // Close the loading alert
+     Swal.close();
      // Redirect directly without checking JSON
      window.location.href = 'main/common/login.php';
     })
     .catch(error => {
+     // Close the loading alert
+     Swal.close();
      console.error('Logout error:', error);
      Swal.fire({
       title: 'Logout Error',

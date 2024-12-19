@@ -52,7 +52,7 @@ unset($_SESSION['login_attempt_error']);
  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
  <title>ALF Solution Order List</title>
  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
- <link rel="icon" href="../img/ALFLogoLightSquareBlack.png" type="image/x-icon" />
+ <link rel="icon" href="../img/ALFLogoLightSquareBlack.webp" type="image/x-icon" />
 
  <!-- Fonts and icons -->
  <script src="../../assets/js/plugin/webfont/webfont.min.js"></script>
@@ -81,7 +81,8 @@ unset($_SESSION['login_attempt_error']);
  <link rel="stylesheet" href="../css/login.css" />
 </head>
 
-<body>
+<body style="background-image: url('../img/ALFSolutionCOMPRESSED.webp'); background-size: cover; background-position: center;">
+
  <div class="login-container">
   <div class="login-card">
    <div class="login-header">
@@ -125,11 +126,6 @@ unset($_SESSION['login_attempt_error']);
     <a href="javascript:void(0);" onclick="fetchAdminContacts()" class="text-muted">Forgot Password?</a>
    </div>
   </div>
- </div>
-
- <div class="preload-background"></div>
- <div class="loading-overlay">
-  <div class="loading-spinner"></div>
  </div>
 
 </body>
@@ -201,37 +197,6 @@ unset($_SESSION['login_attempt_error']);
    });
  }
  document.addEventListener('DOMContentLoaded', function () {
-  // Hide loading overlay when page is fully loaded
-  const loadingOverlay = document.querySelector('.loading-overlay');
-  const backgroundImage = new Image();
-
-  backgroundImage.onload = function () {
-   loadingOverlay.style.opacity = '0';
-   setTimeout(() => {
-    loadingOverlay.style.display = 'none';
-   }, 500);
-  };
-
-  backgroundImage.onerror = function () {
-   // Fallback to white background if image fails to load
-   document.body.style.backgroundImage = 'none';
-   loadingOverlay.style.opacity = '0';
-   setTimeout(() => {
-    loadingOverlay.style.display = 'none';
-   }, 500);
-  };
-
-  // Preload the background image
-  backgroundImage.src = '../img/DSCF7610.JPG';
-
-  // Prevent default scroll behavior
-  document.body.style.overflow = 'hidden';
-  document.documentElement.style.overflow = 'hidden';
-
-  // Optional: Adjust for mobile devices
-  document.body.addEventListener('touchmove', function (e) {
-   e.preventDefault();
-  }, { passive: false });
 
   $(document).ready(function () {
    // Password toggle script
@@ -286,6 +251,17 @@ unset($_SESSION['login_attempt_error']);
      return;
     }
 
+    // Show loading alert
+    Swal.fire({
+     title: 'Logging In...',
+     text: 'Please wait while we log you in.',
+     allowOutsideClick: false,
+     showConfirmButton: false, // Remove the OK button
+     didOpen: () => {
+      Swal.showLoading(); // Show loading spinner
+     }
+    });
+
     $.ajax({
      url: '../api/loginProcess.php',
      method: 'POST',
@@ -296,8 +272,10 @@ unset($_SESSION['login_attempt_error']);
      },
      dataType: 'json',
      success: function (response) {
-      if (response.status === 'success') {
+      // Close the loading alert
+      Swal.close();
 
+      if (response.status === 'success') {
        Swal.fire({
         title: 'Login Successful',
         text: 'Click OK to Continue to Dashboard',
@@ -318,6 +296,8 @@ unset($_SESSION['login_attempt_error']);
       }
      },
      error: function (xhr, status, error) {
+      // Close the loading alert
+      Swal.close();
       console.error('AJAX Error:', status, error);
       Swal.fire({
        title: 'Error',
@@ -328,7 +308,7 @@ unset($_SESSION['login_attempt_error']);
      }
     });
    });
-
+   
   });
 
   // Forgot Password Event Listener
@@ -342,4 +322,5 @@ unset($_SESSION['login_attempt_error']);
 
  });
 </script>
+
 </html>
