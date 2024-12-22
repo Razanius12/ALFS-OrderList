@@ -109,17 +109,11 @@ The new system addresses key limitations of the manual process:
 ## 🚀 Getting Started
 Visit our [live platform](https://alfsorderlist.ct.ws/) to experience the system.
 
-## 📞 Support
-For technical support or queries, please contact:
-Project Manager: Ganjar Apriyanto
-
 ## 🏢 About CV ALF Solution
 A creative agency specializing in logo design and content creation, committed to delivering high-quality design solutions through efficient project management.
 
 ## 👨‍💻 Development Details
-- **Developer**: Razanius12
-- **Last Updated**: 2024-12-22
-- **Version**: 1.0.0
+- **Developer**: [Razanius12](https://github.com/Razanius12) and [Fauzan](https://github.com/UjungberungG432)
 
 ## 🎨 Credits
 
