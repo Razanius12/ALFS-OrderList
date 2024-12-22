@@ -41,6 +41,31 @@ document.addEventListener('DOMContentLoaded', function () {
   // Call the function when the page loads
   setCurrentDateTime();
 
+  // Auto-select Project Manager based on session
+  function initializeProjectManagerSelects() {
+   const isAdmin = window.isAdmin || false; // Get from PHP variable
+   const autoSelectProjectManager = window.autoSelectProjectManager || null; // Get from PHP variable
+
+   if (isAdmin && autoSelectProjectManager) {
+    // For Add Order Modal
+    const addModalSelect = document.querySelector('#addOrderModal select[name="project_manager_id"]');
+    if (addModalSelect) {
+     addModalSelect.value = autoSelectProjectManager;
+     addModalSelect.disabled = true;
+    }
+
+    // For Edit Order Modal
+    const editModalSelect = document.querySelector('#editOrderModal select[name="project_manager_id"]');
+    if (editModalSelect) {
+     editModalSelect.value = autoSelectProjectManager;
+     editModalSelect.disabled = true;
+    }
+   }
+  }
+
+  // Call the initialization function
+  initializeProjectManagerSelects();
+
   // Function to calculate the number of rows based on the number of lines in the text
   function calculateRows(text) {
    const lines = text.split('\n').length; // Count the number of lines

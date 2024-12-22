@@ -64,4 +64,4 @@
  <!-- End Navbar -->
 </div>
 
-<script src="main/js/logout.js"></script>
+<script src="main/js/logouts.js"></script>

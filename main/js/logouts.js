@@ -44,6 +44,13 @@ function confirmLogout() {
      }
      // Close the loading alert
      Swal.close();
+
+     // Prevent back navigation
+     history.pushState(null, null, window.location.href);
+     window.onpopstate = function () {
+      history.pushState(null, null, window.location.href);
+     };
+
      // Redirect directly without checking JSON
      window.location.href = 'main/common/login.php';
     })

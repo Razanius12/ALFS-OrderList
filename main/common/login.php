@@ -81,7 +81,8 @@ unset($_SESSION['login_attempt_error']);
  <link rel="stylesheet" href="../css/login.css" />
 </head>
 
-<body style="background-image: url('../img/ALFSolutionCOMPRESSED.webp'); background-size: cover; background-position: center;">
+<body
+ style="background-image: url('../img/ALFSolutionCOMPRESSED.webp'); background-size: cover; background-position: center;">
 
  <div class="login-container">
   <div class="login-card">
@@ -140,6 +141,12 @@ unset($_SESSION['login_attempt_error']);
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+ window.onload = function () {
+  if (window.performance && window.performance.navigation.type === 2) {
+   window.location.reload();
+  }
+ }
+
  function fetchAdminContacts() {
   fetch('../api/getAdminContacts.php')
    .then(response => {
@@ -308,7 +315,7 @@ unset($_SESSION['login_attempt_error']);
      }
     });
    });
-   
+
   });
 
   // Forgot Password Event Listener

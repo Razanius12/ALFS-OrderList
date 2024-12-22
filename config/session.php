@@ -170,6 +170,26 @@ function logoutUser()
 {
  global $conn;
 
+ // First, nullify all session variables individually before clearing
+ $session_vars = [
+  'user_id',
+  'username',
+  'name',
+  'role',
+  'level',
+  'position_id',
+  'name_admin',
+  'name_worker',
+  'last_access_attempt'
+ ];
+
+ foreach ($session_vars as $var) {
+  if (isset($_SESSION[$var])) {
+   $_SESSION[$var] = null;
+   unset($_SESSION[$var]);
+  }
+ }
+
  // Remove remember me token from database
  if (isset($_COOKIE['remember_me'])) {
   $token = $_COOKIE['remember_me'];
@@ -184,7 +204,7 @@ function logoutUser()
   unset($_COOKIE['remember_me']);
  }
 
- // Completely clear all session variables
+ // Clear all session data after nullifying
  $_SESSION = array();
 
  // Destroy the session
@@ -193,7 +213,7 @@ function logoutUser()
  // Regenerate session ID
  session_regenerate_id(true);
 
- // Clear all cookies
+ // Clear all cookies including session cookie
  if (ini_get("session.use_cookies")) {
   $params = session_get_cookie_params();
   setcookie(
@@ -206,6 +226,11 @@ function logoutUser()
    $params["httponly"]
   );
  }
+
+ // Force browser to clear cache for security
+ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+ header("Cache-Control: post-check=0, pre-check=0", false);
+ header("Pragma: no-cache");
 }
 
 // Check remember me if not logged in

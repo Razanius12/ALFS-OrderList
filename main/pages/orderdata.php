@@ -47,6 +47,20 @@ $adminQuery = "SELECT a.id_admin, a.name_admin
                JOIN positions p ON a.id_position = p.id_position";
 $adminOptions = mysqli_query($conn, $adminQuery);
 
+// Get current user's ID and level from session
+$currentUserId = $_SESSION['user_id'] ?? null;
+$currentUserLevel = $_SESSION['level'] ?? null;
+
+// Initialize variables for JavaScript
+$autoSelectProjectManager = 'null';
+$isAdmin = 'false';
+
+// If user is an admin, prepare their ID for auto-selection
+if ($currentUserLevel === 'admin') {
+ $autoSelectProjectManager = $currentUserId;
+ $isAdmin = 'true';
+}
+
 // Helper function to determine badge class based on status
 function getStatusBadgeClass($status)
 {
@@ -176,12 +190,20 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Project Manager</label>
-          <select class="form-control" name="project_manager_id" required>
+          <select class="form-control" name="project_manager_id" required <?= $currentUserLevel === 'admin' ? 'disabled' : '' ?>>
            <option value="">Select Project Manager</option>
-           <?php while ($admin = mysqli_fetch_assoc($adminOptions)): ?>
-            <option value="<?= $admin['id_admin'] ?>"><?= htmlspecialchars($admin['name_admin']) ?></option>
+           <?php
+           mysqli_data_seek($adminOptions, 0);
+           while ($admin = mysqli_fetch_assoc($adminOptions)):
+            $selected = ($currentUserLevel === 'admin' && $currentUserId == $admin['id_admin']) ? 'selected' : '';
+            ?>
+            <option value="<?= $admin['id_admin'] ?>" <?= $selected ?>><?= htmlspecialchars($admin['name_admin']) ?>
+            </option>
            <?php endwhile; ?>
           </select>
+          <?php if ($currentUserLevel === 'admin'): ?>
+           <input type="hidden" name="project_manager_id" value="<?= $currentUserId ?>">
+          <?php endif; ?>
          </div>
         </div>
        </div>
@@ -267,12 +289,21 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Project Manager</label>
-          <select class="form-control" id="edit_project_manager" name="project_manager_id" required>
+          <select class="form-control" id="edit_project_manager" name="project_manager_id" required
+           <?= $currentUserLevel === 'admin' ? 'disabled' : '' ?>>
            <option value="">Select Project Manager</option>
-           <?php while ($admin = mysqli_fetch_assoc($adminOptions)): ?>
-            <option value="<?= $admin['id_admin'] ?>"><?= htmlspecialchars($admin['name_admin']) ?></option>
+           <?php
+           mysqli_data_seek($adminOptions, 0);
+           while ($admin = mysqli_fetch_assoc($adminOptions)):
+            $selected = ($currentUserLevel === 'admin' && $currentUserId == $admin['id_admin']) ? 'selected' : '';
+            ?>
+            <option value="<?= $admin['id_admin'] ?>" <?= $selected ?>><?= htmlspecialchars($admin['name_admin']) ?>
+            </option>
            <?php endwhile; ?>
           </select>
+          <?php if ($currentUserLevel === 'admin'): ?>
+           <input type="hidden" name="project_manager_id" value="<?= $currentUserId ?>">
+          <?php endif; ?>
          </div>
         </div>
        </div>
@@ -345,4 +376,10 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/orderDat.js"></script>
+<script src="main/js/orderData.js"></script>
+
+<script>
+ // Make PHP session variables available to JavaScript
+ window.isAdmin = <?= json_encode($currentUserLevel === 'admin') ?>;
+ window.autoSelectProjectManager = <?= json_encode($currentUserId) ?>;
+</script>

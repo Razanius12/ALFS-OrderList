@@ -127,7 +127,7 @@ function renderSidebarItems($items, $currentPage, $currentUser)
 
 <!-- Sidebar -->
 <div class="sidebar" data-background-color="dark">
- <?php include 'header.php'; ?>
+ <?php include_once 'header.php'; ?>
 
  <div class="sidebar-wrapper scrollbar scrollbar-inner">
   <div class="sidebar-content">
