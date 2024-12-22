@@ -31,7 +31,7 @@ try {
  }
 
  // Handle order assignment
- $orderAssignmentUpdate = '';
+ $assigned_order_id = 'null';
  if (isset($_POST['assigned_order_id']) && !empty($_POST['assigned_order_id'])) {
   $assigned_order_id = mysqli_real_escape_string($conn, $_POST['assigned_order_id']);
 

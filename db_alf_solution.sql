@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 19, 2024 at 04:52 AM
+-- Generation Time: Dec 22, 2024 at 02:59 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -187,9 +187,9 @@ CREATE TABLE `remember_tokens` (
 INSERT INTO `remember_tokens` (`id`, `user_id`, `user_type`, `token`, `expiry`, `created_at`) VALUES
 (9, 11, 'worker', '30b878188892d6f50d6096ecf9355007df76cc8f30539de139067a00133e21c3', 1736901461, '2024-12-16 00:34:41'),
 (19, 1, 'admin', '384fbc072c089f0422aa0a13b80a3560ebe1cec77c8aed61e3897df8fd66d061', 1737011590, '2024-12-17 04:17:05'),
-(36, 10, 'worker', '56f5a5684bb94b3b980ce616677ec96cc78eecdcb76227c20a55425e355d586f', 1737169220, '2024-12-19 02:36:26'),
-(37, 3, 'admin', '3c7c370824b85d4135f7fbb040b83e137bf65cd08bd2423a00a8cf253a6119fe', 1737171251, '2024-12-19 03:00:20'),
-(38, 6, 'worker', '7f5659577c4ec2b75064dddcf02006efdfc9b1f37c160522b19effaefa163ff4', 1737171452, '2024-12-19 03:34:11');
+(38, 6, 'worker', 'f3c8a74f95b2881b141c4ffe316460abfef9de71f8604efdb1a9373b7147d9d2', 1737172687, '2024-12-19 03:34:11'),
+(44, 3, 'admin', '40fb7d3dedccccec8117428a0c09fb1fc2ab2f7a3fca258045b71ca462f390a4', 1737422836, '2024-12-19 12:16:27'),
+(45, 10, 'worker', '868bfd6bb6e3dd01e5df0817b7e6d3e061d5a1945ae471401610deddc1937742', 1737423864, '2024-12-22 01:39:43');
 
 -- --------------------------------------------------------
 
@@ -282,25 +282,25 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `gmaps`
 --
 ALTER TABLE `gmaps`
-  MODIFY `id_maps` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_maps` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `id_position` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id_position` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `remember_tokens`
 --
 ALTER TABLE `remember_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `workers`

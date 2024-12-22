@@ -103,8 +103,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Format description
       const formattedDescription = data.description
-       .replace(/\\r\\n|\\r|\\n/g, '\n') // Replace line breaks for textarea
-       .replace(/\\"/g, '"'); // Replace escaped quotes
+      .replace(/\\r\\n|\\r|\\n/g, '\n')  // Replace line breaks for textarea
+      .replace(/\\"/g, '"')              // Replace escaped quotes
+      .replace(/\\'/g, "'");             // Replace escaped single quotes
 
       $('#edit_description').val(formattedDescription);
 

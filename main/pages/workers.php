@@ -320,12 +320,12 @@ function maskPassword($password)
         <div class="form-group">
          <label>Assign Order (Optional)</label>
          <select class="form-control" name="assigned_order_id" id="edit_assigned_order">
-          <option value="">Unassign from order</option>
+          <option value="null">Unassign from order</option>
           <?php
           // Fetch available orders
           $orderQuery = "SELECT id_order, order_name, status 
                          FROM orders 
-                         WHERE worker_id IS NULL OR worker_id = ''
+                         WHERE status = 'IN_PROGRESS' OR status = 'PENDING'
                          ORDER BY order_name";
           $orderResult = mysqli_query($conn, $orderQuery);
           while ($order = mysqli_fetch_assoc($orderResult)): ?>

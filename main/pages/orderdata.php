@@ -376,7 +376,7 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/orderData.js"></script>
+<script src="main/js/orderDatas.js"></script>
 
 <script>
  // Make PHP session variables available to JavaScript

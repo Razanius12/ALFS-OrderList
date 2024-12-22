@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#edit_position').val(data.id_position);
 
       // Add order assignment population
-      $('#edit_assigned_order').val(data.assigned_order_id || '');
+      $('#edit_assigned_order').val(data.assigned_order_id || 'null');
 
       initializePasswordToggleInModals();
       Swal.close();
