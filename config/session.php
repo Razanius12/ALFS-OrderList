@@ -61,10 +61,16 @@ function checkRememberMeToken()
 
  $token = $_COOKIE['remember_me'];
 
- // Verify token in database
+ // First, clean up expired tokens
+ $cleanup_query = "DELETE FROM remember_tokens WHERE expiry < ?";
+ $cleanup_stmt = $conn->prepare($cleanup_query);
+ $current_time = time();
+ $cleanup_stmt->bind_param("i", $current_time);
+ $cleanup_stmt->execute();
+
+ // Now check for valid token
  $query = "SELECT * FROM remember_tokens WHERE token = ? AND expiry > ?";
  $stmt = $conn->prepare($query);
- $current_time = time();
  $stmt->bind_param("si", $token, $current_time);
  $stmt->execute();
  $result = $stmt->get_result();
@@ -85,17 +91,25 @@ function checkRememberMeToken()
   if ($user_result->num_rows > 0) {
    $user = $user_result->fetch_assoc();
 
-   // Set comprehensive session variables
+   // Start new session if needed
+   if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+   }
+
+   // Regenerate session ID for security
+   session_regenerate_id(true);
+
+   // Set session variables
    $_SESSION['user_id'] = $token_data['user_id'];
    $_SESSION['username'] = $user['username'];
    $_SESSION['name'] = $token_data['user_type'] == 'worker'
     ? $user['name_worker']
     : $user['name_admin'];
    $_SESSION['role'] = $token_data['user_type'];
-   $_SESSION['level'] = $token_data['user_type']; // Ensure this matches your access checks
+   $_SESSION['level'] = $token_data['user_type'];
    $_SESSION['position_id'] = $user['id_position'];
 
-   // Optionally refresh the remember me token
+   // Refresh token
    refreshRememberMeToken($token_data['user_id'], $token_data['user_type']);
 
    return true;
@@ -170,64 +184,72 @@ function logoutUser()
 {
  global $conn;
 
- // First, nullify all session variables individually before clearing
- $session_vars = [
-  'user_id',
-  'username',
-  'name',
-  'role',
-  'level',
-  'position_id',
-  'name_admin',
-  'name_worker',
-  'last_access_attempt'
- ];
+ // Store user info before clearing session
+ $user_id = $_SESSION['user_id'] ?? null;
+ $user_type = $_SESSION['level'] ?? null;
 
- foreach ($session_vars as $var) {
-  if (isset($_SESSION[$var])) {
-   $_SESSION[$var] = null;
-   unset($_SESSION[$var]);
-  }
+ // First, clear the remember me token
+ if ($user_id && $user_type) {
+  // Delete token by user ID and type (more reliable than cookie-based deletion)
+  $delete_query = "DELETE FROM remember_tokens WHERE user_id = ? AND user_type = ?";
+  $stmt = $conn->prepare($delete_query);
+  $stmt->bind_param("is", $user_id, $user_type);
+  $stmt->execute();
  }
 
- // Remove remember me token from database
+ // Also delete by token if cookie exists (as backup)
  if (isset($_COOKIE['remember_me'])) {
   $token = $_COOKIE['remember_me'];
-  $delete_query = "DELETE FROM remember_tokens WHERE token = ?";
-  $stmt = $conn->prepare($delete_query);
+  $delete_token_query = "DELETE FROM remember_tokens WHERE token = ?";
+  $stmt = $conn->prepare($delete_token_query);
   $stmt->bind_param("s", $token);
   $stmt->execute();
+ }
 
-  // Clear remember me cookie more aggressively
-  setcookie('remember_me', '', time() - 42000, '/', '', true, true);
-  setcookie('remember_me', '', time() - 42000, '/', $_SERVER['HTTP_HOST'], true, true);
+ // Clear remember me cookie
+ if (isset($_COOKIE['remember_me'])) {
+  // Clear for all possible paths and domains
+  setcookie('remember_me', '', [
+   'expires' => time() - 3600,
+   'path' => '/',
+   'domain' => '',
+   'secure' => true,
+   'httponly' => true,
+   'samesite' => 'Strict'
+  ]);
   unset($_COOKIE['remember_me']);
  }
 
- // Clear all session data after nullifying
+ // Clear session
  $_SESSION = array();
 
- // Destroy the session
- session_destroy();
-
- // Regenerate session ID
- session_regenerate_id(true);
-
- // Clear all cookies including session cookie
+ // Destroy session cookie
  if (ini_get("session.use_cookies")) {
   $params = session_get_cookie_params();
   setcookie(
    session_name(),
    '',
-   time() - 42000,
-   $params["path"],
-   $params["domain"],
-   $params["secure"],
-   $params["httponly"]
+   [
+    'expires' => time() - 3600,
+    'path' => $params["path"],
+    'domain' => $params["domain"],
+    'secure' => $params["secure"],
+    'httponly' => $params["httponly"],
+    'samesite' => 'Strict'
+   ]
   );
  }
 
- // Force browser to clear cache for security
+ // Destroy session
+ session_destroy();
+
+ // Start new session to ensure clean state
+ session_start();
+
+ // Regenerate session ID
+ session_regenerate_id(true);
+
+ // Set cache headers
  header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
  header("Cache-Control: post-check=0, pre-check=0", false);
  header("Pragma: no-cache");
