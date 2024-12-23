@@ -62,7 +62,19 @@ function takeOrder(taskId) {
     },
     body: `task_id=${taskId}`
    })
-    .then(response => response.json())
+    .then(response => {
+     if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+     }
+     return response.text().then(text => {
+      try {
+       return JSON.parse(text);
+      } catch (e) {
+       console.error('JSON Parse Error:', text);
+       throw new Error('Invalid JSON response from server');
+      }
+     });
+    })
     .then(data => {
      if (data.success) {
       Swal.fire({
@@ -85,8 +97,8 @@ function takeOrder(taskId) {
     .catch(error => {
      console.error('Error:', error);
      Swal.fire({
-      title: 'Network Error',
-      text: 'An error occurred while taking the task.',
+      title: 'Error',
+      text: error.message || 'An error occurred while taking the task.',
       icon: 'error',
       confirmButtonText: 'OK'
      });

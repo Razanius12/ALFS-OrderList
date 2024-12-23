@@ -1,10 +1,11 @@
 <?php
 session_start();
 require_once '../../config/database.php';
-require_once '../common/allowedRoles.php';
+require_once '../../config/session.php';
 
 // Check if user is a worker
 if ($_SESSION['level'] !== 'worker') {
+ header('Content-Type: application/json');
  echo json_encode([
   'success' => false,
   'message' => 'Unauthorized access'
@@ -16,6 +17,7 @@ if ($_SESSION['level'] !== 'worker') {
 $taskId = $_POST['task_id'] ?? null;
 
 if (!$taskId) {
+ header('Content-Type: application/json');
  echo json_encode([
   'success' => false,
   'message' => 'Invalid input'
@@ -28,7 +30,7 @@ try {
  mysqli_begin_transaction($conn);
 
  // Check current order status
- $checkStatusQuery = "SELECT status FROM orders WHERE id_order = ? AND worker_id";
+ $checkStatusQuery = "SELECT status FROM orders WHERE id_order = ?";  // Removed incorrect AND clause
  $stmt = mysqli_prepare($conn, $checkStatusQuery);
  mysqli_stmt_bind_param($stmt, "i", $taskId);
  mysqli_stmt_execute($stmt);
@@ -41,9 +43,9 @@ try {
 
  // Update order to IN_PROGRESS and assign to current worker
  $updateQuery = "UPDATE orders 
-                  SET status = 'IN_PROGRESS', 
-                   worker_id = ? 
-                  WHERE id_order = ?";
+                    SET status = 'IN_PROGRESS', 
+                        worker_id = ? 
+                    WHERE id_order = ?";
  $updateStmt = mysqli_prepare($conn, $updateQuery);
  mysqli_stmt_bind_param($updateStmt, "ii", $_SESSION['user_id'], $taskId);
 
@@ -53,9 +55,9 @@ try {
 
  // Update worker's status
  $workerUpdateQuery = "UPDATE workers 
-                        SET availability_status = 'TASKED', 
-                         assigned_order_id = ? 
-                        WHERE id_worker = ?";
+                         SET availability_status = 'TASKED', 
+                             assigned_order_id = ? 
+                         WHERE id_worker = ?";
  $workerStmt = mysqli_prepare($conn, $workerUpdateQuery);
  mysqli_stmt_bind_param($workerStmt, "ii", $taskId, $_SESSION['user_id']);
 
@@ -66,6 +68,7 @@ try {
  // Commit transaction
  mysqli_commit($conn);
 
+ header('Content-Type: application/json');
  echo json_encode([
   'success' => true,
   'message' => 'Task successfully taken'
@@ -75,6 +78,7 @@ try {
  // Rollback transaction
  mysqli_rollback($conn);
 
+ header('Content-Type: application/json');
  echo json_encode([
   'success' => false,
   'message' => $e->getMessage()

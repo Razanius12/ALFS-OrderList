@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
  try {
   // Check for related orders
-  $checkOrdersQuery = "SELECT COUNT(*) as count FROM orders WHERE project_manager_id = ?";
+  $checkOrdersQuery = "SELECT COUNT(*) as count FROM orders WHERE worker_id = ?";
   $checkStmt = mysqli_prepare($conn, $checkOrdersQuery);
   mysqli_stmt_bind_param($checkStmt, "i", $id_worker);
   mysqli_stmt_execute($checkStmt);

@@ -69,7 +69,6 @@ try {
   $workerStatsQuery = "
             SELECT 
                 COUNT(*) as total_tasks,
-                COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed_tasks,
                 COUNT(CASE WHEN status = 'IN_PROGRESS' THEN 1 END) as ongoing_tasks
             FROM orders 
             WHERE worker_id = ?
@@ -83,6 +82,15 @@ try {
 } catch (Exception $e) {
  error_log("Dashboard Count Error: " . $e->getMessage());
 }
+
+// Get current worker's status
+$workerId = $_SESSION['user_id'];
+$statusQuery = "SELECT availability_status FROM workers WHERE id_worker = ?";
+$stmt = mysqli_prepare($conn, $statusQuery);
+mysqli_stmt_bind_param($stmt, "i", $workerId);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$workerStatus = mysqli_fetch_assoc($result);
 ?>
 
 <!-- Page content -->
@@ -229,14 +237,20 @@ try {
       <div class="card-body">
        <div class="row align-items-center">
         <div class="col-icon">
-         <div class="icon-big text-center icon-primary bubble-shadow-small">
-          <i class="fas fa-tasks"></i>
+         <div class="icon-big text-center icon-success bubble-shadow-small">
+          <i class="fas fa-toggle-on"></i>
          </div>
         </div>
         <div class="col col-stats ms-3 ms-sm-0">
          <div class="numbers">
-          <p class="card-category">Total Tasks</p>
-          <h4 class="card-title"><?php echo htmlspecialchars($workerStats['total_tasks']); ?></h4>
+          <p class="card-category">Availability Status</p>
+          <h4 class="card-title" id="availabilityStatus">
+           <?php echo htmlspecialchars($workerStatus['availability_status']); ?>
+          </h4>
+          <button id="toggleAvailability"
+           class="btn btn-sm mt-2 <?php echo $workerStatus['availability_status'] === 'AVAILABLE' ? 'btn-success' : 'btn-warning'; ?>">
+           Toggle Status
+          </button>
          </div>
         </div>
        </div>
@@ -275,3 +289,83 @@ try {
 </div>
 
 <?php mysqli_close($conn); ?>
+
+<script>
+ document.getElementById('toggleAvailability').addEventListener('click', function () {
+  const currentStatus = document.getElementById('availabilityStatus').textContent.trim();
+  const newStatus = currentStatus === 'AVAILABLE' ? 'TASKED' : 'AVAILABLE';
+
+  Swal.fire({
+   title: 'Change Availability Status?',
+   text: `Are you sure you want to change your status to ${newStatus}?`,
+   icon: 'question',
+   showCancelButton: true,
+   confirmButtonColor: '#3085d6',
+   cancelButtonColor: '#d33',
+   confirmButtonText: 'Yes, change it!'
+  }).then((result) => {
+   if (result.isConfirmed) {
+    // Show loading state
+    Swal.fire({
+     title: 'Updating...',
+     text: 'Please wait while we update your status',
+     allowOutsideClick: false,
+     allowEscapeKey: false,
+     didOpen: () => {
+      Swal.showLoading()
+     }
+    });
+
+    // Make the API call
+    fetch('main/api/toggleAvailability.php', {
+     method: 'POST',
+     headers: {
+      'Content-Type': 'application/json',
+     },
+    })
+     .then(response => response.json())
+     .then(data => {
+      if (data.success) {
+       const statusElement = document.getElementById('availabilityStatus');
+       const buttonElement = document.getElementById('toggleAvailability');
+
+       statusElement.textContent = data.new_status;
+
+       // Toggle button color
+       if (data.new_status === 'AVAILABLE') {
+        buttonElement.classList.remove('btn-warning');
+        buttonElement.classList.add('btn-success');
+       } else {
+        buttonElement.classList.remove('btn-success');
+        buttonElement.classList.add('btn-warning');
+       }
+
+       // Show success message
+       Swal.fire({
+        title: 'Status Updated!',
+        text: `Your status has been changed to ${data.new_status}`,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+       });
+      } else {
+       // Show error message
+       Swal.fire({
+        title: 'Error!',
+        text: data.message || 'Failed to update status',
+        icon: 'error'
+       });
+      }
+     })
+     .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+       title: 'Error!',
+       text: 'An unexpected error occurred',
+       icon: 'error'
+      });
+     });
+   }
+  });
+ });
+</script>
