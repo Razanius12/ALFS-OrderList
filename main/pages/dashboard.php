@@ -345,8 +345,6 @@ $workerStatus = mysqli_fetch_assoc($result);
         title: 'Status Updated!',
         text: `Your status has been changed to ${data.new_status}`,
         icon: 'success',
-        timer: 2000,
-        showConfirmButton: false
        });
       } else {
        // Show error message
