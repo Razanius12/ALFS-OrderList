@@ -211,7 +211,7 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Start Date</label>
-          <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date">
          </div>
         </div>
         <div class="col-md-6">
