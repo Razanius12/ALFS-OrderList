@@ -34,8 +34,7 @@ The new system addresses key limitations of the manual process:
 - **Detail Recording**
   - New project information input
   - Client requirement documentation
-  - Project deadline setting
-  - Project categorization (logo design, content creation, etc.)
+  - Project's price
 
 ### Status Monitoring
 - **Project States**
@@ -43,18 +42,11 @@ The new system addresses key limitations of the manual process:
   - In Progress
   - Completed
   - Cancelled
-- Progress tracking
-- Deadline alert system
 
 ### Resource Management
-- **Task Distribution**
-  - Skill-based project allocation
-  - Workload mapping
-  - New assignment notifications
 - **Worker Availability**
   - Real-time availability status
   - Maximum project limits per worker
-  - Workload distribution metrics
 
 ### Reporting System
 - **Performance Analytics**
@@ -64,11 +56,6 @@ The new system addresses key limitations of the manual process:
 - **Financial Tracking**
   - Project-based revenue recording
   - Period-based analysis
-- **Productivity Analysis**
-  - Individual performance metrics
-  - Team/division performance
-  - Average project completion time
-  - Project completion ratio
 
 ## 👥 User Roles
 
@@ -93,12 +80,6 @@ The new system addresses key limitations of the manual process:
 - Secure login/logout process
 - Role-based access control
 - Remember token functionality
-- Password encryption
-
-### Database Structure
-- Integrated ERD design
-- Relational data management
-- Efficient data organization
 
 ### Interface Design
 - Intuitive dashboard layout
