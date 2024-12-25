@@ -1,22 +1,37 @@
 document.addEventListener('DOMContentLoaded', function () {
- if ($.fn.DataTable) {
-  $('#task-table').DataTable({
-   "pageLength": 10,
-   "order": [[0, "desc"]],
-   responsive: true,
-   language: {
-    search: "_INPUT_",
-    searchPlaceholder: "Search tasks...",
-    lengthMenu: "Show _MENU_ entries"
+ $.fn.dataTable.ext.type.order['remaining-time-pre'] = function (data) {
+  // Convert the remaining time text to a numeric value for sorting
+  if (data.includes('Overdue')) {
+   return -1; // Treat overdue as the lowest priority
+  } else if (data.includes('Less than 1 day left')) {
+   return 0; // Treat as 0 days left
+  } else {
+   const match = data.match(/(\d+) days left/);
+   return match ? parseInt(match[1], 10) : Infinity; // Treat as a large number if not matched
+  }
+ };
+
+ // DataTable initialization, specify the column type
+ $('#task-table').DataTable({
+  "pageLength": 10,
+  "order": [[2, "asc"]],
+  "columnDefs": [
+   {
+    targets: 2, // The Remaining Time column
+    type: 'remaining-time' // Use the custom sorting type
    },
-   columnDefs: [
-    {
-     targets: 0,
-     visible: false
-    }
-   ]
-  });
- }
+   {
+    targets: 0,
+    visible: false
+   }
+  ],
+  responsive: true,
+  language: {
+   search: "_INPUT_",
+   searchPlaceholder: "Search tasks...",
+   lengthMenu: "Show _MENU_ entries"
+  }
+ });
 });
 
 function showTaskDetails(button) {

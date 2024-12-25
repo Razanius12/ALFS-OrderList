@@ -59,7 +59,7 @@ try {
 
  // Validate worker ID if provided
  if ($worker_id !== NULL) {
-  $check_worker_query = "SELECT id_worker FROM workers WHERE id_worker = ? AND availability_status = 'AVAILABLE'";
+  $check_worker_query = "SELECT id_worker FROM workers WHERE id_worker = ?";
   $stmt = mysqli_prepare($conn, $check_worker_query);
   mysqli_stmt_bind_param($stmt, "i", $worker_id);
   mysqli_stmt_execute($stmt);

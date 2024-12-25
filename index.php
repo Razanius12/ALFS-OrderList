@@ -56,8 +56,8 @@ include_once 'head.php';
     case 'alfOffices':
      includePage('main/pages/alfOffices.php');
      break;
-    case 'dailyProgress':
-     includePage('main/pages/dailyProgress.php');
+    case 'monthlyRecap':
+     includePage('main/pages/monthlyRecap.php');
      break;
     case 'profile':
      includePage('main/pages/profile.php');

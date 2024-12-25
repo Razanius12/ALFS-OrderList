@@ -80,7 +80,7 @@ try {
 
  echo json_encode([
   'success' => true,
-  'message' => 'The task has been successfully marked as completed. Refer to Task History if you want to see completed tasks'
+  'message' => 'The task has been successfully marked as completed. See Task History if you want to see completed tasks'
  ]);
 } catch (Exception $e) {
  // Rollback the transaction in case of error

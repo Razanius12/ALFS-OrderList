@@ -57,10 +57,10 @@ $contentSidebarItems = [
   'url' => 'index.php?page=alfOffices',
   'roles' => ['admin', 'worker']
  ],
- 'dailyProgress' => [
+ 'monthlyRecap' => [
   'icon' => 'far fa-chart-bar',
-  'label' => 'Daily Progress',
-  'url' => 'index.php?page=dailyProgress',
+  'label' => 'Monthly Recap',
+  'url' => 'index.php?page=monthlyRecap',
   'roles' => ['admin']
  ]
 ];

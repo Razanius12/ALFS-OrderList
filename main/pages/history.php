@@ -147,7 +147,7 @@ function getStatusBadgeClass($status)
               $daysBeforeDeadline = $interval->days;
 
               if ($daysBeforeDeadline == 0) {
-               $timeText = '<span class="text-success">Completed on deadline</span>';
+               $timeText = '<span class="text-warning">Completed on deadline</span>';
               } elseif ($daysBeforeDeadline == 1) {
                $timeText = '<span class="text-success">Completed 1 day before deadline</span>';
               } else {
@@ -156,7 +156,11 @@ function getStatusBadgeClass($status)
              } else {
               $interval = $deadlineDate->diff($finishedDate);
               $daysAfterDeadline = $interval->days;
-              $timeText = '<span class="text-danger">Completed ' . $daysAfterDeadline . ' days after deadline</span>';
+              if ($daysAfterDeadline == 0) {
+               $timeText = '<span class="text-warning">Completed on deadline</span>';
+              } else {
+               $timeText = '<span class="text-danger">Completed ' . $daysAfterDeadline . ' days after deadline</span>';
+              }
              }
 
              echo $timeText;

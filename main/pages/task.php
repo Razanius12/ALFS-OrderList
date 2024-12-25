@@ -185,4 +185,4 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/tasks.js"></script>
+<script src="main/js/task.js"></script>

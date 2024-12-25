@@ -137,7 +137,7 @@ $completedTasksQuery = "
         o.worker_id = ? AND o.status = 'COMPLETED'
     ORDER BY 
         o.finished_at DESC
-    LIMIT 5
+    LIMIT 6
 ";
 
 $stmt = mysqli_prepare($conn, $completedTasksQuery);
@@ -466,14 +466,16 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
           <div class="card-tools">
            <?php
            // Determine badge color based on completion time
-           $badgeClass = $task['days_before_deadline'] >= 0 ? 'badge-success' : 'badge-danger';
+           $badgeClass = $task['days_before_deadline'] > 0 ? 'badge-success' : ($task['days_before_deadline'] < 0 ? 'badge-danger' : 'badge-warning');
            ?>
            <span class="badge <?php echo $badgeClass; ?>">
             <?php
-            if ($task['days_before_deadline'] >= 0) {
+            if ($task['days_before_deadline'] > 0) {
              echo "Completed {$task['days_before_deadline']} days early";
-            } else {
+            } elseif ($task['days_before_deadline'] < 0) {
              echo "Completed " . abs($task['days_before_deadline']) . " days late";
+            } elseif ($task['days_before_deadline'] == 0) {
+             echo "Completed at deadline";
             }
             ?>
            </span>
@@ -488,22 +490,6 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
            <div class="col-6">
             <small class="text-muted">Completed</small>
             <p><?php echo date('M d, Y', strtotime($task['finished_at'])); ?></p>
-           </div>
-          </div>
-          <div class="progress">
-           <?php
-           // Calculate progress percentage
-           $totalDays = max(1, strtotime($task['deadline']) - strtotime($task['start_date']));
-           $completedDays = strtotime($task['finished_at']) - strtotime($task['start_date']);
-           $progressPercentage = min(100, max(0, ($completedDays / $totalDays) * 100));
-
-           // Determine progress bar color
-           $progressClass = $task['days_before_deadline'] >= 0 ? 'bg-success' : 'bg-danger';
-           ?>
-           <div class="progress-bar <?php echo $progressClass; ?>" role="progressbar"
-            style="width: <?php echo $progressPercentage; ?>%" aria-valuenow="<?php echo $progressPercentage; ?>"
-            aria-valuemin="0" aria-valuemax="100">
-            <?php echo round($progressPercentage, 0); ?>%
            </div>
           </div>
           <div class="row mt-2">
