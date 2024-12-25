@@ -12,18 +12,40 @@ try {
   $id_worker = mysqli_real_escape_string($conn, $_GET['id_worker']);
 
   // Prepare SQL query to fetch worker details with position and potential order assignment
-  $query = "SELECT 
-             w.id_worker, 
-             w.name_worker, 
-             w.username, 
-             w.id_position, 
-             w.gender_worker,
-             w.phone_number,
-             w.password,
-             o.id_order AS assigned_order_id
+  $query = "
+            SELECT 
+                w.id_worker, 
+                w.name_worker, 
+                w.username, 
+                w.id_position, 
+                w.gender_worker,
+                w.phone_number,
+                w.password,
+                o.id_order AS assigned_order_id,
+                COALESCE(in_progress_counts.order_count, 0) AS order_count
             FROM workers w
             LEFT JOIN orders o ON w.id_worker = o.worker_id
-            WHERE w.id_worker = '$id_worker'";
+            LEFT JOIN (
+                SELECT 
+                    worker_id,
+                    COUNT(id_order) AS order_count
+                FROM 
+                    orders
+                WHERE 
+                    status IN ('IN_PROGRESS', 'PENDING')
+                GROUP BY 
+                    worker_id
+            ) AS in_progress_counts ON w.id_worker = in_progress_counts.worker_id
+            WHERE w.id_worker = '$id_worker'
+            GROUP BY 
+                w.id_worker, 
+                w.name_worker, 
+                w.username, 
+                w.id_position, 
+                w.gender_worker,
+                w.phone_number,
+                w.password
+        ";
 
   // Execute query
   $result = mysqli_query($conn, $query);

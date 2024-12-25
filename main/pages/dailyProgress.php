@@ -12,13 +12,13 @@ $selectedYear = isset($_GET['year']) ? $_GET['year'] : date('Y');
 
 // Fetch daily income data for selected month
 $query = "SELECT 
-            DATE(start_date) AS order_date, 
+            DATE(finished_at) AS order_date, 
             SUM(order_price) AS total_income 
           FROM orders 
           WHERE status = 'COMPLETED' 
-            AND MONTH(start_date) = ? 
-            AND YEAR(start_date) = ?
-          GROUP BY DATE(start_date) 
+            AND MONTH(finished_at) = ? 
+            AND YEAR(finished_at) = ?
+          GROUP BY DATE(finished_at) 
           ORDER BY order_date";
 
 $stmt = mysqli_prepare($conn, $query);

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 22, 2024 at 02:59 AM
+-- Generation Time: Dec 25, 2024 at 08:41 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -80,6 +80,8 @@ CREATE TABLE `orders` (
   `order_name` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `start_date` datetime DEFAULT NULL,
+  `finished_at` datetime DEFAULT NULL,
+  `deadline` date DEFAULT NULL,
   `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') DEFAULT 'PENDING',
   `order_price` int(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -88,57 +90,17 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `status`, `order_price`) VALUES
-(19, 1, NULL, 'atest1', NULL, '2024-12-17 10:38:00', 'COMPLETED', 40),
-(20, 1, NULL, 'atest2', NULL, '2024-12-18 10:39:00', 'COMPLETED', 50),
-(21, 1, NULL, 'atest3', NULL, '2024-12-19 10:39:00', 'COMPLETED', 30),
-(22, 1, NULL, 'atest4', NULL, '2024-12-20 10:41:00', 'COMPLETED', 60),
-(23, 1, NULL, 'atest5', NULL, '2024-12-21 10:41:00', 'COMPLETED', 45),
-(24, 1, NULL, 'atest6', NULL, '2024-12-22 10:41:00', 'COMPLETED', 55),
-(25, 1, NULL, 'atest7', NULL, '2024-12-23 10:41:00', 'COMPLETED', 35),
-(26, 1, NULL, 'atest8', NULL, '2024-12-24 10:41:00', 'COMPLETED', 65),
-(27, 1, NULL, 'atest9', NULL, '2024-12-25 10:41:00', 'COMPLETED', 40),
-(28, 1, NULL, 'atest10', NULL, '2024-12-26 10:41:00', 'COMPLETED', 55),
-(29, 1, NULL, 'atest11', NULL, '2024-12-27 10:41:00', 'COMPLETED', 45),
-(30, 1, NULL, 'atest12', NULL, '2024-12-28 10:41:00', 'COMPLETED', 60),
-(31, 1, NULL, 'atest13', NULL, '2024-12-29 10:41:00', 'COMPLETED', 50),
-(32, 1, NULL, 'atest14', NULL, '2024-12-30 10:41:00', 'COMPLETED', 70),
-(33, 1, NULL, 'atest15', NULL, '2024-12-31 10:41:00', 'COMPLETED', 40),
-(34, 1, NULL, 'atest16', NULL, '2025-01-01 10:41:00', 'COMPLETED', 55),
-(35, 1, NULL, 'atest17', NULL, '2025-01-02 10:41:00', 'COMPLETED', 45),
-(36, 1, NULL, 'atest18', NULL, '2025-01-03 10:41:00', 'COMPLETED', 65),
-(37, 1, NULL, 'atest19', NULL, '2025-01-04 10:41:00', 'COMPLETED', 35),
-(38, 1, NULL, 'atest20', NULL, '2025-01-05 10:41:00', 'COMPLETED', 60),
-(39, 1, NULL, 'atest21', NULL, '2025-01-06 10:41:00', 'COMPLETED', 50),
-(40, 1, NULL, 'atest22', NULL, '2025-01-07 10:41:00', 'COMPLETED', 45),
-(41, 1, NULL, 'atest23', NULL, '2025-01-08 10:41:00', 'COMPLETED', 55),
-(42, 1, NULL, 'atest24', NULL, '2025-01-09 10:41:00', 'COMPLETED', 40),
-(43, 1, NULL, 'atest25', NULL, '2025-01-10 10:41:00', 'COMPLETED', 70),
-(44, 1, NULL, 'atest26', NULL, '2025-01-11 10:41:00', 'COMPLETED', 45),
-(45, 1, NULL, 'atest27', NULL, '2025-01-12 10:41:00', 'COMPLETED', 60),
-(46, 1, NULL, 'atest28', NULL, '2025-01-13 10:41:00', 'COMPLETED', 50),
-(47, 1, NULL, 'atest29', NULL, '2025-01-14 10:41:00', 'COMPLETED', 55),
-(48, 1, NULL, 'atest30', NULL, '2025-01-15 10:41:00', 'COMPLETED', 40),
-(49, 1, NULL, 'atest31', NULL, '2025-01-16 10:41:00', 'COMPLETED', 65),
-(50, 1, NULL, 'atest32', NULL, '2025-01-17 10:41:00', 'COMPLETED', 45),
-(51, 1, NULL, 'atest33', NULL, '2025-01-18 10:41:00', 'COMPLETED', 60),
-(52, 1, NULL, 'atest34', NULL, '2025-01-19 10:41:00', 'COMPLETED', 50),
-(53, 1, NULL, 'atest35', NULL, '2025-01-20 10:41:00', 'COMPLETED', 55),
-(54, 1, NULL, 'atest36', NULL, '2025-01-21 10:41:00', 'COMPLETED', 40),
-(55, 1, NULL, 'atest37', NULL, '2025-01-22 10:41:00', 'COMPLETED', 70),
-(56, 1, NULL, 'atest38', NULL, '2025-01-23 10:41:00', 'COMPLETED', 45),
-(57, 1, NULL, 'atest39', NULL, '2025-01-24 10:41:00', 'COMPLETED', 60),
-(58, 1, NULL, 'atest40', NULL, '2025-01-25 10:41:00', 'COMPLETED', 50),
-(59, 1, NULL, 'atest41', NULL, '2025-01-26 10:41:00', 'COMPLETED', 55),
-(60, 1, NULL, 'atest42', NULL, '2025-01-27 10:41:00', 'COMPLETED', 40),
-(61, 1, NULL, 'atest43', NULL, '2025-01-28 10:41:00', 'COMPLETED', 65),
-(62, 1, NULL, 'atest44', NULL, '2025-01-29 10:41:00', 'COMPLETED', 45),
-(63, 1, NULL, 'atest45', NULL, '2025-01-30 10:41:00', 'COMPLETED', 60),
-(64, 1, NULL, 'atest46', NULL, '2025-01-31 10:41:00', 'COMPLETED', 50),
-(79, 3, 6, 'DA - 4085197', 'Logo Design Brief\\r\\nLooking for a High End General Contractor Company logo for a new startup in Florida, USA. I think a graphic with a shell or something like that might look nice too. Thank you for your help!\\r\\n\\r\\nLogo Text\\r\\nShell Coast Construction LLC', '2025-02-01 09:31:00', 'PENDING', 10),
-(80, 3, 10, 'DA - 4084837', 'Logo Design Brief\r\nLooking for a clean and simple logo for my new gourmet mushroom farm, located in Texas.\r\n\"Prosporeus Mushrooms\"\r\nGourmet mushrooms are my business.\r\nIm looking for the \"Prosporeus\" to have a subtle standout on the \"spore\" section. It should look like one word, but be able to see the word \"spore\" inside the entire word \"Prosporeus \". Something simple and clean with a mushroom influence. Maybe Texas influence. Not looking for a colorful logo. 3 solid colors maximum.\r\n\r\nTarget Market(s)\r\nRestaurants, general public\r\n\r\nIndustry/Entity Type\r\nMushroom Cultivation and Sales\r\n\r\nLogo Text\r\nProsporeus Mushrooms\r\n\r\nMust have\r\nSlight highlight to \"spore\" inside \"Prosporeus \". Mushroom influence\r\nNice to have\r\nSimple and clean. Mushroom design integrated into logo. Not a gimmicky Alice in wounderland mushroom... more interested in edible gourmet mushrooms like oyster, morel, chestnut. Maybe even a spore print design.\r\nShould not have\r\nNo fades or graduated colors. No more than 3 colors total', '2025-02-02 09:32:00', 'IN_PROGRESS', 20),
-(81, 3, NULL, 'DA - 4084880', 'Logo Design Brief\r\nI need a logo design for a new natural and holistic cosmetic brand. Our cosmetics are designed not only to have an impact on skin but also to have an impact on mental health.\r\nAll of our bottles are amber glass, and we will need a second project for the label design.\r\nThe design should comunicate calm and hope\r\n\r\nLogo Text\r\nHealing', '2025-02-03 10:08:00', 'CANCELLED', 8),
-(82, 3, NULL, 'DA - 4084742', 'Logo Design Brief\r\nMy brother and I need a logo for our new real estate company. I like some of the examples that were used in your teaser email including a lion/tiger/eagle and scrolling. We both like astronomy, are open to any design, we place extreme value in our last name \"Cassell\". We like the idea of \"CB\" or \"CBV interlocking letters as part of the emblem.\r\n\r\nTarget Market(s)\r\nReal Estate in the Piney Woods of East Texas\r\n\r\nIndustry/Entity Type\r\nReal Estate\r\n\r\nLogo Text\r\nCassell Brothers Ventures\r\n\r\nMust have\r\nCassell Brother Ventures or CBV\r\nNice to have\r\nSome sort of design that would fit and wear good on a hat or pullover shit or polo shirt', '2025-02-04 10:09:00', 'COMPLETED', 13);
+INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `finished_at`, `deadline`, `status`, `order_price`) VALUES
+(126, 3, 15, 'Prosporeus Mushrooms Logo Design', 'Create a clean, professional logo for gourmet mushroom farm. Must highlight \"spore\" within \"Prosporeus\". Incorporate subtle mushroom/Texas influence. Maximum 3 colors. Target market: restaurants and general public.', '2024-12-01 10:00:00', NULL, '2024-12-15', 'IN_PROGRESS', 1200),
+(127, 3, 15, 'Tech Startup Minimalist Logo', 'Design a modern, minimalist logo for AI-driven cybersecurity startup. Emphasize technology and security themes. Clean typography, geometric elements. Monochrome or max 2 colors.', '2024-12-05 14:30:00', NULL, '2024-12-20', 'PENDING', 1500),
+(128, 3, 15, 'Artisan Coffee Roasters Branding', 'Create logo for small-batch, local coffee roastery. Vintage-inspired design with modern touches. Incorporate coffee bean or brewing equipment subtly. Earthy color palette.', '2024-11-25 09:45:00', '2024-12-10 16:15:00', '2024-12-12', 'COMPLETED', 950),
+(129, 3, 15, 'Sustainable Fashion Brand Logo', 'Design logo for eco-friendly clothing line. Represent sustainability, minimalism, and modern fashion. Use natural color scheme. Must convey ethical production values.', '2024-12-03 11:20:00', NULL, '2024-12-18', 'IN_PROGRESS', 1100),
+(130, 3, 15, 'Urban Vertical Farming Logo', 'Create logo for innovative urban agriculture company. Blend technology and nature. Geometric plant/building hybrid design. Clean, progressive visual language.', '2024-11-28 15:00:00', '2024-12-08 13:45:00', '2024-12-10', 'COMPLETED', 1250),
+(131, 3, 15, 'Craft Brewery Rebranding', 'Redesign logo for local microbrewery. Capture craft beer culture, local heritage. Incorporate brewing equipment or hop elements. Rustic yet contemporary feel.', '2024-12-07 10:15:00', NULL, '2024-12-22', 'PENDING', 1350),
+(132, 3, 15, 'Wellness Meditation App Logo', 'Design logo for mental health and meditation mobile application. Represent calm, balance, and modern wellness. Minimalist design with soft, soothing colors.', '2024-11-22 13:30:00', '2024-12-05 11:10:00', '2024-12-07', 'COMPLETED', 850),
+(133, 3, 15, 'Electric Vehicle Charging Network', 'Create logo for regional EV charging infrastructure company. Represent innovation, sustainability, and technology. Use electric/energy-inspired design elements.', '2024-12-09 16:45:00', NULL, '2024-12-25', 'IN_PROGRESS', 1600),
+(134, 3, 15, 'Organic Skincare Brand Identity', 'Design logo for natural, organic skincare line. Emphasize purity, botanical ingredients. Soft, clean design with botanical subtle references.', '2024-11-20 09:00:00', '2024-12-02 14:20:00', '2024-12-05', 'COMPLETED', 1000),
+(135, 3, 15, 'Local Artisan Cheese Company', 'Create logo for small-batch, handcrafted cheese producer. Represent traditional cheesemaking, local agriculture. Blend rustic and modern design elements.', '2024-12-11 11:50:00', NULL, '2024-12-26', 'PENDING', 1150);
 
 -- --------------------------------------------------------
 
@@ -188,8 +150,8 @@ INSERT INTO `remember_tokens` (`id`, `user_id`, `user_type`, `token`, `expiry`, 
 (9, 11, 'worker', '30b878188892d6f50d6096ecf9355007df76cc8f30539de139067a00133e21c3', 1736901461, '2024-12-16 00:34:41'),
 (19, 1, 'admin', '384fbc072c089f0422aa0a13b80a3560ebe1cec77c8aed61e3897df8fd66d061', 1737011590, '2024-12-17 04:17:05'),
 (38, 6, 'worker', 'f3c8a74f95b2881b141c4ffe316460abfef9de71f8604efdb1a9373b7147d9d2', 1737172687, '2024-12-19 03:34:11'),
-(44, 3, 'admin', '40fb7d3dedccccec8117428a0c09fb1fc2ab2f7a3fca258045b71ca462f390a4', 1737422836, '2024-12-19 12:16:27'),
-(45, 10, 'worker', '868bfd6bb6e3dd01e5df0817b7e6d3e061d5a1945ae471401610deddc1937742', 1737423864, '2024-12-22 01:39:43');
+(49, 15, 'worker', '7523f683ed06802670be7713a509ba4cefea461622279d19b4ada2fa4634a6ce', 1737656113, '2024-12-24 18:15:13'),
+(50, 3, 'admin', 'f5843035efb38f63af2341a9dd73cf420349a429adaabde5626474fc0c624c7e', 1737696783, '2024-12-25 05:33:03');
 
 -- --------------------------------------------------------
 
@@ -217,8 +179,9 @@ CREATE TABLE `workers` (
 
 INSERT INTO `workers` (`id_worker`, `username`, `password`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `assigned_order_id`, `created_at`, `updated_at`) VALUES
 (6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'AVAILABLE', NULL, '2024-11-26 07:14:02', '2024-12-19 02:16:46'),
-(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'TASKED', 80, '2024-11-29 10:01:30', '2024-12-19 03:03:24'),
-(14, 'langs', 'yangaslinyanih', 'Erlangga', 13, 'MALE', '62895320087774', 'AVAILABLE', NULL, '2024-12-17 05:10:30', '2024-12-17 05:10:30');
+(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', NULL, '2024-11-29 10:01:30', '2024-12-24 18:15:06'),
+(14, 'langs', 'yangaslinyanih', 'Erlangga', 13, 'MALE', '62895320087774', 'AVAILABLE', NULL, '2024-12-17 05:10:30', '2024-12-17 05:10:30'),
+(15, 'vivi', 'prettiestgurls', 'Evelyna Cristina Ziovaj', 17, 'FEMALE', '6282257762471', 'TASKED', NULL, '2024-12-24 15:30:59', '2024-12-25 07:20:12');
 
 --
 -- Indexes for dumped tables
@@ -288,7 +251,7 @@ ALTER TABLE `gmaps`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 
 --
 -- AUTO_INCREMENT for table `positions`
@@ -300,13 +263,13 @@ ALTER TABLE `positions`
 -- AUTO_INCREMENT for table `remember_tokens`
 --
 ALTER TABLE `remember_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `workers`
 --
 ALTER TABLE `workers`
-  MODIFY `id_worker` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_worker` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables

@@ -25,15 +25,6 @@ try {
  $result = mysqli_stmt_get_result($stmt);
  $worker = mysqli_fetch_assoc($result);
 
- // Check if worker can toggle status
- if ($worker['assigned_order_id'] !== null) {
-  echo json_encode([
-   'success' => false,
-   'message' => 'Cannot change status while assigned to an order'
-  ]);
-  exit;
- }
-
  // Toggle the status
  $newStatus = $worker['availability_status'] === 'AVAILABLE' ? 'TASKED' : 'AVAILABLE';
 

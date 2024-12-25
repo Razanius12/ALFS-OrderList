@@ -19,7 +19,7 @@ try {
  }
 
  // Validate required fields
- $required_fields = ['order_name', 'project_manager_id', 'start_date'];
+ $required_fields = ['order_name', 'project_manager_id', 'start_date', 'deadline'];
  foreach ($required_fields as $field) {
   if (!isset($_POST[$field]) || empty($_POST[$field])) {
    throw new Exception("$field is required");
@@ -33,6 +33,10 @@ try {
  // Convert datetime-local input to MySQL datetime format
  $start_date_input = $_POST['start_date'];
  $start_date = date('Y-m-d H:i:s', strtotime($start_date_input));
+
+ // Sanitize and validate the deadline input
+ $deadline_input = $_POST['deadline'];
+ $deadline = date('Y-m-d', strtotime($deadline_input));
 
  // Optional worker and description
  $worker_id = isset($_POST['assigned_worker']) && !empty($_POST['assigned_worker'])
@@ -67,16 +71,17 @@ try {
   mysqli_stmt_close($stmt);
  }
 
- // Insert new order with worker_id directly in orders table
+ // Insert new order query
  $insert_query = "INSERT INTO orders (
-  order_name, 
-  start_date, 
-  project_manager_id, 
-  worker_id,
-  description,
-  status,
-  order_price
- ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+ order_name, 
+ start_date, 
+ deadline, 
+ project_manager_id, 
+ worker_id,
+ description,
+ status,
+ order_price
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
  $default_status = 'PENDING';
 
@@ -90,14 +95,15 @@ try {
  $stmt = mysqli_prepare($conn, $insert_query);
  mysqli_stmt_bind_param(
   $stmt,
-  "ssisssi", 
-  $order_name,    // s
-  $start_date,   // s
-  $project_manager_id,  // i
-  $worker_id,           // i (nullable)
-  $description,         // s (nullable)
-  $default_status,      // s
-  $order_price          // i
+  "sssisssi",   // Adjust parameter types as needed
+  $order_name,   // s
+  $start_date,  // s
+  $deadline,           // s
+  $project_manager_id, // i
+  $worker_id,          // i (nullable)
+  $description,        // s (nullable)
+  $default_status,     // s
+  $order_price         // i
  );
 
  if (mysqli_stmt_execute($stmt)) {
@@ -109,6 +115,7 @@ try {
    'id_order' => $order_id,
    'order_name' => $order_name,
    'start_date' => $start_date,
+   'deadline' => $deadline,
    'worker_assigned' => $worker_id ? 'Yes' : 'No'
   ];
 

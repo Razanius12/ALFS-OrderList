@@ -39,6 +39,12 @@ $contentSidebarItems = [
   'url' => 'index.php?page=task',
   'roles' => ['worker']
  ],
+ 'history' => [
+  'icon' => 'fas fa-search',
+  'label' => 'Task History',
+  'url' => 'index.php?page=history',
+  'roles' => ['worker']
+ ],
  'orderData' => [
   'icon' => 'fas fa-table',
   'label' => 'Order Data',

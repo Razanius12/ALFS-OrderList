@@ -2,6 +2,8 @@
 session_start();
 require_once '../../config/database.php';
 
+header('Content-Type: application/json');
+
 // Check if user is a worker
 if ($_SESSION['level'] !== 'worker') {
  echo json_encode([
@@ -47,13 +49,10 @@ try {
   throw new Exception('Task not found or not assigned to you');
  }
 
- // Reset worker's assignment and unlink worker from order in one query
+ // Update Worker Table - Fixed SQL syntax
  $resetWorkerQuery = "UPDATE workers w
                       JOIN orders o ON w.assigned_order_id = o.id_order
-                      SET 
-                       w.availability_status = 'AVAILABLE', 
-                       w.assigned_order_id = NULL,
-                       o.worker_id = NULL
+                      SET w.availability_status = 'AVAILABLE'
                       WHERE o.id_order = ?";
 
  $resetStmt = mysqli_prepare($conn, $resetWorkerQuery);
@@ -62,13 +61,14 @@ try {
   throw new Exception('Failed to update worker status: ' . mysqli_error($conn));
  }
 
- // Update order status and reset worker assignment
+ // Update Order Table - Now includes finished_at with current datetime
  $updateOrderQuery = "UPDATE orders 
-                      SET status = ?, 
-                       worker_id = NULL 
-                      WHERE id_order = ?";
+                     SET status = ?,
+                      finished_at = NOW()
+                     WHERE id_order = ?";
 
  $stmt = mysqli_prepare($conn, $updateOrderQuery);
+ mysqli_stmt_bind_param($stmt, "si", $status, $taskId);
  mysqli_stmt_bind_param($stmt, "si", $status, $taskId);
 
  if (!mysqli_stmt_execute($stmt)) {
@@ -80,7 +80,7 @@ try {
 
  echo json_encode([
   'success' => true,
-  'message' => 'The task has been successfully marked as completed. You will not see the task again when it\'s completed.'
+  'message' => 'The task has been successfully marked as completed. Refer to Task History if you want to see completed tasks'
  ]);
 } catch (Exception $e) {
  // Rollback the transaction in case of error
@@ -92,11 +92,14 @@ try {
   'success' => false,
   'message' => $e->getMessage()
  ]);
+} finally {
+ // Close statements and connection
+ if (isset($checkStmt))
+  mysqli_stmt_close($checkStmt);
+ if (isset($resetStmt))
+  mysqli_stmt_close($resetStmt);
+ if (isset($stmt))
+  mysqli_stmt_close($stmt);
+ mysqli_close($conn);
 }
-
-// Close statements and connection
-mysqli_stmt_close($checkStmt);
-mysqli_stmt_close($resetStmt);
-mysqli_stmt_close($stmt);
-mysqli_close($conn);
 ?>

@@ -43,9 +43,9 @@ try {
 
  // Update order to IN_PROGRESS and assign to current worker
  $updateQuery = "UPDATE orders 
-                    SET status = 'IN_PROGRESS', 
-                        worker_id = ? 
-                    WHERE id_order = ?";
+                 SET status = 'IN_PROGRESS', 
+                  worker_id = ? 
+                 WHERE id_order = ?";
  $updateStmt = mysqli_prepare($conn, $updateQuery);
  mysqli_stmt_bind_param($updateStmt, "ii", $_SESSION['user_id'], $taskId);
 
@@ -55,9 +55,9 @@ try {
 
  // Update worker's status
  $workerUpdateQuery = "UPDATE workers 
-                         SET availability_status = 'TASKED', 
-                             assigned_order_id = ? 
-                         WHERE id_worker = ?";
+                       SET availability_status = 'TASKED', 
+                        assigned_order_id = ? 
+                       WHERE id_worker = ?";
  $workerStmt = mysqli_prepare($conn, $workerUpdateQuery);
  mysqli_stmt_bind_param($workerStmt, "ii", $taskId, $_SESSION['user_id']);
 

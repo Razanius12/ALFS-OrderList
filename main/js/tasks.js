@@ -131,21 +131,20 @@ function markTaskComplete(taskId) {
      status: 'COMPLETED'
     })
    })
-    .then(response => {
-     // Check if the response is OK (status in 200-299 range)
-     if (!response.ok) {
-      // If not OK, try to parse error message from response
-      return response.json().then(errorData => {
-       throw new Error(errorData.message || 'Server error');
-      });
+    .then(response => response.text())
+    .then(text => {
+     try {
+      return JSON.parse(text);
+     } catch (e) {
+      console.error('Raw response:', text);
+      throw new Error('Invalid JSON response from server');
      }
-     return response.json();
     })
     .then(data => {
      if (data.success) {
       Swal.fire({
        title: 'Task Completed!',
-       text: 'The task has been successfully marked as completed. You will not see the task again when it\'s completed.',
+       text: data.message,
        icon: 'success',
        confirmButtonText: 'OK'
       }).then(() => {

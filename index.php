@@ -41,6 +41,9 @@ include_once 'head.php';
     case 'task':
      includePage('main/pages/task.php');
      break;
+     case 'history':
+      includePage('main/pages/history.php');
+      break;
     case 'orderData':
      includePage('main/pages/orderData.php');
      break;

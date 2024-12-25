@@ -1,25 +1,40 @@
 document.addEventListener('DOMContentLoaded', function () {
- if ($.fn.DataTable) {
-  $('#order-data-table').DataTable({
-   "pageLength": 10,
-   "order": [[0, "desc"]],
-   responsive: true,
-   language: {
-    search: "_INPUT_",
-    searchPlaceholder: "Search orders...",
-    lengthMenu: "Show _MENU_ entries"
-   },
-   columnDefs: [
-    {
-     targets: 0,
-     visible: false
-    }
-   ]
-  });
- }
  $(document).ready(function () {
 
-  // Function to set current date and time
+  // Function to get query parameters from the URL
+  function getQueryParam(param) {
+   const urlParams = new URLSearchParams(window.location.search);
+   return urlParams.get(param);
+  }
+
+  // Get the name_worker parameter from the URL
+  const nameWorker = getQueryParam('name_worker');
+
+  if ($.fn.DataTable) {
+   const table = $('#order-data-table').DataTable({
+    "pageLength": 10,
+    "order": [[0, "desc"]],
+    responsive: true,
+    language: {
+     search: "_INPUT_",
+     searchPlaceholder: "Search orders...",
+     lengthMenu: "Show _MENU_ entries"
+    },
+    columnDefs: [
+     {
+      targets: 0,
+      visible: false
+     }
+    ]
+   });
+
+   // If name_worker is present, search the DataTable
+   if (nameWorker) {
+    table.search(nameWorker).draw(); // Search for the name_worker value
+   }
+  }
+
+  // Function to set current date and time for start_date
   function setCurrentDateTime() {
    // Get current date and time
    const now = new Date();
@@ -34,8 +49,31 @@ document.addEventListener('DOMContentLoaded', function () {
    // Create datetime-local format (YYYY-MM-DDTHH:mm)
    const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-   // Set the value of the input
-   $('#start_date').val(formattedDateTime);
+   // Set the value of the start_date input
+   $('#start_date').val(formattedDateTime).prop('readonly', true);
+
+   // Calculate and set the default deadline (3 days later)
+   setDeadline(formattedDateTime);
+  }
+
+  // Function to calculate and set deadline 3 days after start_date
+  function setDeadline(startDateTime) {
+   // Parse startDateTime into a Date object
+   const startDate = new Date(startDateTime);
+
+   // Add 3 days to the start date
+   startDate.setDate(startDate.getDate() + 3);
+
+   // Format the new date for datetime-local input
+   const year = startDate.getFullYear();
+   const month = String(startDate.getMonth() + 1).padStart(2, '0');
+   const day = String(startDate.getDate()).padStart(2, '0');
+
+   // Create datetime-local format (YYYY-MM-DDTHH:mm)
+   const formattedDeadline = `${year}-${month}-${day}`;
+
+   // Set the value of the deadline input
+   $('#deadline').val(formattedDeadline);
   }
 
   // Call the function when the page loads
@@ -101,11 +139,12 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#edit_order_id').val(data.id_order);
       $('#edit_order_name').val(data.order_name);
 
-      // Format description
       const formattedDescription = data.description
-      .replace(/\\r\\n|\\r|\\n/g, '\n')  // Replace line breaks for textarea
-      .replace(/\\"/g, '"')              // Replace escaped quotes
-      .replace(/\\'/g, "'");             // Replace escaped single quotes
+       ? data.description
+        .replace(/\\r\\n|\\r|\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\'/g, "'")
+       : '';
 
       $('#edit_description').val(formattedDescription);
 
@@ -125,6 +164,8 @@ document.addEventListener('DOMContentLoaded', function () {
        setCurrentDateTime(); // Optionally set current date if no start_date
       }
 
+      $('#edit_deadline').val(data.deadline);
+      
       // Populate status dropdown
       $('#edit_status').val(data.status);
 

@@ -116,11 +116,30 @@ document.addEventListener('DOMContentLoaded', function () {
       passwordField.val(data.password || ''); // Populate if password exists
       passwordField.attr('type', 'password'); // Ensure type is password
 
-      // Set the selected position
-      $('#edit_position').val(data.id_position);
-
       // Add order assignment population
       $('#edit_assigned_order').val(data.assigned_order_id || 'null');
+
+      // Use order_count for further logic
+      const orderCount = data.order_count;
+
+      // Add functionality to the search button
+      $('#searchOrdersButton').off('click').on('click', function () {
+       const workerName = data.name_worker; // Get the worker's name
+
+       // Check if order count is 0
+       if (orderCount == 0) {
+        // Show Swal message
+        Swal.fire({
+         icon: 'info',
+         title: 'No Related Orders',
+         text: 'This worker has no related orders.',
+         confirmButtonText: 'OK'
+        });
+       } else {
+        // Redirect to the orderData page with the worker's name as a query parameter
+        window.location.href = 'index.php?page=orderData&name_worker=' + encodeURIComponent(workerName);
+       }
+      });
 
       initializePasswordToggleInModals();
       Swal.close();

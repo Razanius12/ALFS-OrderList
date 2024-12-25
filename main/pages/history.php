@@ -16,6 +16,7 @@ $stmt = mysqli_prepare($conn, "SELECT
            o.order_name, 
            o.status, 
            o.start_date,
+           o.finished_at,
            o.deadline,
            o.description,
            a.name_admin AS project_manager
@@ -26,7 +27,7 @@ $stmt = mysqli_prepare($conn, "SELECT
           LEFT JOIN 
            workers w ON o.worker_id = w.id_worker
           WHERE 
-          o.worker_id = ? AND o.status IN ('IN_PROGRESS', 'PENDING')");
+          o.worker_id = ? AND o.status = 'COMPLETED'");
 
 // Bind the parameter
 mysqli_stmt_bind_param($stmt, "i", $currentWorkerId);
@@ -66,7 +67,7 @@ function getStatusBadgeClass($status)
 <div class="container">
  <div class="page-inner">
   <div class="page-header mb-0">
-   <h3 class="fw-bold mb-3">My Tasks</h3>
+   <h3 class="fw-bold mb-3">Task History</h3>
    <ul class="breadcrumbs mb-3">
     <li class="nav-home">
      <a href="index.php">
@@ -77,7 +78,7 @@ function getStatusBadgeClass($status)
      <i class="icon-arrow-right"></i>
     </li>
     <li class="nav-item">
-     <a href="index.php?page=task">My Tasks</a>
+     <a href="index.php?page=history">Task History</a>
     </li>
    </ul>
   </div>
@@ -87,7 +88,7 @@ function getStatusBadgeClass($status)
     <div class="card">
      <div class="card-header">
       <div class="d-flex align-items-center">
-       <h4 class="card-title">Tasks Assigned to Me</h4>
+       <h4 class="card-title">Completed Tasks</h4>
       </div>
      </div>
      <div class="card-body">
@@ -97,6 +98,7 @@ function getStatusBadgeClass($status)
          <tr>
           <th data-orderable="true" style="display: none;">Task ID</th>
           <th>Task Name</th>
+          <th>Task Duration</th>
           <th>Remaining Time</th>
           <th>Project Manager</th>
           <th>Task Status</th>
@@ -111,39 +113,55 @@ function getStatusBadgeClass($status)
            <td><?= htmlspecialchars($task['order_name']) ?></td>
            <td>
             <?php
-            // Format deadline
-            $deadlineDate = new DateTime($task['deadline']);
-            // Calculate remaining time
-            $now = new DateTime();
+            // Calculate task duration
+            if (!empty($task['start_date']) && !empty($task['finished_at'])) {
+             $startDate = new DateTime($task['start_date']);
+             $finishedDate = new DateTime($task['finished_at']);
+             $duration = $startDate->diff($finishedDate);
 
-            if (htmlspecialchars($task['status']) == 'COMPLETED') {
-             echo '<span class="text-success">Completed</span>'; // Order completed
-            } else if (htmlspecialchars($task['status']) == 'CANCELLED') {
-             echo '<span class="text-danger">Cancelled</span>'; // Order cancelled
-            } else {
-             // Compare dates without time
-             $nowDate = new DateTime($now->format('Y-m-d'));
-
-             if ($nowDate > $deadlineDate) {
-              // Overdue case
-              echo '<span class="text-danger">Overdue</span>'; // Deadline passed
-             } else if ($nowDate == $deadlineDate) {
-              // Less than 1 day left (today is the deadline)
-              echo '<span class="text-warning">Less than 1 day left</span>';
+             // Format duration
+             if ($duration->days == 0) {
+              $durationText = "Finished in less than a day";
+             } elseif ($duration->days == 1) {
+              $durationText = "Finished in 1 day";
              } else {
-              // Calculate days remaining
-              $interval = $nowDate->diff($deadlineDate);
-              $daysLeft = $interval->days;
-
-              if ($daysLeft > 1) {
-               // More than 1 day remaining
-               $timeLeft = "$daysLeft days left";
-               echo '<span class="text-success">' . htmlspecialchars($timeLeft) . '</span>';
-              } else {
-               // Less than 1 day left
-               echo '<span class="text-warning">Less than 1 day left</span>';
-              }
+              $durationText = "Finished in " . $duration->days . " days";
              }
+
+             echo '<span class="text-primary">' . htmlspecialchars($durationText) . '</span>';
+            } else {
+             echo '<span class="text-muted">N/A</span>';
+            }
+            ?>
+           </td>
+           <td>
+            <?php
+            // Calculate time relative to deadline
+            if (!empty($task['finished_at']) && !empty($task['deadline'])) {
+             $finishedDate = new DateTime($task['finished_at']);
+             $deadlineDate = new DateTime($task['deadline']);
+
+             // Compare finished date with deadline
+             if ($finishedDate <= $deadlineDate) {
+              $interval = $finishedDate->diff($deadlineDate);
+              $daysBeforeDeadline = $interval->days;
+
+              if ($daysBeforeDeadline == 0) {
+               $timeText = '<span class="text-success">Completed on deadline</span>';
+              } elseif ($daysBeforeDeadline == 1) {
+               $timeText = '<span class="text-success">Completed 1 day before deadline</span>';
+              } else {
+               $timeText = '<span class="text-success">Completed ' . $daysBeforeDeadline . ' days before deadline</span>';
+              }
+             } else {
+              $interval = $deadlineDate->diff($finishedDate);
+              $daysAfterDeadline = $interval->days;
+              $timeText = '<span class="text-danger">Completed ' . $daysAfterDeadline . ' days after deadline</span>';
+             }
+
+             echo $timeText;
+            } else {
+             echo '<span class="text-muted">N/A</span>';
             }
             ?>
            </td>
@@ -185,4 +203,4 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/tasks.js"></script>
+<script src="main/js/history.js"></script>

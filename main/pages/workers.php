@@ -8,14 +8,45 @@ checkPageAccess();
 require 'config/database.php';
 
 // Fetch workers from database
-$query = "SELECT w.id_worker, w.username, w.name_worker, w.gender_worker, 
-          w.phone_number, w.availability_status, w.password,
-          p.position_name,
-          o.order_name AS assigned_order
-          FROM workers w
-          LEFT JOIN positions p ON w.id_position = p.id_position
-          LEFT JOIN orders o ON o.worker_id = w.id_worker
-          GROUP BY w.id_worker";
+$query = "
+    SELECT 
+        w.id_worker, 
+        w.username, 
+        w.name_worker, 
+        w.gender_worker, 
+        w.phone_number, 
+        w.availability_status, 
+        w.password,
+        p.position_name,
+        GROUP_CONCAT(o.order_name) AS assigned_orders,
+        COALESCE(in_progress_counts.order_count, 0) AS order_count
+    FROM 
+        workers w
+    LEFT JOIN 
+        positions p ON w.id_position = p.id_position
+    LEFT JOIN 
+        orders o ON o.worker_id = w.id_worker
+    LEFT JOIN (
+        SELECT 
+            worker_id,
+            COUNT(id_order) AS order_count
+        FROM 
+            orders
+        WHERE 
+            status IN ('IN_PROGRESS', 'PENDING')
+        GROUP BY 
+            worker_id
+    ) AS in_progress_counts ON w.id_worker = in_progress_counts.worker_id
+    GROUP BY 
+        w.id_worker, 
+        w.username, 
+        w.name_worker, 
+        w.gender_worker, 
+        w.phone_number, 
+        w.availability_status, 
+        w.password,
+        p.position_name
+";
 $result = mysqli_query($conn, $query);
 
 // Check if the query was successful
@@ -84,7 +115,7 @@ function maskPassword($password)
           <th>Position</th>
           <th>Gender</th>
           <th>Phone</th>
-          <th>Assigned Order</th>
+          <th>Active Task Count</th>
           <th>Status</th>
           <th style="width: 10%">Action</th>
          </tr>
@@ -108,7 +139,7 @@ function maskPassword($password)
            <td><?= htmlspecialchars($worker['position_name']) ?></td>
            <td><?= htmlspecialchars($worker['gender_worker']) ?></td>
            <td><?= htmlspecialchars($worker['phone_number']) ?></td>
-           <td><?= htmlspecialchars($worker['assigned_order']) ?></td>
+           <td><?= htmlspecialchars($worker['order_count']) ?></td>
            <td>
             <span class="badge bg-<?= getAvailabilityBadgeClass($worker['availability_status']) ?>">
              <?= htmlspecialchars($worker['availability_status']) ?>
@@ -318,23 +349,10 @@ function maskPassword($password)
       <div class="row mt-3">
        <div class="col-md-6">
         <div class="form-group">
-         <label>Assign Order (Optional)</label>
-         <select class="form-control" name="assigned_order_id" id="edit_assigned_order">
-          <option value="null">Unassign from order</option>
-          <?php
-          // Fetch available orders
-          $orderQuery = "SELECT id_order, order_name, status 
-                         FROM orders 
-                         WHERE status = 'IN_PROGRESS' OR status = 'PENDING'
-                         ORDER BY order_name";
-          $orderResult = mysqli_query($conn, $orderQuery);
-          while ($order = mysqli_fetch_assoc($orderResult)): ?>
-           <option value="<?= $order['id_order'] ?>">
-            <?= htmlspecialchars($order['order_name']) ?>
-            (<?= htmlspecialchars($order['status']) ?>)
-           </option>
-          <?php endwhile; ?>
-         </select>
+         <label>&nbsp;</label>
+         <button type="button" class="btn btn-primary" id="searchOrdersButton">
+          Search Related Orders
+         </button>
         </div>
        </div>
       </div>
@@ -353,4 +371,4 @@ function maskPassword($password)
 <!-- passwords css -->
 <link rel="stylesheet" href="main/css/toggle.css" />
 
-<script src="main/js/workers.js"></script>
+<script src="main/js/worker.js"></script>

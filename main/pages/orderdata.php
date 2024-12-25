@@ -9,11 +9,12 @@ require 'config/database.php';
 
 // Existing query to fetch orders
 $query = "SELECT 
-           o.id_order, 
-           o.order_name, 
-           o.status, 
-           o.start_date,
+           o.id_order,
+           o.order_name,
+           o.status,
            o.order_price,
+           o.finished_at,
+           o.deadline,
            a.name_admin AS project_manager,
            w.name_worker AS assigned_worker,
            w.availability_status AS worker_availability
@@ -118,25 +119,67 @@ function getStatusBadgeClass($status)
          <tr>
           <th data-orderable="true" style="display: none;">Order ID</th>
           <th>Order Name</th>
-          <th>Start Date</th>
+          <th>Remaining Time</th>
+          <th>Finished At</th>
           <th>Project Manager</th>
-          <th>Assigned Workers</th>
+          <th>Assigned To</th>
           <th>Status</th>
           <th>Price</th>
           <th style="width: 10%">Action</th>
          </tr>
         </thead>
         <tbody>
-         <?php
-         while ($order = mysqli_fetch_assoc($result)): ?>
+         <?php while ($order = mysqli_fetch_assoc($result)): ?>
           <tr>
            <td style="display: none;"><?= htmlspecialchars($order['id_order']) ?></td>
            <td><?= htmlspecialchars($order['order_name']) ?></td>
            <td>
             <?php
+            // Format deadline
+            $deadlineDate = new DateTime($order['deadline']);
+            // Calculate remaining time
+            $now = new DateTime();
+
+            if (htmlspecialchars($order['status']) == 'COMPLETED') {
+             echo '<span class="text-success">Completed</span>'; // Order completed
+            } else if (htmlspecialchars($order['status']) == 'CANCELLED') {
+             echo '<span class="text-danger">Cancelled</span>'; // Order cancelled
+            } else {
+             // Compare dates without time
+             $nowDate = new DateTime($now->format('Y-m-d'));
+
+             if ($nowDate > $deadlineDate) {
+              // Overdue case
+              echo '<span class="text-danger">Overdue</span>'; // Deadline passed
+             } else if ($nowDate == $deadlineDate) {
+              // Less than 1 day left (today is the deadline)
+              echo '<span class="text-warning">Less than 1 day left</span>';
+             } else {
+              // Calculate days remaining
+              $interval = $nowDate->diff($deadlineDate);
+              $daysLeft = $interval->days;
+
+              if ($daysLeft > 1) {
+               // More than 1 day remaining
+               $timeLeft = "$daysLeft days left";
+               echo '<span class="text-success">' . htmlspecialchars($timeLeft) . '</span>';
+              } else {
+               // Less than 1 day left
+               echo '<span class="text-warning">Less than 1 day left</span>';
+              }
+             }
+            }
+            ?>
+           </td>
+           <td>
+            <?php
             // Convert datetime 
-            $startDateTime = new DateTime($order['start_date']);
-            echo $startDateTime->format('Y F d') . ' at ' . $startDateTime->format('h:i A');
+            if (!empty(htmlspecialchars($order['finished_at']))) {
+             $finishedAT = new DateTime($order['finished_at']);
+             echo $finishedAT->format('Y F d') . ' at ' . $finishedAT->format('h:i A');
+            } else {
+             echo 'Not finished';
+            }
             ?>
            </td>
            <td><?= htmlspecialchars($order['project_manager'] ?? 'N/A') ?></td>
@@ -211,7 +254,26 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Start Date</label>
-          <input type="datetime-local" class="form-control" id="start_date" name="start_date">
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date" readonly>
+         </div>
+        </div>
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Deadline</label>
+          <input type="date" class="form-control" id="deadline" name="deadline">
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-6">
+         <div class="form-group">
+          <label>Order Price</label>
+          <div class="input-icon">
+           <span class="input-icon-addon">
+            <i class="fas fa-dollar-sign"></i>
+           </span>
+           <input type="number" class="form-control" name="order_price">
+          </div>
          </div>
         </div>
         <div class="col-md-6">
@@ -229,19 +291,6 @@ function getStatusBadgeClass($status)
             </option>
            <?php endwhile; ?>
           </select>
-         </div>
-        </div>
-       </div>
-       <div class="row mt-3">
-        <div class="col-md-12">
-         <div class="form-group">
-          <label>Order Price</label>
-          <div class="input-icon">
-           <span class="input-icon-addon">
-            <i class="fas fa-dollar-sign"></i>
-           </span>
-           <input type="number" class="form-control" name="order_price">
-          </div>
          </div>
         </div>
        </div>
@@ -316,6 +365,14 @@ function getStatusBadgeClass($status)
         </div>
         <div class="col-md-6">
          <div class="form-group">
+          <label>Deadline</label>
+          <input type="date" class="form-control" id="edit_deadline" name="deadline" required>
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-6">
+         <div class="form-group">
           <label>Order Status</label>
           <select class="form-control" id="edit_status" name="status">
            <option value="">Select Order Status</option>
@@ -326,8 +383,6 @@ function getStatusBadgeClass($status)
           </select>
          </div>
         </div>
-       </div>
-       <div class="row mt-3">
         <div class="col-md-6">
          <div class="form-group">
           <label>Assign Worker (Optional)</label>
@@ -342,14 +397,16 @@ function getStatusBadgeClass($status)
           </select>
          </div>
         </div>
-        <div class="col-md-6">
-         <div class="form-group">
-          <label>Order Price</label>
-          <div class="input-icon">
-           <span class="input-icon-addon">
-            <i class="fas fa-dollar-sign"></i>
-           </span>
-           <input type="number" class="form-control" id="edit_order_price" name="order_price">
+        <div class="row mt-3">
+         <div class="col-md-12">
+          <div class="form-group">
+           <label>Order Price</label>
+           <div class="input-icon">
+            <span class="input-icon-addon">
+             <i class="fas fa-dollar-sign"></i>
+            </span>
+            <input type="number" class="form-control" id="edit_order_price" name="order_price">
+           </div>
           </div>
          </div>
         </div>
