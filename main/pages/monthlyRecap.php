@@ -9,28 +9,114 @@ $selectedMonth = isset($_GET['month']) ? $_GET['month'] : date('m');
 $selectedYear = isset($_GET['year']) ? $_GET['year'] : date('Y');
 
 // Query for worker statistics
-// Update the query section
 $query = "SELECT 
     w.id_worker,
     w.name_worker,
-    COUNT(DISTINCT CASE WHEN o.status = 'COMPLETED' AND MONTH(o.finished_at) = ? AND YEAR(o.finished_at) = ? THEN o.id_order END) as completed_orders,
-    COUNT(DISTINCT CASE WHEN o.status = 'PENDING' THEN o.id_order END) as pending_orders,
-    COUNT(DISTINCT CASE WHEN o.status = 'IN_PROGRESS' THEN o.id_order END) as in_progress_orders,
-    COUNT(DISTINCT CASE WHEN o.status = 'CANCELLED' THEN o.id_order END) as cancelled_orders,
-    SUM(CASE WHEN o.status = 'COMPLETED' AND MONTH(o.finished_at) = ? AND YEAR(o.finished_at) = ? THEN o.order_price ELSE 0 END) as total_earnings
+    COUNT(CASE WHEN o.status = 'COMPLETED' 
+               AND MONTH(o.finished_at) = ? 
+               AND YEAR(o.finished_at) = ? THEN 1 END) as completed_orders,
+    COUNT(CASE WHEN o.status = 'PENDING'
+               AND MONTH(o.start_date) = ? 
+               AND YEAR(o.start_date) = ? THEN 1 END) as pending_orders,
+    COUNT(CASE WHEN o.status = 'IN_PROGRESS'
+               AND MONTH(o.start_date) = ? 
+               AND YEAR(o.start_date) = ? THEN 1 END) as in_progress_orders,
+    COUNT(CASE WHEN o.status = 'CANCELLED'
+               AND MONTH(o.start_date) = ? 
+               AND YEAR(o.start_date) = ? THEN 1 END) as cancelled_orders,
+    COALESCE(SUM(CASE WHEN o.status = 'COMPLETED' 
+                      AND MONTH(o.finished_at) = ? 
+                      AND YEAR(o.finished_at) = ? 
+                 THEN o.order_price ELSE 0 END), 0) as total_earnings
 FROM 
     workers w
 LEFT JOIN 
-    orders o ON w.id_worker = o.worker_id 
+    orders o ON w.id_worker = o.worker_id
 GROUP BY 
     w.id_worker, w.name_worker
 ORDER BY 
     total_earnings DESC";
 
 $stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, "iiii", $selectedMonth, $selectedYear, $selectedMonth, $selectedYear);
+mysqli_stmt_bind_param(
+ $stmt,
+ "iiiiiiiiii", // 10 placeholders
+ $selectedMonth,
+ $selectedYear, // For completed orders
+ $selectedMonth,
+ $selectedYear, // For pending orders
+ $selectedMonth,
+ $selectedYear, // For in-progress orders
+ $selectedMonth,
+ $selectedYear, // For cancelled orders
+ $selectedMonth,
+ $selectedYear  // For total earnings
+);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
+
+$monthlyTotalsQuery = "SELECT 
+    SUM(order_price) AS total_monthly_income,
+    COUNT(*) AS total_monthly_orders,
+    ROUND(AVG(order_price), 2) AS monthly_average_order
+FROM orders 
+WHERE status = 'COMPLETED' 
+    AND MONTH(finished_at) = ? 
+    AND YEAR(finished_at) = ?";
+
+$monthlyStmt = mysqli_prepare($conn, $monthlyTotalsQuery);
+mysqli_stmt_bind_param($monthlyStmt, "ii", $selectedMonth, $selectedYear);
+mysqli_stmt_execute($monthlyStmt);
+$monthlyTotals = mysqli_fetch_assoc(mysqli_stmt_get_result($monthlyStmt));
+
+// Then get the daily breakdown
+$dailyQuery = "SELECT 
+    DATE(finished_at) AS order_date, 
+    SUM(order_price) AS total_income,
+    COUNT(*) AS order_count,
+    ROUND(AVG(order_price), 2) AS average_order_value,
+    MAX(order_price) AS highest_order,
+    MIN(order_price) AS lowest_order
+FROM orders 
+WHERE status = 'COMPLETED' 
+    AND MONTH(finished_at) = ? 
+    AND YEAR(finished_at) = ?
+GROUP BY DATE(finished_at) 
+ORDER BY order_date";
+
+$dailyStmt = mysqli_prepare($conn, $dailyQuery);
+mysqli_stmt_bind_param($dailyStmt, "ii", $selectedMonth, $selectedYear);
+mysqli_stmt_execute($dailyStmt);
+$dailyResult = mysqli_stmt_get_result($dailyStmt);
+
+// Initialize arrays for the chart data
+$dates = [];
+$incomes = [];
+$orderCounts = [];
+$avgOrderValues = [];
+$highestOrders = [];
+$lowestOrders = [];
+
+// Process daily data
+while ($row = mysqli_fetch_assoc($dailyResult)) {
+ $dates[] = date('d', strtotime($row['order_date']));
+ $incomes[] = floatval($row['total_income']);
+ $orderCounts[] = intval($row['order_count']);
+
+ if ($row['order_count'] > 0) {
+  $avgOrderValues[] = round(floatval($row['average_order_value']), 2);
+ } else {
+  $avgOrderValues[] = null;
+ }
+
+ $highestOrders[] = floatval($row['highest_order']);
+ $lowestOrders[] = floatval($row['lowest_order']);
+}
+
+// Use the monthly totals from our first query
+$totalIncome = floatval($monthlyTotals['total_monthly_income']);
+$totalWorkerOrdersChart = intval($monthlyTotals['total_monthly_orders']);
+$overallAvgOrderValue = floatval($monthlyTotals['monthly_average_order']);
 
 // Generate month and year options
 $months = [];
@@ -55,17 +141,23 @@ $years = range($currentYear - 5, $currentYear + 5);
      <a href="./index.php?page=monthlyRecap">Monthly Recap</a>
     </li>
    </ul>
+   <div class="ms-md-auto py-2 py-md-0 mb-2">
+    <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#filterModal">
+     <i class="fas fa-filter"></i> Filter
+    </button>
+   </div>
   </div>
+  <div class="page-category">Shows worker perfomance report and monthly earnings chart</div>
 
-  <div class="row">
+  <!-- Worker Performance Card -->
+  <div class="row mb-4">
    <div class="col-md-12">
     <div class="card">
      <div class="card-header">
       <div class="d-flex align-items-center">
-       <h4 class="card-title">Worker Performance - <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?></h4>
-       <button class="btn btn-primary btn-round ms-auto" data-toggle="modal" data-target="#filterModal">
-        <i class="fas fa-filter"></i> Filter
-       </button>
+       <h4 class="card-title">Worker Performance -
+        <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?>
+       </h4>
       </div>
      </div>
      <div class="card-body">
@@ -81,44 +173,61 @@ $years = range($currentYear - 5, $currentYear + 5);
         </thead>
         <tbody>
          <?php while ($row = mysqli_fetch_assoc($result)):
-          $totalOrders = $row['completed_orders'] + $row['pending_orders'] +
+          $totalWorkerOrders = $row['completed_orders'] + $row['pending_orders'] +
            $row['in_progress_orders'] + $row['cancelled_orders'];
 
-          $ratio = $totalOrders > 0 ? [
-           'completed' => round(($row['completed_orders'] / $totalOrders) * 100),
-           'pending' => round(($row['pending_orders'] / $totalOrders) * 100),
-           'in_progress' => round(($row['in_progress_orders'] / $totalOrders) * 100),
-           'cancelled' => round(($row['cancelled_orders'] / $totalOrders) * 100)
-          ] : ['completed' => 0, 'pending' => 0, 'in_progress' => 0, 'cancelled' => 0];
+          if ($totalWorkerOrders > 0) {
+           $ratio = [
+            'completed' => round(($row['completed_orders'] / $totalWorkerOrders) * 100),
+            'pending' => round(($row['pending_orders'] / $totalWorkerOrders) * 100),
+            'in_progress' => round(($row['in_progress_orders'] / $totalWorkerOrders) * 100),
+            'cancelled' => round(($row['cancelled_orders'] / $totalWorkerOrders) * 100)
+           ];
+          } else {
+           $ratio = [
+            'completed' => 0,
+            'pending' => 0,
+            'in_progress' => 0,
+            'cancelled' => 0
+           ];
+          }
           ?>
           <tr>
            <td><?= htmlspecialchars($row['name_worker']) ?></td>
            <td><?= $row['completed_orders'] ?></td>
            <td>
-            <?php if ($totalOrders == 0): ?>
+            <?php if ($totalWorkerOrders == 0): ?>
              <div class="text-muted">No orders yet</div>
             <?php else: ?>
              <div class="progress" style="height: 20px;">
-              <div class="progress-bar bg-success" style="width: <?= $ratio['completed'] ?>%"
-               title="Completed: <?= $row['completed_orders'] ?>">
-               <?= $ratio['completed'] ?>%
-              </div>
-              <div class="progress-bar bg-warning" style="width: <?= $ratio['pending'] ?>%"
-               title="Pending: <?= $row['pending_orders'] ?>">
-               <?= $ratio['pending'] ?>%
-              </div>
-              <div class="progress-bar bg-info" style="width: <?= $ratio['in_progress'] ?>%"
-               title="In Progress: <?= $row['in_progress_orders'] ?>">
-               <?= $ratio['in_progress'] ?>%
-              </div>
-              <div class="progress-bar bg-danger" style="width: <?= $ratio['cancelled'] ?>%"
-               title="Cancelled: <?= $row['cancelled_orders'] ?>">
-               <?= $ratio['cancelled'] ?>%
-              </div>
+              <?php if ($ratio['completed'] > 0): ?>
+               <div class="progress-bar bg-success" style="width: <?= $ratio['completed'] ?>%"
+                title="Completed: <?= $row['completed_orders'] ?>">
+                <?= $ratio['completed'] ?>%
+               </div>
+              <?php endif; ?>
+              <?php if ($ratio['pending'] > 0): ?>
+               <div class="progress-bar bg-warning" style="width: <?= $ratio['pending'] ?>%"
+                title="Pending: <?= $row['pending_orders'] ?>">
+                <?= $ratio['pending'] ?>%
+               </div>
+              <?php endif; ?>
+              <?php if ($ratio['in_progress'] > 0): ?>
+               <div class="progress-bar bg-info" style="width: <?= $ratio['in_progress'] ?>%"
+                title="In Progress: <?= $row['in_progress_orders'] ?>">
+                <?= $ratio['in_progress'] ?>%
+               </div>
+              <?php endif; ?>
+              <?php if ($ratio['cancelled'] > 0): ?>
+               <div class="progress-bar bg-danger" style="width: <?= $ratio['cancelled'] ?>%"
+                title="Cancelled: <?= $row['cancelled_orders'] ?>">
+                <?= $ratio['cancelled'] ?>%
+               </div>
+              <?php endif; ?>
              </div>
             <?php endif; ?>
            </td>
-           <td>$<?= number_format($row['total_earnings'], 2) ?></td>
+           <td>$<?= number_format($row['total_earnings']) ?></td>
           </tr>
          <?php endwhile; ?>
         </tbody>
@@ -151,7 +260,64 @@ $years = range($currentYear - 5, $currentYear + 5);
     </div>
    </div>
   </div>
+
+  <!-- Statistics Summary -->
+  <div class="row mb-4">
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Total Income</h6>
+      <h4 class="card-value">$<?= number_format($totalIncome, 2) ?></h4>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Total Orders</h6>
+      <h4 class="card-value"><?= $totalWorkerOrdersChart ?></h4>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Avg Order Value</h6>
+      <h4 class="card-value">$<?= number_format($overallAvgOrderValue, 2) ?></h4>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Daily Average</h6>
+      <h4 class="card-value">
+       <?= count($dates) > 0 ? round($totalWorkerOrdersChart / count($dates), 1) : 0 ?> orders
+      </h4>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Daily Progress Chart Card -->
+  <div class="row">
+   <div class="col-md-12">
+    <div class="card">
+     <div class="card-header">
+      <div class="d-flex align-items-center">
+       <h4 class="card-title">Daily Income Progress - <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?></h4>
+      </div>
+     </div>
+     <div class="card-body">
+      <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+       <canvas id="dailyProgressBarChart"></canvas>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
  </div>
+
 </div>
 
 <!-- Filter Modal -->
@@ -164,28 +330,15 @@ $years = range($currentYear - 5, $currentYear + 5);
      <span aria-hidden="true">&times;</span>
     </button>
    </div>
-   <form method="GET" action="">
+   <form method="GET" action="" id="filterForm">
     <div class="modal-body">
      <input type="hidden" name="page" value="monthlyRecap">
      <div class="form-group">
-      <label>Select Month</label>
-      <select name="month" class="form-control">
-       <?php foreach ($months as $num => $name): ?>
-        <option value="<?= $num ?>" <?= ($num == $selectedMonth) ? 'selected' : '' ?>>
-         <?= $name ?>
-        </option>
-       <?php endforeach; ?>
-      </select>
-     </div>
-     <div class="form-group">
-      <label>Select Year</label>
-      <select name="year" class="form-control">
-       <?php foreach ($years as $year): ?>
-        <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>>
-         <?= $year ?>
-        </option>
-       <?php endforeach; ?>
-      </select>
+      <label>Select Month and Year</label>
+      <input type="month" class="form-control" id="monthYearPicker" required
+       value="<?php echo $selectedYear . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT); ?>">
+      <input type="hidden" name="month" id="monthInput">
+      <input type="hidden" name="year" id="yearInput">
      </div>
     </div>
     <div class="modal-footer">
@@ -196,6 +349,8 @@ $years = range($currentYear - 5, $currentYear + 5);
   </div>
  </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
  document.addEventListener('DOMContentLoaded', function () {
@@ -211,37 +366,267 @@ $years = range($currentYear - 5, $currentYear + 5);
     }
    });
 
-   // Initialize modal with explicit methods
+   const monthYearPicker = document.getElementById('monthYearPicker');
+   const monthInput = document.getElementById('monthInput');
+   const yearInput = document.getElementById('yearInput');
+   const filterForm = document.getElementById('filterForm');
+
+   // Set initial values
+   const currentValue = monthYearPicker.value;
+   if (currentValue) {
+    const [year, month] = currentValue.split('-');
+    monthInput.value = parseInt(month);
+    yearInput.value = year;
+   }
+
+   // Update hidden inputs when date is changed
+   monthYearPicker.addEventListener('change', function (e) {
+    const [year, month] = this.value.split('-');
+    monthInput.value = parseInt(month);
+    yearInput.value = year;
+   });
+
+   // Prevent form submission if no date is selected
+   filterForm.addEventListener('submit', function (e) {
+    if (!monthYearPicker.value) {
+     e.preventDefault();
+     alert('Please select a month and year');
+    }
+   });
+
+   // Initialize modal handlers
    $('#filterModal').modal({
     show: false,
     backdrop: 'static',
     keyboard: true
    });
 
-   // Add explicit trigger for modal
    $('[data-toggle="modal"]').on('click', function () {
     var target = $(this).data('target');
     $(target).modal('show');
    });
 
-   // Ensure modal can be closed
    $(document).on('click', '[data-dismiss="modal"]', function () {
     $(this).closest('.modal').modal('hide');
    });
 
-   // Filter form submission handler
-   $('#filterForm').on('submit', function (e) {
-    e.preventDefault();
-    Swal.fire({
-     title: 'Loading...',
-     allowOutsideClick: false,
-     didOpen: () => {
-      Swal.showLoading();
-     }
-    });
-    this.submit();
-   });
-  });
+   // Initialize Daily Progress Chart
+   const ctx = document.getElementById('dailyProgressBarChart').getContext('2d');
 
+   // Custom gradient for income bars
+   const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
+   incomeGradient.addColorStop(0, 'rgba(116, 96, 238, 0.8)');
+   incomeGradient.addColorStop(1, 'rgba(116, 96, 238, 0.2)');
+
+   new Chart(ctx, {
+    type: 'bar',
+    data: {
+     labels: <?php echo json_encode($dates); ?>,
+     datasets: [
+      {
+       label: 'Daily Income',
+       data: <?php echo json_encode($incomes); ?>,
+       backgroundColor: incomeGradient,
+       borderColor: 'rgba(116, 96, 238, 1)',
+       borderWidth: 1,
+       yAxisID: 'y-income',
+       order: 1
+      },
+      {
+       label: 'Number of Orders',
+       data: <?php echo json_encode($orderCounts); ?>,
+       type: 'bar',
+       backgroundColor: 'rgba(46, 202, 106, 0.6)',
+       borderColor: 'rgba(46, 202, 106, 1)',
+       borderWidth: 1,
+       yAxisID: 'y-orders',
+       order: 2
+      },
+      {
+       label: 'Average Order Value',
+       data: <?php echo json_encode($avgOrderValues); ?>,
+       type: 'line',
+       borderColor: 'rgba(255, 99, 132, 1)',
+       borderWidth: 2,
+       fill: false,
+       yAxisID: 'y-income',
+       pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+       pointRadius: 4,
+       order: 0,
+       spanGaps: true // This will skip null values instead of showing them as 0
+      }
+     ]
+    },
+    options: {
+     responsive: true,
+     maintainAspectRatio: false,
+     interaction: {
+      mode: 'index',
+      intersect: false,
+     },
+     scales: {
+      'y-income': {
+       type: 'linear',
+       position: 'left',
+       title: {
+        display: true,
+        text: 'Income ($)',
+        color: 'rgba(116, 96, 238, 1)'
+       },
+       beginAtZero: true,
+       grid: {
+        drawOnChartArea: true
+       },
+       ticks: {
+        callback: function (value) {
+         return '$' + value.toLocaleString(undefined, {
+          maximumFractionDigits: 2
+         });
+        }
+       }
+      },
+      'y-orders': {
+       type: 'linear',
+       position: 'right',
+       title: {
+        display: true,
+        text: 'Number of Orders',
+        color: 'rgba(46, 202, 106, 1)'
+       },
+       beginAtZero: true,
+       grid: {
+        drawOnChartArea: false
+       }
+      },
+      x: {
+       title: {
+        display: true,
+        text: 'Date'
+       }
+      }
+     },
+     plugins: {
+      tooltip: {
+       callbacks: {
+        label: function (context) {
+         let label = context.dataset.label || '';
+         if (label) {
+          label += ': ';
+         }
+         switch (context.dataset.label) {
+          case 'Daily Income':
+           return label + '$' + context.parsed.y.toLocaleString(undefined, {
+            maximumFractionDigits: 2
+           });
+          case 'Number of Orders':
+           if (context.raw === null) {
+            return label + 'No orders';
+           }
+           if (context.raw === 1) {
+            return label + context.parsed.y + ' order';
+           }
+           return label + context.parsed.y + ' orders';
+          case 'Average Order Value':
+           if (context.raw === null) {
+            return label + 'No orders';
+           }
+           return label + '$' + context.parsed.y.toLocaleString(undefined, {
+            maximumFractionDigits: 2
+           });
+          default:
+           return label + context.parsed.y;
+         }
+        },
+        afterBody: function (tooltipItems) {
+         const idx = tooltipItems[0].dataIndex;
+         const avgValue = <?php echo json_encode($avgOrderValues); ?>[idx];
+         const highValue = <?php echo json_encode($highestOrders); ?>[idx];
+         const lowValue = <?php echo json_encode($lowestOrders); ?>[idx];
+
+         if (avgValue === null) {
+          return ['', 'No orders on this day'];
+         }
+
+         return [
+          '',
+          'Daily Statistics:',
+          'Average Order: $' + avgValue.toLocaleString(undefined, {
+           maximumFractionDigits: 2
+          }),
+          'Highest Order: $' + highValue.toLocaleString(undefined, {
+           maximumFractionDigits: 2
+          }),
+          'Lowest Order: $' + lowValue.toLocaleString(undefined, {
+           maximumFractionDigits: 2
+          })
+         ];
+        }
+       }
+      }
+     }
+    }
+   });
+
+  });
  });
 </script>
+
+<style>
+ .card-stats {
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+ }
+
+ .card-stats .card-body {
+  padding: 15px;
+ }
+
+ .card-stats .card-title {
+  color: #8898aa;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+ }
+
+ .card-stats .card-value {
+  color: #32325d;
+  margin-bottom: 0;
+ }
+
+ /* Hide calendar icon in some browsers */
+ input[type="month"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+ }
+
+ /* Ensure consistent height across browsers */
+ input[type="month"] {
+  height: calc(1.5em + .75rem + 2px);
+ }
+
+ /* Improve modal appearance on mobile */
+ @media (max-width: 576px) {
+  .modal-dialog {
+   margin: 0.5rem;
+  }
+
+  input[type="month"] {
+   font-size: 16px;
+   /* Prevent zoom on mobile */
+  }
+ }
+
+ @media (max-width: 767px) {
+  .card-title {
+   font-size: 16px !important;
+  }
+
+  .btn-round {
+   font-size: 14px !important;
+  }
+
+  .chart-container {
+   padding-left: 0 !important;
+   padding-right: 0 !important;
+  }
+ }
+</style>

@@ -31,14 +31,14 @@ try {
  }
 
  // Count all orders
- $orderQuery = "SELECT COUNT(*) AS count FROM orders";
+ $orderQuery = "SELECT COUNT(*) AS count FROM orders WHERE status = 'COMPLETED'";
  $orderResult = mysqli_query($conn, $orderQuery);
  if ($orderResult) {
   $orderCount = mysqli_fetch_assoc($orderResult)['count'];
  }
 
  // Calculate total sales
- $totalSalesQuery = "SELECT SUM(order_price) AS total_sales FROM orders";
+ $totalSalesQuery = "SELECT SUM(order_price) AS total_sales FROM orders WHERE status = 'COMPLETED'";
  $totalSalesResult = mysqli_query($conn, $totalSalesQuery);
  if ($totalSalesResult) {
   $totalSales = mysqli_fetch_assoc($totalSalesResult)['total_sales'];
@@ -47,14 +47,14 @@ try {
  // Monthly statistics - last 6 months
  $monthlyStatsQuery = "
         SELECT 
-            DATE_FORMAT(start_date, '%Y-%m') as month,
-            COUNT(*) as total_orders,
-            COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed_orders,
-            SUM(order_price) as monthly_revenue
-        FROM orders
-        WHERE start_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
-        GROUP BY DATE_FORMAT(start_date, '%Y-%m')
-        ORDER BY month DESC
+    DATE_FORMAT(start_date, '%Y-%m') as month,
+    COUNT(*) as total_orders,
+    COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed_orders,
+    SUM(CASE WHEN status = 'COMPLETED' THEN order_price ELSE 0 END) as monthly_revenue
+FROM orders
+WHERE start_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
+GROUP BY DATE_FORMAT(start_date, '%Y-%m')
+ORDER BY month DESC;
     ";
  $monthlyStatsResult = mysqli_query($conn, $monthlyStatsQuery);
  if ($monthlyStatsResult) {
@@ -62,6 +62,46 @@ try {
    $monthlyStats[] = $row;
   }
  }
+
+ // Monthly totals for the current month
+ $monthlyTotalsQuery = "
+    SELECT 
+        SUM(order_price) AS total_monthly_income,
+        COUNT(*) AS total_monthly_orders,
+        ROUND(AVG(order_price), 2) AS monthly_average_order
+    FROM orders 
+    WHERE status = 'COMPLETED' 
+        AND MONTH(finished_at) = MONTH(CURRENT_DATE()) 
+        AND YEAR(finished_at) = YEAR(CURRENT_DATE())
+";
+
+ $monthlyTotalsResult = mysqli_query($conn, $monthlyTotalsQuery);
+ $monthlyTotals = mysqli_fetch_assoc($monthlyTotalsResult);
+
+ $totalMonthlyIncome = $monthlyTotals['total_monthly_income'] ?? 0;
+ $totalMonthlyOrders = $monthlyTotals['total_monthly_orders'] ?? 0;
+ $averageMonthlyOrder = $monthlyTotals['monthly_average_order'] ?? 0;
+
+ // Monthly average orders for the last 6 months
+ $monthlyAverageOrdersQuery = "
+SELECT 
+    ROUND(COUNT(*) / 6, 1) AS average_orders
+FROM (
+    SELECT 
+        MONTH(finished_at) AS month,
+        YEAR(finished_at) AS year,
+        COUNT(*) AS total_orders
+    FROM orders 
+    WHERE status = 'COMPLETED' 
+        AND finished_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
+    GROUP BY YEAR(finished_at), MONTH(finished_at)
+) AS monthly_orders
+";
+
+ $monthlyAverageOrdersResult = mysqli_query($conn, $monthlyAverageOrdersQuery);
+ $monthlyAverageOrders = mysqli_fetch_assoc($monthlyAverageOrdersResult)['average_orders'] ?? 0;
+
+
 
  // For workers, get their specific statistics
  if ($currentUser['role'] === 'worker') {
@@ -188,7 +228,7 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
   <?php if ($currentUser['role'] === 'admin'): ?>
    <!-- Admin Dashboard -->
    <div class="row">
-    <div class="col-sm-6 col-md-3">
+    <div class="col-sm-6 col-md-4">
      <div class="card card-stats card-round">
       <div class="card-body">
        <div class="row align-items-center">
@@ -199,7 +239,7 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
         </div>
         <div class="col col-stats ms-3 ms-sm-0">
          <div class="numbers">
-          <p class="card-category">Admins</p>
+          <p class="card-category">Total Admins</p>
           <h4 class="card-title"><?php echo htmlspecialchars($adminCount); ?></h4>
          </div>
         </div>
@@ -207,7 +247,7 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
       </div>
      </div>
     </div>
-    <div class="col-sm-6 col-md-3">
+    <div class="col-sm-6 col-md-4">
      <div class="card card-stats card-round">
       <div class="card-body">
        <div class="row align-items-center">
@@ -218,7 +258,7 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
         </div>
         <div class="col col-stats ms-3 ms-sm-0">
          <div class="numbers">
-          <p class="card-category">Workers</p>
+          <p class="card-category">Total Workers</p>
           <h4 class="card-title"><?php echo htmlspecialchars($workerCount); ?></h4>
          </div>
         </div>
@@ -226,26 +266,7 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
       </div>
      </div>
     </div>
-    <div class="col-sm-6 col-md-3">
-     <div class="card card-stats card-round">
-      <div class="card-body">
-       <div class="row align-items-center">
-        <div class="col-icon">
-         <div class="icon-big text-center icon-success bubble-shadow-small">
-          <i class="fas fa-luggage-cart"></i>
-         </div>
-        </div>
-        <div class="col col-stats ms-3 ms-sm-0">
-         <div class="numbers">
-          <p class="card-category">Total Sales</p>
-          <h4 class="card-title">$ <?php echo htmlspecialchars(number_format($totalSales, 0, ',', '.')); ?></h4>
-         </div>
-        </div>
-       </div>
-      </div>
-     </div>
-    </div>
-    <div class="col-sm-6 col-md-3">
+    <div class="col-sm-6 col-md-4">
      <div class="card card-stats card-round">
       <div class="card-body">
        <div class="row align-items-center">
@@ -256,8 +277,65 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
         </div>
         <div class="col col-stats ms-3 ms-sm-0">
          <div class="numbers">
-          <p class="card-category">Orders</p>
+          <p class="card-category">Completed Orders</p>
           <h4 class="card-title"><?php echo htmlspecialchars($orderCount); ?></h4>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+     <div class="card card-stats card-round">
+      <div class="card-body">
+       <div class="row align-items-center">
+        <div class="col-icon">
+         <div class="icon-big text-center icon-warning bubble-shadow-small">
+          <i class="fas fa-dollar-sign"></i>
+         </div>
+        </div>
+        <div class="col col-stats ms-3 ms-sm-0">
+         <div class="numbers">
+          <p class="card-category">Monthly Income</p>
+          <h4 class="card-title">$ <?php echo htmlspecialchars(number_format($totalMonthlyIncome, 2, ',', '.')); ?></h4>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+     <div class="card card-stats card-round">
+      <div class="card-body">
+       <div class="row align-items-center">
+        <div class="col-icon">
+         <div class="icon-big text-center icon-success bubble-shadow-small">
+          <i class="fas fa-chart-line"></i>
+         </div>
+        </div>
+        <div class="col col-stats ms-3 ms-sm-0">
+         <div class="numbers">
+          <p class="card-category">Avg Order Value</p>
+          <h4 class="card-title">$ <?php echo htmlspecialchars(number_format($averageMonthlyOrder, 2, ',', '.')); ?></h4>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+     <div class="card card-stats card-round">
+      <div class="card-body">
+       <div class="row align-items-center">
+        <div class="col-icon">
+         <div class="icon-big text-center icon-warning bubble-shadow-small">
+          <i class="fas fa-calendar-alt"></i>
+         </div>
+        </div>
+        <div class="col col-stats ms-3 ms-sm-0">
+         <div class="numbers">
+          <p class="card-category">Avg Monthly Orders</p>
+          <h4 class="card-title"><?php echo htmlspecialchars($monthlyAverageOrders); ?></h4>
          </div>
         </div>
        </div>
