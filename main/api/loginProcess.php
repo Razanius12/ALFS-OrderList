@@ -34,10 +34,12 @@ function handleSuccessfulLogin($conn, $user, $user_type, $remember_me = false)
  // Set name based on user type with explicit naming
  if ($user_type == 'admin') {
   $_SESSION['name_admin'] = $user['name_admin'];
-  $_SESSION['name'] = $user['name_admin']; // Add this line
+  $_SESSION['name'] = $user['name_admin'];
+  $_SESSION['profile_pic'] = $user['profile_pic'];
  } else {
   $_SESSION['name_worker'] = $user['name_worker'];
-  $_SESSION['name'] = $user['name_worker']; // Add this line
+  $_SESSION['name'] = $user['name_worker'];
+  $_SESSION['profile_pic'] = $user['profile_pic'];
  }
 
  // Debug logging

@@ -391,7 +391,8 @@ function getCurrentUserDetails()
    'id' => null,
    'username' => null,
    'name' => 'User',
-   'role' => null
+   'role' => null,
+   'profile_pic' => null
   ];
  }
 
@@ -412,7 +413,8 @@ function getCurrentUserDetails()
   'id' => $_SESSION['user_id'],
   'username' => $_SESSION['username'] ?? null,
   'name' => $name ?? 'User',
-  'role' => $_SESSION['level']
+  'role' => $_SESSION['level'],
+  'profile_pic' => $_SESSION['profile_pic'] ?? null
  ];
 }
 

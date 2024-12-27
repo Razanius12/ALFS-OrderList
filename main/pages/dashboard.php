@@ -82,21 +82,21 @@ ORDER BY month DESC;
  $totalMonthlyOrders = $monthlyTotals['total_monthly_orders'] ?? 0;
  $averageMonthlyOrder = $monthlyTotals['monthly_average_order'] ?? 0;
 
- // Monthly average orders for the last 6 months
+ // Calculate Monthly Average Orders for Completed Orders
  $monthlyAverageOrdersQuery = "
-SELECT 
-    ROUND(COUNT(*) / 6, 1) AS average_orders
-FROM (
-    SELECT 
-        MONTH(finished_at) AS month,
-        YEAR(finished_at) AS year,
-        COUNT(*) AS total_orders
-    FROM orders 
-    WHERE status = 'COMPLETED' 
-        AND finished_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
-    GROUP BY YEAR(finished_at), MONTH(finished_at)
-) AS monthly_orders
-";
+ SELECT 
+     ROUND(SUM(total_orders) / COUNT(DISTINCT CONCAT(year, '-', month)), 1) AS average_orders
+ FROM (
+     SELECT 
+         MONTH(finished_at) AS month,
+         YEAR(finished_at) AS year,
+         COUNT(*) AS total_orders
+     FROM orders 
+     WHERE status = 'COMPLETED'
+         AND finished_at IS NOT NULL
+     GROUP BY YEAR(finished_at), MONTH(finished_at)
+ ) AS monthly_orders
+ ";
 
  $monthlyAverageOrdersResult = mysqli_query($conn, $monthlyAverageOrdersQuery);
  $monthlyAverageOrders = mysqli_fetch_assoc($monthlyAverageOrdersResult)['average_orders'] ?? 0;

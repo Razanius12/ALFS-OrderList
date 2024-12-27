@@ -27,9 +27,17 @@
     <li class="nav-item topbar-user dropdown hidden-caret">
      <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
       <div class="avatar-sm">
-       <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
-        <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
-       </div>
+       <?php if (!empty($currentUser['profile_pic'])): ?>
+        <div
+         class="avatar-img-container rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+         <img src="<?= htmlspecialchars($currentUser['profile_pic']) ?>" class="avatar-img rounded-circle"
+          alt="Profile Picture">
+        </div>
+       <?php else: ?>
+        <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+         <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
+        </div>
+       <?php endif; ?>
       </div>
      </a>
      <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -37,9 +45,17 @@
        <li>
         <div class="user-box">
          <div class="avatar-sm">
-          <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
-           <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
-          </div>
+          <?php if (!empty($currentUser['profile_pic'])): ?>
+           <div
+            class="avatar-img-container rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+            <img src="<?= htmlspecialchars($currentUser['profile_pic']) ?>" class="avatar-img rounded-circle"
+             alt="Profile Picture">
+           </div>
+          <?php else: ?>
+           <div class="avatar-img rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+            <?= strtoupper(substr($currentUser['name'] ?? 'U', 0, 1)) ?>
+           </div>
+          <?php endif; ?>
          </div>
          <div class="u-text">
           <span class="op-7">Hi,</span>
@@ -65,3 +81,12 @@
 </div>
 
 <script src="main/js/logouts.js"></script>
+
+<style>
+ .avatar-img, .avatar-img-container {
+  background-color: #f8f9fa;
+  /* Light background color to show shadow */
+  box-shadow: 0.08rem 0.08rem 0.05rem rgba(0, 0, 0, 0.2);
+  /* Add shadow */
+ }
+</style>
