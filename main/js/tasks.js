@@ -49,17 +49,46 @@ function showTaskDetails(button) {
   .split('\n')                       // Split by line breaks
   .join('<br>');                     // Join with HTML line breaks
 
- Swal.fire({
-  title: taskName,
-  html: `
+ // Fetch references
+ fetch(`main/api/getOrderAttachments.php?order_id=${taskId}`)
+  .then(response => response.json())
+  .then(data => {
+   if (data.success) {
+    const referencesList = data.references.map(file => {
+     if (file.path.match(/\.(jpeg|jpg|png|gif|svg)$/)) {
+      return `
+       <a href="${file.path}" target="_blank">
+        <img src="${file.path}" alt="Reference Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+        <div class="preview-caption">${file.name}</div>
+       </a>`;
+     } else {
+      return `<a href="${file.path}" target="_blank">${file.name}</a>`;
+     }
+    }).join('<br>');
+
+    Swal.fire({
+     title: taskName,
+     html: `
       <div class="text-start">
-        <p><strong>Description:</strong><br>${formattedDescription}</p>
-        <p><strong>Status:</strong> <span class="badge bg-${getStatusBadgeClass(taskStatus)}">${taskStatus}</span></p>
+       <p><strong>Description:</strong><br>${formattedDescription}</p>
+       <p><strong>Status:</strong> <span class="badge bg-${getStatusBadgeClass(taskStatus)}">${taskStatus}</span></p>
+       <p><strong>References:</strong><br>${referencesList || 'No references available'}</p>
       </div>
-    `,
-  icon: 'info',
-  confirmButtonText: 'Close'
- });
+     `,
+     icon: 'info',
+     confirmButtonText: 'Close'
+    });
+   } else {
+    throw new Error(data.message || 'Failed to fetch references');
+   }
+  })
+  .catch(error => {
+   Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: `Failed to load references: ${error.message}`,
+   });
+  });
 }
 
 function takeOrder(taskId) {
@@ -127,55 +156,87 @@ function takeOrder(taskId) {
 
 function markTaskComplete(taskId) {
  Swal.fire({
-  title: 'Mark Task as Complete?',
-  text: "Are you sure you want to mark this task as completed?",
-  icon: 'warning',
+  title: 'Submit Task Completion',
+  html: `
+    <form id="taskCompletionForm" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">Attachments (Max 10 files, 5MB each)</label>
+        <input type="file" class="form-control" id="taskAttachments" name="attachments[]" multiple 
+          accept=".jpg,.jpeg,.png,.gif,.svg,.ai,.psd,.cdr" max="10">
+        <small class="text-muted">Allowed files: Images, SVG, AI, PSD, CDR (Max 5MB each)</small>
+      </div>
+    </form>
+  `,
   showCancelButton: true,
-  confirmButtonColor: '#3085d6',
-  cancelButtonColor: '#d33',
-  confirmButtonText: 'Yes, complete it!'
+  confirmButtonText: 'Submit',
+  cancelButtonText: 'Cancel',
+  preConfirm: () => {
+   const files = document.getElementById('taskAttachments').files;
+   if (files.length > 10) {
+    Swal.showValidationMessage('Maximum 10 files allowed');
+    return false;
+   }
+   if (files.length == 0) {
+    Swal.fire({
+     title: 'No Attachments',
+     text: 'Please upload at least one attachment before completing the task.',
+     icon: 'warning'
+    });
+    return;
+   }
+
+   for (let file of files) {
+    if (file.size > 5 * 1024 * 1024) { // 5MB in bytes
+     Swal.showValidationMessage(`File ${file.name} exceeds 5MB limit`);
+     return false;
+    }
+
+    const allowedTypes = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.ai', '.psd', '.cdr'];
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!allowedTypes.includes(ext)) {
+     Swal.showValidationMessage(`File ${file.name} has invalid type`);
+     return false;
+    }
+   }
+   return true;
+  }
  }).then((result) => {
   if (result.isConfirmed) {
+   const formData = new FormData(document.getElementById('taskCompletionForm'));
+   formData.append('task_id', taskId);
+
+   Swal.fire({
+    title: 'Uploading...',
+    html: 'Please wait while we upload your files',
+    allowOutsideClick: false,
+    didOpen: () => {
+     Swal.showLoading();
+    }
+   });
+
    fetch('main/api/updateTask.php', {
     method: 'POST',
-    headers: {
-     'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-     task_id: taskId,
-     status: 'COMPLETED'
-    })
+    body: formData
    })
-    .then(response => response.text())
-    .then(text => {
-     try {
-      return JSON.parse(text);
-     } catch (e) {
-      console.error('Raw response:', text);
-      throw new Error('Invalid JSON response from server');
-     }
-    })
+    .then(response => response.json())
     .then(data => {
      if (data.success) {
       Swal.fire({
-       title: 'Task Completed!',
-       text: data.message,
-       icon: 'success',
-       confirmButtonText: 'OK'
+       title: 'Success!',
+       text: 'Task completed and files uploaded successfully',
+       icon: 'success'
       }).then(() => {
        location.reload();
       });
      } else {
-      throw new Error(data.message || 'Failed to update task status');
+      throw new Error(data.message || 'Failed to update task');
      }
     })
     .catch(error => {
-     console.error('Error:', error);
      Swal.fire({
       title: 'Error',
-      text: error.message || 'An error occurred while updating the task status.',
-      icon: 'error',
-      confirmButtonText: 'OK'
+      text: error.message,
+      icon: 'error'
      });
     });
   }

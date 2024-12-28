@@ -207,4 +207,4 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/history.js"></script>
+<script src="main/js/histories.js"></script>

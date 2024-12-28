@@ -198,6 +198,9 @@ function getStatusBadgeClass($status)
               data-bs-target="#editOrderModal" data-order-id="<?= $order['id_order'] ?>">
               <i class="fa fa-edit"></i>
              </button>
+             <button type="button" class="btn btn-link btn-info" onclick="viewAttachments(<?= $order['id_order'] ?>)">
+              <i class="fa fa-paperclip"></i>
+             </button>
              <button type="button" class="btn btn-link btn-danger" onclick="deleteOrder(<?= $order['id_order'] ?>)">
               <i class="fa fa-times"></i>
              </button>
@@ -221,7 +224,7 @@ function getStatusBadgeClass($status)
       <h5 class="modal-title">Add New Order</h5>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
      </div>
-     <form id="addOrderForm" method="POST" action="main/api/addOrder.php">
+     <form id="addOrderForm" method="POST" enctype="multipart/form-data" action="main/api/addOrder.php">
       <div class="modal-body">
        <div class="row mt-3">
         <div class="col-md-6">
@@ -254,7 +257,7 @@ function getStatusBadgeClass($status)
         <div class="col-md-6">
          <div class="form-group">
           <label>Start Date</label>
-          <input type="datetime-local" class="form-control" id="start_date" name="start_date" readonly>
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date">
          </div>
         </div>
         <div class="col-md-6">
@@ -299,6 +302,16 @@ function getStatusBadgeClass($status)
          <div class="form-group">
           <label>Project Description</label>
           <textarea class="form-control" name="description" rows="6"></textarea>
+         </div>
+        </div>
+       </div>
+       <div class="row mt-3">
+        <div class="col-md-12">
+         <div class="form-group">
+          <label>Reference Files (Optional)</label>
+          <input type="file" class="form-control" name="references[]" multiple
+           accept=".jpg,.jpeg,.png,.gif,.svg,.ai,.psd,.cdr" max="10">
+          <small class="text-muted">Allowed files: JPG, JPEG, SVG, GIF, AI, PSD, CDR, PDF (Max 5MB each)</small>
          </div>
         </div>
        </div>
@@ -430,10 +443,59 @@ function getStatusBadgeClass($status)
    </div>
   </div>
 
+  <!-- View Attachments Modal -->
+  <div class="modal fade" id="viewAttachmentsModal" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="attachmentModalTitle">View Attachments</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+     </div>
+     <div class="modal-body">
+      <div class="row">
+       <div class="col">
+        <div class="form-group">
+         <div class="description-section mb-4">
+          <h6 class="fw-bold">Description:</h6>
+          <p id="orderDescription">No description available</p>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="modal-body">
+       <div class="row mt-3">
+        <div class="col">
+         <h6 class="fw-bold">References:</h6>
+         <div id="referencesList" class="list-group"></div>
+        </div>
+       </div>
+      </div>
+      <div class="row mt-3 mb-3">
+       <div class="col">
+        <h6 class="fw-bold">Attachments:</h6>
+        <div id="attachmentsList" class="list-group"></div>
+       </div>
+      </div>
+     </div>
+     <div class="modal-footer">
+
+      <button type="button" class="btn btn-danger" onclick="deleteAllAttachments('all')">
+       Delete All</button>
+      <button type="button" class="btn btn-danger" onclick="deleteAllAttachments('references')">
+       Delete All References</button>
+      <button type="button" class="btn btn-danger" onclick="deleteAllAttachments('attachments')">
+       Delete All Attachments</button>
+
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+     </div>
+    </div>
+   </div>
+  </div>
+
  </div>
 </div>
 
-<script src="main/js/orderDatas.js"></script>
+<script src="main/js/orders.js"></script>
 
 <script>
  // Make PHP session variables available to JavaScript

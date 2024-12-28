@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 27, 2024 at 11:33 AM
+-- Generation Time: Dec 28, 2024 at 06:21 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -68,6 +68,20 @@ CREATE TABLE `attachments` (
   `atch10` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `attachments`
+--
+
+INSERT INTO `attachments` (`id_attachment`, `atch1`, `atch2`, `atch3`, `atch4`, `atch5`, `atch6`, `atch7`, `atch8`, `atch9`, `atch10`) VALUES
+(13, 'ref_67702bec0350b1.11680174.png', 'ref_67702bec0388b1.37067231.jpeg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(14, 'order_67702c056285f9.30712447.png', 'order_67702c0562b529.59726683.svg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(16, 'ref_677030c473d131.72262434.jpg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(17, 'ref_677030ff328681.23535783.jpg', 'ref_677030ff32bc98.91991436.jpeg', 'ref_677030ff32f493.19517402.jpeg', 'ref_677030ff332277.22338845.jpeg', NULL, NULL, NULL, NULL, NULL, NULL),
+(18, 'ref_6770321d1fb476.24616432.pdf', 'ref_6770321d1fed42.64306189.jpg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(19, 'ref_677032cfaacad3.81915042.jpeg', 'ref_677032cfab1292.14059193.jpeg', 'ref_677032cfac0b73.59007356.jpeg', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(20, 'ref_677033250dda44.91610599.jpg', 'ref_677033250e2562.10674083.jpg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(21, 'order_6770335709cb91.15817242.png', 'order_6770335709fec4.58908844.svg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -105,91 +119,21 @@ CREATE TABLE `orders` (
   `deadline` date DEFAULT NULL,
   `status` enum('PENDING','IN_PROGRESS','COMPLETED','CANCELLED') DEFAULT 'PENDING',
   `order_price` int(255) DEFAULT NULL,
-  `attachment_id` int(11) DEFAULT NULL
+  `references_id` int(11) DEFAULT NULL,
+  `attach_result_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `finished_at`, `deadline`, `status`, `order_price`, `attachment_id`) VALUES
-(128, 3, 15, 'Artisan Coffee Roasters Branding', 'Create logo for small-batch, local coffee roastery. Vintage-inspired design with modern touches. Incorporate coffee bean or brewing equipment subtly. Earthy color palette.', '2024-11-25 09:45:00', '2024-12-10 16:15:00', '2024-12-12', 'COMPLETED', 950, NULL),
-(129, 3, 15, 'Sustainable Fashion Brand Logo', 'Design logo for eco-friendly clothing line. Represent sustainability, minimalism, and modern fashion. Use natural color scheme. Must convey ethical production values.', '2024-12-03 11:20:00', '2024-12-25 21:32:11', '2024-12-18', 'COMPLETED', 1100, NULL),
-(130, 3, 15, 'Urban Vertical Farming Logo', 'Create logo for innovative urban agriculture company. Blend technology and nature. Geometric plant/building hybrid design. Clean, progressive visual language.', '2024-11-28 15:00:00', '2024-12-08 13:45:00', '2024-12-10', 'COMPLETED', 1250, NULL),
-(132, 3, 15, 'Wellness Meditation App Logo', 'Design logo for mental health and meditation mobile application. Represent calm, balance, and modern wellness. Minimalist design with soft, soothing colors.', '2024-11-22 13:30:00', '2024-12-05 11:10:00', '2024-12-07', 'COMPLETED', 850, NULL),
-(134, 3, 15, 'Organic Skincare Brand Identity', 'Design logo for natural, organic skincare line. Emphasize purity, botanical ingredients. Soft, clean design with botanical subtle references.', '2024-11-20 09:00:00', '2024-12-02 14:20:00', '2024-12-05', 'COMPLETED', 1000, NULL),
-(135, 3, 15, 'Local Artisan Cheese Company', 'Create logo for small-batch, handcrafted cheese producer. Represent traditional cheesemaking, local agriculture. Blend rustic and modern design elements.', '2024-12-11 11:50:00', NULL, '2024-12-27', 'PENDING', 1150, NULL),
-(140, 3, 15, 'QuantumLeap Consulting Logo', 'Professional logo for technology consulting firm', '2024-12-08 11:45:00', '2024-12-25 21:19:55', '2024-12-25', 'COMPLETED', 400, NULL),
-(141, 3, 15, 'Green Horizon Farms Logo', 'Agricultural logo representing sustainable farming', '2024-12-10 13:00:00', '2024-12-26 13:53:05', '2024-12-27', 'COMPLETED', 375, NULL),
-(142, 3, 15, 'NeuroPeak Performance Logo', 'Dynamic logo for mental health and wellness center', '2024-12-12 09:30:00', NULL, '2024-12-28', 'IN_PROGRESS', 425, NULL),
-(143, 3, 15, 'StellarTech Robotics Logo', 'Futuristic logo for robotics and AI company', '2024-12-15 15:45:00', NULL, '2024-12-30', 'PENDING', 475, NULL),
-(144, 3, 15, 'Harmony Holistic Wellness Logo', 'Serene logo for integrated health practice', '2024-12-18 10:00:00', NULL, '2024-12-31', 'PENDING', 350, NULL),
-(145, 3, 15, 'Arctic Innovations Logo', 'Clean, minimalist logo for climate technology startup', '2024-12-20 14:00:00', NULL, '2025-01-05', 'PENDING', 400, NULL),
-(146, 3, 15, 'Pulse Fitness Studios Logo', 'Modern, energetic logo for fitness and wellness brand', '2024-12-22 11:15:00', NULL, '2025-01-10', 'PENDING', 525, NULL),
-(148, 3, 6, 'EcoTech Innovations Logo', 'Minimalist logo for sustainable technology startup', '2024-12-02 10:30:00', '2024-12-26 13:53:33', '2024-12-20', 'COMPLETED', 350, NULL),
-(149, 3, 6, 'Urban Roots Cafe Branding', 'Modern logo design for farm-to-table coffee shop', '2024-12-05 14:15:00', NULL, '2024-12-22', 'PENDING', 500, NULL),
-(150, 3, 6, 'QuantumLeap Consulting Logo', 'Professional logo for technology consulting firm', '2024-12-08 11:45:00', '2024-12-24 10:15:00', '2024-12-25', 'COMPLETED', 400, NULL),
-(151, 3, 6, 'Green Horizon Farms Logo', 'Agricultural logo representing sustainable farming', '2024-12-10 13:00:00', NULL, '2024-12-27', 'PENDING', 375, NULL),
-(152, 3, 6, 'NeuroPeak Performance Logo', 'Dynamic logo for mental health and wellness center', '2024-12-12 09:30:00', '2024-12-28 14:45:00', '2024-12-28', 'COMPLETED', 425, NULL),
-(153, 3, 6, 'StellarTech Robotics Logo', 'Futuristic logo for robotics and AI company', '2024-12-15 15:45:00', NULL, '2024-12-30', 'IN_PROGRESS', 475, NULL),
-(154, 3, 6, 'Harmony Holistic Wellness Logo', 'Serene logo for integrated health practice', '2024-12-18 10:00:00', '2024-12-31 11:30:00', '2024-12-31', 'COMPLETED', 350, NULL),
-(155, 3, 6, 'Arctic Innovations Logo', 'Clean, minimalist logo for climate technology startup', '2024-12-20 14:00:00', NULL, '2025-01-05', 'PENDING', 400, NULL),
-(156, 3, 6, 'Pulse Fitness Studios Logo', 'Modern, energetic logo for fitness and wellness brand', '2024-12-22 11:15:00', '2025-01-10 09:45:00', '2025-01-10', 'COMPLETED', 525, NULL),
-(157, 3, 10, 'Woodland Whispers Brewery Logo', 'Rustic logo for craft brewery with nature themes', '2024-12-25 13:30:00', NULL, '2025-01-15', 'IN_PROGRESS', 450, NULL),
-(158, 3, 10, 'Quantum Leap Educational Tech Logo', 'Innovative logo for online learning platform', '2024-12-27 09:45:00', NULL, '2025-01-20', 'PENDING', 375, NULL),
-(159, 3, 10, 'Ocean Guardians Conservation Logo', 'Environmentally focused logo for marine protection', '2024-12-29 15:00:00', '2025-01-25 13:15:00', '2025-01-25', 'COMPLETED', 500, NULL),
-(160, 3, 10, 'Mindful Moments Meditation Logo', 'Calming logo for meditation and wellness app', '2024-12-31 10:15:00', NULL, '2025-01-30', 'IN_PROGRESS', 350, NULL),
-(161, 3, 10, 'Tech Horizon Innovations Logo', 'Forward-thinking logo for emerging tech company', '2025-01-02 14:30:00', '2025-02-05 10:00:00', '2025-02-05', 'COMPLETED', 425, NULL),
-(162, 3, 10, 'Green Palette Organic Foods Logo', 'Fresh and natural logo for organic food brand', '2025-01-05 11:00:00', NULL, '2025-02-10', 'PENDING', 400, NULL),
-(163, 3, 10, 'Cosmic Connections Astronomy Logo', 'Space-inspired logo for astronomy education center', '2025-01-07 09:15:00', '2025-02-15 15:45:00', '2025-02-15', 'COMPLETED', 475, NULL),
-(164, 3, 10, 'Urban Jungle Landscaping Logo', 'Modern logo for urban gardening and design firm', '2025-01-10 13:45:00', NULL, '2025-02-20', 'IN_PROGRESS', 375, NULL),
-(165, 3, 10, 'Wellness Wave Health Center Logo', 'Holistic health logo with fluid, dynamic design', '2025-01-12 15:30:00', '2025-02-25 11:30:00', '2025-02-25', 'COMPLETED', 525, NULL),
-(166, 3, 10, 'Digital Nomad Collective Logo', 'Contemporary logo for remote work community', '2025-01-15 10:45:00', NULL, '2025-03-01', 'CANCELLED', 450, NULL),
-(167, 3, 14, 'Prosporeus Mushrooms Logo', 'Logo design for gourmet mushroom farm with subtle \"spore\" highlight', '2024-12-01 09:00:00', '2024-12-14 16:30:00', '2024-12-15', 'COMPLETED', 450, NULL),
-(168, 3, 14, 'EcoTech Innovations Logo', 'Minimalist logo for sustainable technology startup', '2024-12-02 10:30:00', NULL, '2024-12-20', 'IN_PROGRESS', 350, NULL),
-(169, 3, 14, 'Urban Roots Cafe Branding', 'Modern logo design for farm-to-table coffee shop', '2024-12-05 14:15:00', NULL, '2024-12-22', 'PENDING', 500, NULL),
-(170, 3, 14, 'QuantumLeap Consulting Logo', 'Professional logo for technology consulting firm', '2024-12-08 11:45:00', '2024-12-24 10:15:00', '2024-12-25', 'COMPLETED', 400, NULL),
-(171, 3, 14, 'Green Horizon Farms Logo', 'Agricultural logo representing sustainable farming', '2024-12-10 13:00:00', NULL, '2024-12-27', 'PENDING', 375, NULL),
-(172, 3, 14, 'NeuroPeak Performance Logo', 'Dynamic logo for mental health and wellness center', '2024-12-12 09:30:00', '2024-12-28 14:45:00', '2024-12-28', 'COMPLETED', 425, NULL),
-(173, 3, 14, 'StellarTech Robotics Logo', 'Futuristic logo for robotics and AI company', '2024-12-15 15:45:00', NULL, '2024-12-30', 'IN_PROGRESS', 475, NULL),
-(174, 3, 14, 'Harmony Holistic Wellness Logo', 'Serene logo for integrated health practice', '2024-12-18 10:00:00', '2024-12-31 11:30:00', '2024-12-31', 'COMPLETED', 350, NULL),
-(175, 3, 14, 'Arctic Innovations Logo', 'Clean, minimalist logo for climate technology startup', '2024-12-20 14:00:00', NULL, '2025-01-05', 'PENDING', 400, NULL),
-(176, 3, 14, 'Pulse Fitness Studios Logo', 'Modern, energetic logo for fitness and wellness brand', '2024-12-22 11:15:00', '2025-01-10 09:45:00', '2025-01-10', 'COMPLETED', 525, NULL),
-(177, 3, 14, 'Woodland Whispers Brewery Logo', 'Rustic logo for craft brewery with nature themes', '2024-12-25 13:30:00', NULL, '2025-01-15', 'IN_PROGRESS', 450, NULL),
-(178, 3, 14, 'Quantum Leap Educational Tech Logo', 'Innovative logo for online learning platform', '2024-12-27 09:45:00', NULL, '2025-01-20', 'PENDING', 375, NULL),
-(179, 3, 14, 'Ocean Guardians Conservation Logo', 'Environmentally focused logo for marine protection', '2024-12-29 15:00:00', '2025-01-25 13:15:00', '2025-01-25', 'COMPLETED', 500, NULL),
-(180, 3, 14, 'Mindful Moments Meditation Logo', 'Calming logo for meditation and wellness app', '2024-12-31 10:15:00', NULL, '2025-01-30', 'IN_PROGRESS', 350, NULL),
-(181, 3, 14, 'Tech Horizon Innovations Logo', 'Forward-thinking logo for emerging tech company', '2025-01-02 14:30:00', '2025-02-05 10:00:00', '2025-02-05', 'COMPLETED', 425, NULL),
-(182, 3, 14, 'Green Palette Organic Foods Logo', 'Fresh and natural logo for organic food brand', '2025-01-05 11:00:00', NULL, '2025-02-10', 'PENDING', 400, NULL),
-(185, 3, 14, 'Wellness Wave Health Center Logo', 'Holistic health logo with fluid, dynamic design', '2025-01-12 15:30:00', '2025-02-25 11:30:00', '2025-02-25', 'COMPLETED', 525, NULL),
-(186, 3, 14, 'Digital Nomad Collective Logo', 'Contemporary logo for remote work community', '2025-01-15 10:45:00', NULL, '2025-03-01', 'CANCELLED', 450, NULL),
-(190, 3, 6, 'Prosporeus Mushrooms Logo', 'Logo design for gourmet mushroom farm with subtle \"spore\" highlight', '2024-12-01 09:00:00', '2024-12-14 16:30:00', '2024-12-15', 'COMPLETED', 450, NULL),
-(191, 3, 6, 'EcoTech Innovations Logo', 'Minimalist logo for sustainable technology startup', '2024-12-02 10:30:00', '2024-12-27 10:41:43', '2024-12-20', 'COMPLETED', 350, NULL),
-(192, 3, 6, 'Urban Roots Cafe Branding', 'Modern logo design for farm-to-table coffee shop', '2024-12-05 14:15:00', NULL, '2024-12-22', 'PENDING', 500, NULL),
-(193, 3, 6, 'QuantumLeap Consulting Logo', 'Professional logo for technology consulting firm', '2024-12-08 11:45:00', '2024-12-24 10:15:00', '2024-12-25', 'COMPLETED', 400, NULL),
-(194, 3, 6, 'Green Horizon Farms Logo', 'Agricultural logo representing sustainable farming', '2024-12-10 13:00:00', '2024-12-27 10:41:52', '2024-12-27', 'COMPLETED', 375, NULL),
-(195, 3, 6, 'NeuroPeak Performance Logo', 'Dynamic logo for mental health and wellness center', '2024-12-12 09:30:00', '2024-12-28 14:45:00', '2024-12-28', 'COMPLETED', 425, NULL),
-(196, 3, 6, 'StellarTech Robotics Logo', 'Futuristic logo for robotics and AI company', '2024-12-15 15:45:00', NULL, '2024-12-30', 'IN_PROGRESS', 475, NULL),
-(197, 3, 6, 'Harmony Holistic Wellness Logo', 'Serene logo for integrated health practice', '2024-12-18 10:00:00', '2024-12-31 11:30:00', '2024-12-31', 'COMPLETED', 350, NULL),
-(198, 3, 6, 'Arctic Innovations Logo', 'Clean, minimalist logo for climate technology startup', '2024-12-20 14:00:00', NULL, '2025-01-05', 'PENDING', 400, NULL),
-(199, 3, 6, 'Pulse Fitness Studios Logo', 'Modern, energetic logo for fitness and wellness brand', '2024-12-22 11:15:00', '2025-01-10 09:45:00', '2025-01-10', 'COMPLETED', 525, NULL),
-(200, 3, 10, 'Woodland Whispers Brewery Logo', 'Rustic logo for craft brewery with nature themes', '2024-12-25 13:30:00', NULL, '2025-01-15', 'IN_PROGRESS', 450, NULL),
-(201, 3, 10, 'Quantum Leap Educational Tech Logo', 'Innovative logo for online learning platform', '2024-12-27 09:45:00', NULL, '2025-01-20', 'PENDING', 375, NULL),
-(202, 3, 10, 'Ocean Guardians Conservation Logo', 'Environmentally focused logo for marine protection', '2024-12-29 15:00:00', '2025-01-25 13:15:00', '2025-01-25', 'COMPLETED', 500, NULL),
-(203, 3, 10, 'Mindful Moments Meditation Logo', 'Calming logo for meditation and wellness app', '2024-12-31 10:15:00', NULL, '2025-01-30', 'IN_PROGRESS', 350, NULL),
-(204, 3, 10, 'Tech Horizon Innovations Logo', 'Forward-thinking logo for emerging tech company', '2025-01-02 14:30:00', '2025-02-05 10:00:00', '2025-02-05', 'COMPLETED', 425, NULL),
-(205, 3, 10, 'Green Palette Organic Foods Logo', 'Fresh and natural logo for organic food brand', '2025-01-05 11:00:00', NULL, '2025-02-10', '', 400, NULL),
-(206, 3, 10, 'Cosmic Connections Astronomy Logo', 'Space-inspired logo for astronomy education center', '2025-01-07 09:15:00', '2025-02-15 15:45:00', '2025-02-15', 'COMPLETED', 475, NULL),
-(207, 3, 10, 'Urban Jungle Landscaping Logo', 'Modern logo for urban gardening and design firm', '2025-01-10 13:45:00', NULL, '2025-02-20', 'IN_PROGRESS', 375, NULL),
-(208, 3, 10, 'Wellness Wave Health Center Logo', 'Holistic health logo with fluid, dynamic design', '2025-01-12 15:30:00', '2025-02-25 11:30:00', '2025-02-25', 'COMPLETED', 525, NULL),
-(209, 3, 10, 'Digital Nomad Collective Logo', 'Contemporary logo for remote work community', '2025-01-15 10:45:00', NULL, '2025-03-01', 'CANCELLED', 450, NULL),
-(210, 3, 14, 'Prosporeus Mushrooms Logo', 'Logo design for gourmet mushroom farm with subtle \"spore\" highlight', '2024-12-01 09:00:00', '2024-12-14 16:30:00', '2024-12-15', 'COMPLETED', 450, NULL),
-(213, 3, 14, 'QuantumLeap Consulting Logo', 'Professional logo for technology consulting firm', '2024-12-08 11:45:00', '2024-12-24 10:15:00', '2024-12-25', 'COMPLETED', 400, NULL),
-(215, 3, 14, 'NeuroPeak Performance Logo', 'Dynamic logo for mental health and wellness center', '2024-12-12 09:30:00', '2024-12-28 14:45:00', '2024-12-28', 'COMPLETED', 425, NULL),
-(216, 3, 14, 'StellarTech Robotics Logo', 'Futuristic logo for robotics and AI company', '2024-12-15 15:45:00', NULL, '2024-12-30', 'IN_PROGRESS', 475, NULL),
-(217, 3, 14, 'Harmony Holistic Wellness Logo', 'Serene logo for integrated health practice', '2024-12-18 10:00:00', '2024-12-31 11:30:00', '2024-12-31', 'COMPLETED', 350, NULL),
-(218, 3, 14, 'Arctic Innovations Logo', 'Clean, minimalist logo for climate technology startup', '2024-12-20 14:00:00', NULL, '2025-01-05', 'PENDING', 400, NULL),
-(219, 3, 14, 'Pulse Fitness Studios Logo', 'Modern, energetic logo for fitness and wellness brand', '2024-12-22 11:15:00', '2025-01-10 09:45:00', '2025-01-10', 'COMPLETED', 525, NULL);
+INSERT INTO `orders` (`id_order`, `project_manager_id`, `worker_id`, `order_name`, `description`, `start_date`, `finished_at`, `deadline`, `status`, `order_price`, `references_id`, `attach_result_id`) VALUES
+(224, 3, 6, 'Big Pine Canvas', 'custom heavy duty fabric creations (bags, pillows, marine canvas, repairs to same.\\r\\n\\r\\nIndustry\\r\\nHome Furnishing\\r\\n\\r\\nOther notes\\r\\nI am envisioning a Pine Tree in dark green with a palm tree in front in a Bahama blue. see the rough sketch I did.`', '2024-12-28 23:48:00', '2024-12-28 23:49:09', '2024-12-31', 'COMPLETED', 14, 13, 14),
+(226, 3, 10, 'Crestone Apparel', 'makes gender neutral technical UPF clothing for infants and other outdoor accessories geared towards families trying to get outdoors/into the mountains with young children\\r\\n\\r\\nIndustry\\r\\nFashion\\r\\n\\r\\nOther notes\\r\\nOur brand aesthetic is patagonia meets topo designs for babies with a side of fun color like Cotopaxi. We plan to eventually branch into adult apparel if things go well. Crestone Peak in Colorado is where the name is derived from. The sketch is a crappy version of just one idea of a crescent moon plus sangre de cristo mountain range.', '2024-12-29 00:07:00', NULL, '2025-01-01', 'PENDING', 21, 16, NULL),
+(227, 3, 6, 'Harris Creek Outfitters est 2021', 'Slogan\\r\\nNo swimming allowed\\r\\n\\r\\nDescription of the organization and its target audience\\r\\n\\r\\nWhite water Raft company\\r\\n\\r\\nIndustry\\r\\nSport\\r\\n\\r\\nOther notes\\r\\nI have a picture I want centralized in the logo. But I want it rendered as more of a simple sketch', '2024-12-29 00:09:00', NULL, '2025-01-01', 'IN_PROGRESS', 34, 17, NULL),
+(228, 3, 6, 'Paloma Plumbing', 'Plumbing service and repair residential and commercial\\r\\n\\r\\nIndustry\\r\\nConstruction\\r\\n\\r\\nOther notes\\r\\nWould like to incorporate olive branch possibly. Attached are a couple sketches I threw together (don\\\'t laugh, lol). Like the color scheme of navy blue and peach (kinda get a sunset type vibe)', '2024-12-29 00:14:00', NULL, '2025-01-01', 'PENDING', 18, 18, NULL),
+(229, 3, 10, 'Meadow Green', 'Snow plow and lawn care services company\\r\\n\\r\\nIndustry\\r\\nLandscaping\\r\\n\\r\\nOther notes\\r\\nLooking for something mainly geared to snowplowing but they also do landscaping in the off season see sketches for client ideas', '2024-12-29 00:15:00', '2024-12-29 00:20:23', '2025-01-01', 'COMPLETED', 26, 19, 21),
+(230, 3, 6, 'Jeunesse de Faoug', 'We are a group of young people from our village who organize parties during the year. We want to make a fairly casual logo for t-shirts.\\r\\n\\r\\nIndustry\\r\\nCommunity & Non-Profit\\r\\n\\r\\nOther notes\\r\\nOur village badge is the peacock so we want a logo that features a peacock. This is an image that pretty much describes the style we want (minimalist).', '2024-12-29 00:18:00', NULL, '2025-01-01', 'PENDING', 69, 20, NULL);
 
 -- --------------------------------------------------------
 
@@ -239,7 +183,8 @@ INSERT INTO `remember_tokens` (`id`, `user_id`, `user_type`, `token`, `expiry`, 
 (9, 11, 'worker', '30b878188892d6f50d6096ecf9355007df76cc8f30539de139067a00133e21c3', 1736901461, '2024-12-16 00:34:41'),
 (19, 1, 'admin', '384fbc072c089f0422aa0a13b80a3560ebe1cec77c8aed61e3897df8fd66d061', 1737011590, '2024-12-17 04:17:05'),
 (57, 3, 'admin', '6c8482487ddfc39e908097b3b77e847dac1394f880d6fd5b55ed8c796c6949d3', 1737885813, '2024-12-27 10:03:33'),
-(58, 15, 'worker', 'ea6e8d6b3e844aa59d21a469de1e9ff4e008206fd6aa95bab4743528d763be7c', 1737886229, '2024-12-27 10:10:29');
+(58, 15, 'worker', 'ea6e8d6b3e844aa59d21a469de1e9ff4e008206fd6aa95bab4743528d763be7c', 1737886229, '2024-12-27 10:10:29'),
+(61, 6, 'worker', 'f2f34373de3a4ff1af708f0232de46e2d0a4c21c9ce31b7cba143924b0b9ff4c', 1737998470, '2024-12-28 17:21:09');
 
 -- --------------------------------------------------------
 
@@ -267,8 +212,8 @@ CREATE TABLE `workers` (
 --
 
 INSERT INTO `workers` (`id_worker`, `username`, `password`, `name_worker`, `id_position`, `gender_worker`, `phone_number`, `availability_status`, `assigned_order_id`, `created_at`, `updated_at`, `profile_pic`) VALUES
-(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'AVAILABLE', 194, '2024-11-26 07:14:02', '2024-12-27 10:07:14', 'main/imgdata/profile/676e7c52b35c4_profile_pic.png'),
-(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', NULL, '2024-11-29 10:01:30', '2024-12-24 18:15:06', ''),
+(6, 'razanius12', 'realgamer', 'Razan Muhammad Ihsan', 17, 'MALE', '6281238314426', 'TASKED', 227, '2024-11-26 07:14:02', '2024-12-28 17:16:16', 'main/imgdata/profile/676e7c52b35c4_profile_pic.png'),
+(10, 'fauzanUber', 'fzfnfzfn', 'Muhammad Fauzan', 18, 'MALE', '6281234567878', 'AVAILABLE', 229, '2024-11-29 10:01:30', '2024-12-28 17:20:44', ''),
 (14, 'langs', 'yangaslinyanih', 'Erlangga', 13, 'MALE', '62895320087774', 'AVAILABLE', NULL, '2024-12-17 05:10:30', '2024-12-17 05:10:30', ''),
 (15, 'vivi', 'prettiestgurls', 'Evelyna Cristina Ziovaj', 17, 'FEMALE', '6282257762471', 'TASKED', NULL, '2024-12-24 15:30:59', '2024-12-27 10:30:58', 'main/imgdata/profile/676e81e2b23f2_profile_pic.png');
 
@@ -303,7 +248,8 @@ ALTER TABLE `orders`
   ADD PRIMARY KEY (`id_order`),
   ADD KEY `project_manager_id` (`project_manager_id`),
   ADD KEY `worker_id` (`worker_id`) USING BTREE,
-  ADD KEY `attachment_id` (`attachment_id`) USING BTREE;
+  ADD KEY `references_id` (`references_id`),
+  ADD KEY `attach_result_id` (`attach_result_id`);
 
 --
 -- Indexes for table `positions`
@@ -341,7 +287,7 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `attachments`
 --
 ALTER TABLE `attachments`
-  MODIFY `id_attachment` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_attachment` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `gmaps`
@@ -353,7 +299,7 @@ ALTER TABLE `gmaps`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=220;
+  MODIFY `id_order` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=231;
 
 --
 -- AUTO_INCREMENT for table `positions`
@@ -365,7 +311,7 @@ ALTER TABLE `positions`
 -- AUTO_INCREMENT for table `remember_tokens`
 --
 ALTER TABLE `remember_tokens`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `workers`
@@ -389,7 +335,8 @@ ALTER TABLE `admins`
 ALTER TABLE `orders`
   ADD CONSTRAINT `fk_worker` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`id_worker`),
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`project_manager_id`) REFERENCES `admins` (`id_admin`),
-  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`attachment_id`) REFERENCES `attachments` (`id_attachment`);
+  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`references_id`) REFERENCES `attachments` (`id_attachment`) ON DELETE SET NULL,
+  ADD CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`attach_result_id`) REFERENCES `attachments` (`id_attachment`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `workers`
