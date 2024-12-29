@@ -40,52 +40,45 @@ function showTaskDetails(button) {
   .then(data => {
    if (data.success) {
     const referencesList = data.references.map(file => {
-     if (file.path.match(/\.(jpeg|jpg|png|gif|svg)$/)) {
+     if (file.path.match(/\.(jpeg|jpg|png|gif|svg|webp|PNG)$/)) {
       return `
-       <a href="${file.path}" target="_blank">
-        <img src="${file.path}" alt="Reference Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-        <div class="preview-caption">${file.name}</div>
-       </a>`;
+        <a href="${file.path}" target="_blank">
+         <img src="${file.path}" alt="Reference Image" class="img-thumbnail" style="max-height: 200px;">
+        </a>`;
      } else {
       return `<a href="${file.path}" target="_blank">${file.name}</a>`;
      }
     }).join('<br>');
 
     const attachmentsList = data.attachments.map(file => {
-     if (file.path.match(/\.(jpeg|jpg|png|gif|svg)$/)) {
+     if (file.path.match(/\.(jpeg|jpg|png|gif|svg|webp|PNG)$/)) {
       return `
-       <a href="${file.path}" target="_blank">
-        <img src="${file.path}" alt="Attachment Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-        <div class="preview-caption">${file.name}</div>
-       </a>`;
+        <a href="${file.path}" target="_blank">
+         <img src="${file.path}" alt="Attachment Image" class="img-thumbnail" style="max-height: 200px;">
+        </a>`;
      } else {
       return `<a href="${file.path}" target="_blank">${file.name}</a>`;
      }
     }).join('<br>');
 
-    Swal.fire({
-     title: taskName,
-     html: `
-      <div class="text-start">
-       <p><strong>Description:</strong><br>${formattedDescription}</p>
-       <p><strong>Status:</strong> <span class="badge bg-${getStatusBadgeClass(taskStatus)}">${taskStatus}</span></p>
-       <p><strong>References:</strong><br>${referencesList || 'No references available'}</p>
-       <p><strong>Attachments:</strong><br>${attachmentsList || 'No attachments available'}</p>
-      </div>
-     `,
-     icon: 'info',
-     confirmButtonText: 'Close'
-    });
+    // Populate modal content
+    document.getElementById('taskDetailsModalLabel').innerText = taskName;
+    document.getElementById('taskDescription').innerHTML = formattedDescription;
+    document.getElementById('taskStatus').innerText = taskStatus;
+    document.getElementById('taskStatus').className = `badge bg-${getStatusBadgeClass(taskStatus)}`;
+    document.getElementById('taskReferences').innerHTML = referencesList || 'No references available';
+    document.getElementById('taskAttachments').innerHTML = attachmentsList || 'No attachments available';
+
+    // Show modal
+    var taskDetailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
+    taskDetailsModal.show();
    } else {
     throw new Error(data.message || 'Failed to fetch references and attachments');
    }
   })
   .catch(error => {
-   Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: `Failed to load references and attachments: ${error.message}`,
-   });
+   console.error('Error:', error);
+   alert(`Failed to load references and attachments: ${error.message}`);
   });
 }
 

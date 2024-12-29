@@ -3,7 +3,7 @@
   <!-- Logo Header -->
   <div class="logo-header" data-background-color="dark">
    <a href="index.php" class="logo">
-    <img src="main/img/ALFLogoLightLandscape.webp" alt="navbar brand" class="navbar-brand" height="20" />
+    <img src="main/img/ALFLogoLightLandscape.webp" alt="ALF Solution Logo" class="navbar-brand" height="20">
    </a>
    <div class="nav-toggle">
     <button class="btn btn-toggle toggle-sidebar">
@@ -83,7 +83,8 @@
 <script src="main/js/logouts.js"></script>
 
 <style>
- .avatar-img, .avatar-img-container {
+ .avatar-img,
+ .avatar-img-container {
   background-color: #f8f9fa;
   /* Light background color to show shadow */
   box-shadow: 0.08rem 0.08rem 0.05rem rgba(0, 0, 0, 0.2);

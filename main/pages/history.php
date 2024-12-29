@@ -45,6 +45,25 @@ if ($result === false) {
  $error_message = "Unable to retrieve tasks. Please try again later.";
 }
 
+// Helper function to format order name
+function formatOrderName($orderName)
+{
+ // Decode the string after escaping it with htmlspecialchars
+ $decodedName = htmlspecialchars_decode($orderName, ENT_QUOTES);
+
+ // Replace escaped characters
+ $formattedName = str_replace(
+  ['\\"', "\\'", '\\n', '\\r'],
+  ['"', "'", "\n", ''],
+  $decodedName
+ );
+
+ // Split by line breaks and join with <br>
+ $formattedName = implode('<br>', explode("\n", $formattedName));
+
+ return $formattedName;
+}
+
 // Helper function to determine badge class based on status
 function getStatusBadgeClass($status)
 {
@@ -110,7 +129,7 @@ function getStatusBadgeClass($status)
          while ($task = mysqli_fetch_assoc($result)): ?>
           <tr>
            <td style="display: none;"><?= htmlspecialchars($task['id_order']) ?></td>
-           <td><?= htmlspecialchars($task['order_name']) ?></td>
+           <td><?= formatOrderName($task['order_name']) ?></td>
            <td>
             <?php
             // Calculate task duration
@@ -120,18 +139,26 @@ function getStatusBadgeClass($status)
              $duration = $startDate->diff($finishedDate);
 
              // Format duration
-             if ($duration->days == 0) {
-              $durationText = "Finished in less than a day";
-             } elseif ($duration->days == 1) {
-              $durationText = "Finished in 1 day";
-             } else {
-              $durationText = "Finished in " . $duration->days . " days";
+             $days = $duration->days;
+             $hours = $duration->h;
+             $minutes = $duration->i;
+
+             $durationText = [];
+             if ($days > 0) {
+              $durationText[] = "$days day" . ($days > 1 ? "s" : "");
+             }
+             if ($hours > 0) {
+              $durationText[] = "$hours hour" . ($hours > 1 ? "s" : "");
+             }
+             if ($minutes > 0 || empty($durationText)) {
+              $durationText[] = "$minutes minute" . ($minutes > 1 ? "s" : "");
              }
 
-             echo '<span class="text-primary">' . htmlspecialchars($durationText) . '</span>';
+             echo '<span class="text-primary">Finished in ' . htmlspecialchars(implode(", ", $durationText)) . '</span>';
             } else {
              echo '<span class="text-muted">N/A</span>';
             }
+
             ?>
            </td>
            <td>
@@ -141,32 +168,47 @@ function getStatusBadgeClass($status)
              $finishedDate = new DateTime($task['finished_at']);
              $deadlineDate = new DateTime($task['deadline']);
 
-             // Compare finished date with deadline
              if ($finishedDate <= $deadlineDate) {
               $interval = $finishedDate->diff($deadlineDate);
-              $daysBeforeDeadline = $interval->days;
+              $days = $interval->days;
+              $hours = $interval->h;
+              $minutes = $interval->i;
 
-              if ($daysBeforeDeadline == 0) {
-               $timeText = '<span class="text-warning">Completed on deadline</span>';
-              } elseif ($daysBeforeDeadline == 1) {
-               $timeText = '<span class="text-success">Completed 1 day before deadline</span>';
-              } else {
-               $timeText = '<span class="text-success">Completed ' . $daysBeforeDeadline . ' days before deadline</span>';
+              $timeText = [];
+              if ($days > 0) {
+               $timeText[] = "$days day" . ($days > 1 ? "s" : "");
               }
+              if ($hours > 0) {
+               $timeText[] = "$hours hour" . ($hours > 1 ? "s" : "");
+              }
+              if ($minutes > 0 || empty($timeText)) {
+               $timeText[] = "$minutes minute" . ($minutes > 1 ? "s" : "");
+              }
+
+              echo '<span class="text-success">Completed in ' . htmlspecialchars(implode(", ", $timeText)) . ' before deadline</span>';
              } else {
               $interval = $deadlineDate->diff($finishedDate);
-              $daysAfterDeadline = $interval->days;
-              if ($daysAfterDeadline == 0) {
-               $timeText = '<span class="text-warning">Completed on deadline</span>';
-              } else {
-               $timeText = '<span class="text-danger">Completed ' . $daysAfterDeadline . ' days after deadline</span>';
-              }
-             }
+              $days = $interval->days;
+              $hours = $interval->h;
+              $minutes = $interval->i;
 
-             echo $timeText;
+              $timeText = [];
+              if ($days > 0) {
+               $timeText[] = "$days day" . ($days > 1 ? "s" : "");
+              }
+              if ($hours > 0) {
+               $timeText[] = "$hours hour" . ($hours > 1 ? "s" : "");
+              }
+              if ($minutes > 0 || empty($timeText)) {
+               $timeText[] = "$minutes minute" . ($minutes > 1 ? "s" : "");
+              }
+
+              echo '<span class="text-danger">Completed in ' . htmlspecialchars(implode(", ", $timeText)) . ' after deadline</span>';
+             }
             } else {
              echo '<span class="text-muted">N/A</span>';
             }
+
             ?>
            </td>
            <td><?= htmlspecialchars($task['project_manager'] ?? 'N/A') ?></td>
@@ -183,15 +225,6 @@ function getStatusBadgeClass($status)
               data-task-status="<?= htmlspecialchars($task['status']) ?>" onclick="showTaskDetails(this)">
               <i class="fa fa-eye"></i>
              </button>
-             <?php if ($task['status'] === 'PENDING'): ?>
-              <button type="button" class="btn btn-link btn-success" onclick="takeOrder(<?= $task['id_order'] ?>)">
-               <i class="fa fa-play"></i>
-              </button>
-             <?php elseif ($task['status'] === 'IN_PROGRESS'): ?>
-              <button type="button" class="btn btn-link btn-success" onclick="markTaskComplete(<?= $task['id_order'] ?>)">
-               <i class="fa fa-check"></i>
-              </button>
-             <?php endif; ?>
             </div>
            </td>
           </tr>
@@ -207,4 +240,57 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/histories.js"></script>
+<!-- Modal -->
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+  <div class="modal-content">
+   <div class="modal-header">
+    <h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+   </div>
+   <div class="modal-body">
+    <div class="row">
+     <div class="col">
+      <div class="form-group">
+       <div class="description-section mb-4">
+        <p><strong>Description:</strong><br><span id="taskDescription"></span></p>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="row mt-3">
+     <div class="col">
+      <div class="form-group">
+       <p><strong>Status:</strong> <span id="taskStatus" class="badge"></span></p>
+      </div>
+     </div>
+    </div>
+    <div class="row mt-3">
+     <div class="col">
+      <div class="form-group">
+       <p>
+        <strong>References:</strong> (Click to see full preview)<br>
+       <div id="taskReferences" class="d-flex flex-wrap">No references available</div>
+       </p>
+      </div>
+     </div>
+    </div>
+    <div class="row mt-3 mb-3">
+     <div class="col">
+      <div class="form-group">
+       <p>
+        <strong>Attachments:</strong> (Click to see full preview)<br>
+       <div id="taskAttachments" class="d-flex flex-wrap">No attachments available</div>
+       </p>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script src="main/js/history.js"></script>

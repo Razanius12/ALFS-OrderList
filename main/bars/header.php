@@ -1,19 +1,19 @@
 <div class="sidebar-logo">
  <div class="logo-header" data-background-color="dark">
   <a href="index.php" class="logo">
-   <img src="main/img/ALFLogoLightLandscape.webp" alt="navbar brand" class="navbar-brand" height="20" />
+   <img src="main/img/ALFLogoLightLandscape.webp" alt="ALF Solution Logo" class="navbar-brand" height="20">
   </a>
-  <div class="nav-toggle d-flex align-items-center">
-   <button class="btn btn-toggle toggle-sidebar p-2 me-1 btn-no-outline">
-    <i class="gg-menu-right fs-4"></i>
+  <div class="nav-toggle">
+   <button class="btn btn-toggle toggle-sidebar">
+    <i class="gg-menu-right"></i>
    </button>
-   <button class="btn btn-toggle sidenav-toggler p-2 me-1 btn-no-outline">
-    <i class="gg-menu-left fs-4"></i>
-   </button>
-   <button class="topbar-toggler more p-2 btn-no-outline">
-    <i class="gg-more-vertical-alt fs-4"></i>
+   <button class="btn btn-toggle sidenav-toggler">
+    <i class="gg-menu-left"></i>
    </button>
   </div>
+  <button class="topbar-toggler more">
+   <i class="gg-more-vertical-alt"></i>
+  </button>
  </div>
 </div>
 

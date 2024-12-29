@@ -44,6 +44,25 @@ if ($result === false) {
  $error_message = "Unable to retrieve tasks. Please try again later.";
 }
 
+// Helper function to format order name
+function formatOrderName($orderName)
+{
+ // Decode the string after escaping it with htmlspecialchars
+ $decodedName = htmlspecialchars_decode($orderName, ENT_QUOTES);
+
+ // Replace escaped characters
+ $formattedName = str_replace(
+  ['\\"', "\\'", '\\n', '\\r'],
+  ['"', "'", "\n", ''],
+  $decodedName
+ );
+
+ // Split by line breaks and join with <br>
+ $formattedName = implode('<br>', explode("\n", $formattedName));
+
+ return $formattedName;
+}
+
 // Helper function to determine badge class based on status
 function getStatusBadgeClass($status)
 {
@@ -108,7 +127,7 @@ function getStatusBadgeClass($status)
          while ($task = mysqli_fetch_assoc($result)): ?>
           <tr>
            <td style="display: none;"><?= htmlspecialchars($task['id_order']) ?></td>
-           <td><?= htmlspecialchars($task['order_name']) ?></td>
+           <td><?= formatOrderName($task['order_name']) ?></td>
            <td>
             <?php
             // Format deadline
@@ -185,4 +204,56 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/tasks.js"></script>
+<!-- Modal -->
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+ <div class="modal-dialog modal-lg">
+  <div class="modal-content">
+   <div class="modal-header">
+    <h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+   </div>
+   <div class="modal-body">
+    <div class="row">
+     <div class="col">
+      <div class="form-group">
+       <div class="description-section mb-4">
+        <p><strong>Description:</strong><br><span id="taskDescription"></span></p>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="row mt-3">
+     <div class="col">
+      <div class="form-group">
+       <p><strong>Status:</strong> <span id="taskStatus" class="badge"></span></p>
+      </div>
+     </div>
+    </div>
+    <div class="row mt-3">
+     <div class="col">
+      <div class="form-group">
+       <p>
+        <strong>References:</strong> (Click to see full preview)<br>
+       <div id="taskReferences" class="d-flex flex-wrap">No references available</div>
+       </p>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script src="main/js/task.js"></script>
+
+<style>
+ #taskReferences a,
+ #taskAttachments a {
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+ }
+</style>

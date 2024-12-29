@@ -137,7 +137,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Populate form fields
       $('#edit_order_id').val(data.id_order);
-      $('#edit_order_name').val(data.order_name);
+
+      const formattedName = data.order_name
+       ? data.order_name
+        .replace(/\\r\\n|\\r|\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\'/g, "'")
+       : '';
+
+      $('#edit_order_name').val(formattedName);
 
       const formattedDescription = data.description
        ? data.description
@@ -330,7 +338,8 @@ document.addEventListener('DOMContentLoaded', function () {
     'application/postscript', // .ai
     'image/vnd.adobe.photoshop', // .psd
     'application/cdr', // .cdr
-    'application/pdf' // .pdf
+    'application/pdf', // .pdf
+    'image/webp' // .webp
    ];
 
    if (files.length > maxFiles) {
@@ -461,7 +470,20 @@ function viewAttachments(orderId) {
 
 function fetchAttachments() {
  fetch(`main/api/getOrderAttachments.php?order_id=${currentOrderId}`)
-  .then(response => response.json())
+  .then(response => {
+   if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+   }
+   return response.text(); // Get response as text
+  })
+  .then(text => {
+   try {
+    return JSON.parse(text); // Try to parse the text as JSON
+   } catch (e) {
+    console.error('JSON Parse Error:', text);
+    throw new Error('Invalid JSON response from server');
+   }
+  })
   .then(data => {
    if (data.success) {
     const modalTitle = document.getElementById('attachmentModalTitle');
@@ -492,13 +514,13 @@ function fetchAttachments() {
        // Add attachment column information
        const attachmentColumn = `atch${index + 1}`;
 
-       if (file.path.match(/\.(jpeg|jpg|png|gif|svg)$/)) {
+       if (file.path.match(/\.(jpeg|jpg|png|gif|svg|webp|PNG)$/)) {
         contentDiv.innerHTML = `
-                       <a href="${file.path}" target="_blank">
-                           <img src="${file.path}" alt="Attachment Image" class="img-thumbnail" 
-                                style="max-width: 100px; max-height: 100px;">
-                           <div class="preview-caption">${file.name}</div>
-                       </a>`;
+                        <a href="${file.path}" target="_blank">
+                            <img src="${file.path}" alt="Attachment Image" class="img-thumbnail" 
+                                 style="max-width: 100px; max-height: 100px;">
+                            <div class="preview-caption">${file.name}</div>
+                        </a>`;
        } else {
         contentDiv.innerHTML = `<a href="${file.path}" target="_blank">${file.name}</a>`;
        }
@@ -529,13 +551,13 @@ function fetchAttachments() {
        // Add reference column information
        const referenceColumn = `atch${index + 1}`;
 
-       if (file.path.match(/\.(jpeg|jpg|png|gif|svg)$/)) {
+       if (file.path.match(/\.(jpeg|jpg|png|gif|svg|webp|PNG)$/)) {
         contentDiv.innerHTML = `
-                       <a href="${file.path}" target="_blank">
-                           <img src="${file.path}" alt="Reference Image" class="img-thumbnail" 
-                                style="max-width: 100px; max-height: 100px;">
-                           <div class="preview-caption">${file.name}</div>
-                       </a>`;
+                        <a href="${file.path}" target="_blank">
+                            <img src="${file.path}" alt="Reference Image" class="img-thumbnail" 
+                                 style="max-width: 100px; max-height: 100px;">
+                            <div class="preview-caption">${file.name}</div>
+                        </a>`;
        } else {
         contentDiv.innerHTML = `<a href="${file.path}" target="_blank">${file.name}</a>`;
        }

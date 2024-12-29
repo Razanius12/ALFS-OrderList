@@ -137,16 +137,15 @@ $workerStatus = mysqli_fetch_assoc($result);
 // Worker Performance Metrics
 $workerId = $currentUser['id'];
 $performanceQuery = "
-    SELECT 
-        COUNT(*) as total_completed_orders,
-        AVG(TIMESTAMPDIFF(HOUR, start_date, finished_at)) as avg_hours_per_order,
-        AVG(TIMESTAMPDIFF(HOUR, start_date, finished_at) / 
-            TIMESTAMPDIFF(HOUR, start_date, deadline)) as efficiency_ratio,
-        (SELECT AVG(TIMESTAMPDIFF(HOUR, start_date, finished_at)) 
-         FROM orders 
-         WHERE status = 'COMPLETED') as system_avg_hours
-    FROM orders 
-    WHERE worker_id = ? AND status = 'COMPLETED'
+SELECT 
+    COUNT(*) as total_completed_orders,
+    AVG(TIMESTAMPDIFF(HOUR, start_date, finished_at)) as avg_hours_per_order,
+    AVG(1 - (TIMESTAMPDIFF(HOUR, start_date, finished_at) / TIMESTAMPDIFF(HOUR, start_date, deadline))) as efficiency_ratio,
+    (SELECT AVG(TIMESTAMPDIFF(HOUR, start_date, finished_at)) 
+     FROM orders 
+     WHERE status = 'COMPLETED') as system_avg_hours
+FROM orders 
+WHERE worker_id = ? AND status = 'COMPLETED';
 ";
 
 $stmt = mysqli_prepare($conn, $performanceQuery);
@@ -163,21 +162,23 @@ $totalCompletedOrders = $performance['total_completed_orders'] ?? 0;
 
 // Recent Completed Task
 $completedTasksQuery = "
-    SELECT 
-        o.id_order, 
-        o.order_name, 
-        o.start_date, 
-        o.finished_at, 
-        o.deadline,
-        TIMESTAMPDIFF(DAY, o.start_date, o.finished_at) as days_taken,
-        TIMESTAMPDIFF(DAY, o.finished_at, o.deadline) as days_before_deadline
-    FROM 
-        orders o
-    WHERE 
-        o.worker_id = ? AND o.status = 'COMPLETED'
-    ORDER BY 
-        o.finished_at DESC
-    LIMIT 6
+SELECT 
+    o.id_order, 
+    o.order_name, 
+    o.start_date, 
+    o.finished_at, 
+    o.deadline,
+    TIMESTAMPDIFF(DAY, o.start_date, o.finished_at) as days_taken,
+    TIMESTAMPDIFF(HOUR, o.start_date, o.finished_at) as hours_taken,
+    TIMESTAMPDIFF(MINUTE, o.start_date, o.finished_at) as minutes_taken,
+    TIMESTAMPDIFF(DAY, o.finished_at, o.deadline) as days_before_deadline
+FROM 
+    orders o
+WHERE 
+    o.worker_id = ? AND o.status = 'COMPLETED'
+ORDER BY 
+    o.finished_at DESC
+LIMIT 6;
 ";
 
 $stmt = mysqli_prepare($conn, $completedTasksQuery);
@@ -186,6 +187,9 @@ mysqli_stmt_execute($stmt);
 $completedTasksResult = mysqli_stmt_get_result($stmt);
 $completedTasks = [];
 while ($task = mysqli_fetch_assoc($completedTasksResult)) {
+ // Calculate remaining hours and minutes after dividing into days
+ $task['remaining_hours'] = $task['hours_taken'] % 24;
+ $task['remaining_minutes'] = $task['minutes_taken'] % 60;
  $completedTasks[] = $task;
 }
 
@@ -193,10 +197,12 @@ while ($task = mysqli_fetch_assoc($completedTasksResult)) {
 function getPerformanceStatus($efficiencyRatio)
 {
  if ($efficiencyRatio > 100)
-  return ['status' => 'Excellent', 'color' => 'success'];
+  return ['status' => 'Marvelous!', 'color' => 'success'];
  if ($efficiencyRatio > 80)
-  return ['status' => 'Good', 'color' => 'info'];
+  return ['status' => 'Excellent', 'color' => 'info'];
  if ($efficiencyRatio > 60)
+  return ['status' => 'Good', 'color' => 'primary'];
+ if ($efficiencyRatio > 40)
   return ['status' => 'Average', 'color' => 'warning'];
  return ['status' => 'Needs Improvement', 'color' => 'danger'];
 }
@@ -541,6 +547,8 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
           <div class="card-title">
            <?php echo htmlspecialchars($task['order_name']); ?>
           </div>
+         </div>
+         <div class="card-body">
           <div class="card-tools">
            <?php
            // Determine badge color based on completion time
@@ -558,22 +566,16 @@ $performanceStatus = getPerformanceStatus($efficiencyRatio);
             ?>
            </span>
           </div>
-         </div>
-         <div class="card-body">
-          <div class="row">
-           <div class="col-6">
-            <small class="text-muted">Started</small>
-            <p><?php echo date('M d, Y', strtotime($task['start_date'])); ?></p>
-           </div>
-           <div class="col-6">
-            <small class="text-muted">Completed</small>
-            <p><?php echo date('M d, Y', strtotime($task['finished_at'])); ?></p>
-           </div>
-          </div>
-          <div class="row mt-2">
+          <div class="row mt-4">
            <div class="col-12">
-            <small class="text-muted">Total Days Taken</small>
-            <p><?php echo $task['days_taken']; ?> days</p>
+            <small class="text-muted">Total Time Taken</small>
+            <p>
+             <?php
+             echo "{$task['days_taken']} days, " .
+              "{$task['remaining_hours']} hours, " .
+              "{$task['remaining_minutes']} minutes";
+             ?>
+            </p>
            </div>
           </div>
          </div>

@@ -40,6 +40,15 @@ function showTaskDetails(button) {
  const taskDescription = button.getAttribute('data-task-description') || 'No description available';
  const taskStatus = button.getAttribute('data-task-status');
 
+  // First replace escaped characters, then handle line breaks
+  const formattedName = taskName
+  .replace(/\\"/g, '"')              // Replace escaped quotes
+  .replace(/\\'/g, "'")              // Replace escaped single quotes
+  .replace(/\\n/g, '\n')             // Convert \n string to actual line break
+  .replace(/\\r/g, '')               // Remove \r
+  .split('\n')                       // Split by line breaks
+  .join('<br>');                     // Join with HTML line breaks
+
  // First replace escaped characters, then handle line breaks
  const formattedDescription = taskDescription
   .replace(/\\"/g, '"')              // Replace escaped quotes
@@ -49,45 +58,40 @@ function showTaskDetails(button) {
   .split('\n')                       // Split by line breaks
   .join('<br>');                     // Join with HTML line breaks
 
- // Fetch references
+ // Fetch references and attachments
  fetch(`main/api/getOrderAttachments.php?order_id=${taskId}`)
   .then(response => response.json())
   .then(data => {
    if (data.success) {
     const referencesList = data.references.map(file => {
-     if (file.path.match(/\.(jpeg|jpg|png|gif|svg)$/)) {
+     if (file.path.match(/\.(jpeg|jpg|png|gif|svg|webp|PNG)$/)) {
       return `
-       <a href="${file.path}" target="_blank">
-        <img src="${file.path}" alt="Reference Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-        <div class="preview-caption">${file.name}</div>
-       </a>`;
+        <a href="${file.path}" target="_blank">
+         <img src="${file.path}" alt="Reference Image" class="img-thumbnail" style="max-height: 200px;">
+        </a>
+        `;
      } else {
       return `<a href="${file.path}" target="_blank">${file.name}</a>`;
      }
     }).join('<br>');
 
-    Swal.fire({
-     title: taskName,
-     html: `
-      <div class="text-start">
-       <p><strong>Description:</strong><br>${formattedDescription}</p>
-       <p><strong>Status:</strong> <span class="badge bg-${getStatusBadgeClass(taskStatus)}">${taskStatus}</span></p>
-       <p><strong>References:</strong><br>${referencesList || 'No references available'}</p>
-      </div>
-     `,
-     icon: 'info',
-     confirmButtonText: 'Close'
-    });
+    // Populate modal content
+    document.getElementById('taskDetailsModalLabel').innerText = formattedName;
+    document.getElementById('taskDescription').innerHTML = formattedDescription;
+    document.getElementById('taskStatus').innerText = taskStatus;
+    document.getElementById('taskStatus').className = `badge bg-${getStatusBadgeClass(taskStatus)}`;
+    document.getElementById('taskReferences').innerHTML = referencesList || 'No references available';
+
+    // Show modal
+    var taskDetailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
+    taskDetailsModal.show();
    } else {
     throw new Error(data.message || 'Failed to fetch references');
    }
   })
   .catch(error => {
-   Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: `Failed to load references: ${error.message}`,
-   });
+   console.error('Error:', error);
+   alert(`Failed to load references: ${error.message}`);
   });
 }
 

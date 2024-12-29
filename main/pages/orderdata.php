@@ -62,6 +62,25 @@ if ($currentUserLevel === 'admin') {
  $isAdmin = 'true';
 }
 
+// Helper function to format order name
+function formatOrderName($orderName)
+{
+ // Decode the string after escaping it with htmlspecialchars
+ $decodedName = htmlspecialchars_decode($orderName, ENT_QUOTES);
+
+ // Replace escaped characters
+ $formattedName = str_replace(
+  ['\\"', "\\'", '\\n', '\\r'],
+  ['"', "'", "\n", ''],
+  $decodedName
+ );
+
+ // Split by line breaks and join with <br>
+ $formattedName = implode('<br>', explode("\n", $formattedName));
+
+ return $formattedName;
+}
+
 // Helper function to determine badge class based on status
 function getStatusBadgeClass($status)
 {
@@ -132,7 +151,7 @@ function getStatusBadgeClass($status)
          <?php while ($order = mysqli_fetch_assoc($result)): ?>
           <tr>
            <td style="display: none;"><?= htmlspecialchars($order['id_order']) ?></td>
-           <td><?= htmlspecialchars($order['order_name']) ?></td>
+           <td><?= formatOrderName($order['order_name']) ?></td>
            <td>
             <?php
             // Format deadline
@@ -311,7 +330,7 @@ function getStatusBadgeClass($status)
           <label>Reference Files (Optional)</label>
           <input type="file" class="form-control" name="references[]" multiple
            accept=".jpg,.jpeg,.png,.gif,.svg,.ai,.psd,.cdr" max="10">
-          <small class="text-muted">Allowed files: JPG, JPEG, SVG, GIF, AI, PSD, CDR, PDF (Max 5MB each)</small>
+          <small class="text-muted">Allowed files: JPG, JPEG, SVG, GIF, WEBP, AI, PSD, CDR, PDF (Max 5MB each)</small>
          </div>
         </div>
        </div>
@@ -462,18 +481,22 @@ function getStatusBadgeClass($status)
         </div>
        </div>
       </div>
-      <div class="modal-body">
-       <div class="row mt-3">
-        <div class="col">
+      <div class="row mt-3">
+       <div class="col">
+        <div class="form-group">
          <h6 class="fw-bold">References:</h6>
+         <div class="text-muted text-sm mb-2">(Click to see full preview)</div>
          <div id="referencesList" class="list-group"></div>
         </div>
        </div>
       </div>
       <div class="row mt-3 mb-3">
        <div class="col">
-        <h6 class="fw-bold">Attachments:</h6>
-        <div id="attachmentsList" class="list-group"></div>
+        <div class="form-group">
+         <h6 class="fw-bold">Attachments:</h6>
+         <div class="text-muted text-sm mb-2">(Click to see full preview)</div>
+         <div id="attachmentsList" class="list-group"></div>
+        </div>
        </div>
       </div>
      </div>
@@ -495,7 +518,7 @@ function getStatusBadgeClass($status)
  </div>
 </div>
 
-<script src="main/js/orders.js"></script>
+<script src="main/js/orderdata.js"></script>
 
 <script>
  // Make PHP session variables available to JavaScript
