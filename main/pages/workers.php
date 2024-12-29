@@ -32,8 +32,6 @@ $query = "
             COUNT(id_order) AS order_count
         FROM 
             orders
-        WHERE 
-            status IN ('IN_PROGRESS', 'PENDING')
         GROUP BY 
             worker_id
     ) AS in_progress_counts ON w.id_worker = in_progress_counts.worker_id
@@ -115,7 +113,7 @@ function maskPassword($password)
           <th>Position</th>
           <th>Gender</th>
           <th>Phone</th>
-          <th>Active Task Count</th>
+          <th>Related Orders Count</th>
           <th>Status</th>
           <th style="width: 10%">Action</th>
          </tr>

@@ -142,6 +142,11 @@ $years = range($currentYear - 5, $currentYear + 5);
     </li>
    </ul>
    <div class="ms-md-auto py-2 py-md-0 mb-2">
+    <a href="main/api/exportToPdf.php">
+     <button class="btn btn-primary btn-round">
+      <i class="fas fa-file-pdf"></i> Export to PDF
+     </button>
+    </a>
     <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#filterModal">
      <i class="fas fa-filter"></i> Filter
     </button>
@@ -149,8 +154,64 @@ $years = range($currentYear - 5, $currentYear + 5);
   </div>
   <div class="page-category">Shows worker perfomance report and monthly earnings chart</div>
 
-  <!-- Worker Performance Card -->
+  <!-- Statistics Summary -->
   <div class="row mb-4">
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Total Income</h6>
+      <h4 class="card-value">$<?= number_format($totalIncome, 2) ?></h4>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Total Orders</h6>
+      <h4 class="card-value"><?= $totalWorkerOrdersChart ?></h4>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Avg Order Value</h6>
+      <h4 class="card-value">$<?= number_format($overallAvgOrderValue, 2) ?></h4>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-3">
+    <div class="card card-stats">
+     <div class="card-body">
+      <h6 class="card-title">Daily Average</h6>
+      <h4 class="card-value">
+       <?= count($dates) > 0 ? round($totalWorkerOrdersChart / count($dates), 1) : 0 ?> orders
+      </h4>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Daily Progress Chart Card -->
+  <div class="row mb-4">
+   <div class="col-md-12">
+    <div class="card">
+     <div class="card-header">
+      <div class="d-flex align-items-center">
+       <h4 class="card-title">Daily Income Progress - <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?></h4>
+      </div>
+     </div>
+     <div class="card-body">
+      <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+       <canvas id="dailyProgressBarChart"></canvas>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Worker Performance Card -->
+  <div class="row">
    <div class="col-md-12">
     <div class="card">
      <div class="card-header">
@@ -261,63 +322,7 @@ $years = range($currentYear - 5, $currentYear + 5);
    </div>
   </div>
 
-  <!-- Statistics Summary -->
-  <div class="row mb-4">
-   <div class="col-md-3">
-    <div class="card card-stats">
-     <div class="card-body">
-      <h6 class="card-title">Total Income</h6>
-      <h4 class="card-value">$<?= number_format($totalIncome, 2) ?></h4>
-     </div>
-    </div>
-   </div>
-   <div class="col-md-3">
-    <div class="card card-stats">
-     <div class="card-body">
-      <h6 class="card-title">Total Orders</h6>
-      <h4 class="card-value"><?= $totalWorkerOrdersChart ?></h4>
-     </div>
-    </div>
-   </div>
-   <div class="col-md-3">
-    <div class="card card-stats">
-     <div class="card-body">
-      <h6 class="card-title">Avg Order Value</h6>
-      <h4 class="card-value">$<?= number_format($overallAvgOrderValue, 2) ?></h4>
-     </div>
-    </div>
-   </div>
-   <div class="col-md-3">
-    <div class="card card-stats">
-     <div class="card-body">
-      <h6 class="card-title">Daily Average</h6>
-      <h4 class="card-value">
-       <?= count($dates) > 0 ? round($totalWorkerOrdersChart / count($dates), 1) : 0 ?> orders
-      </h4>
-     </div>
-    </div>
-   </div>
-  </div>
-
-  <!-- Daily Progress Chart Card -->
-  <div class="row">
-   <div class="col-md-12">
-    <div class="card">
-     <div class="card-header">
-      <div class="d-flex align-items-center">
-       <h4 class="card-title">Daily Income Progress - <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?></h4>
-      </div>
-     </div>
-     <div class="card-body">
-      <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
-       <canvas id="dailyProgressBarChart"></canvas>
-      </div>
-     </div>
-    </div>
-   </div>
-  </div>
  </div>
-
 </div>
 
 <!-- Filter Modal -->

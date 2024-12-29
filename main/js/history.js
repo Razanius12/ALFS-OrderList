@@ -25,6 +25,15 @@ function showTaskDetails(button) {
  const taskDescription = button.getAttribute('data-task-description') || 'No description available';
  const taskStatus = button.getAttribute('data-task-status');
 
+  // First replace escaped characters, then handle line breaks
+  const formattedName = taskName
+  .replace(/\\"/g, '"')              // Replace escaped quotes
+  .replace(/\\'/g, "'")              // Replace escaped single quotes
+  .replace(/\\n/g, '\n')             // Convert \n string to actual line break
+  .replace(/\\r/g, '')               // Remove \r
+  .split('\n')                       // Split by line breaks
+  .join('<br>');                     // Join with HTML line breaks
+
  // First replace escaped characters, then handle line breaks
  const formattedDescription = taskDescription
   .replace(/\\"/g, '"')              // Replace escaped quotes
@@ -62,7 +71,7 @@ function showTaskDetails(button) {
     }).join('<br>');
 
     // Populate modal content
-    document.getElementById('taskDetailsModalLabel').innerText = taskName;
+    document.getElementById('taskDetailsModalLabel').innerText = formattedName;
     document.getElementById('taskDescription').innerHTML = formattedDescription;
     document.getElementById('taskStatus').innerText = taskStatus;
     document.getElementById('taskStatus').className = `badge bg-${getStatusBadgeClass(taskStatus)}`;

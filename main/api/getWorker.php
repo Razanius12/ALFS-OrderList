@@ -31,8 +31,6 @@ try {
                     COUNT(id_order) AS order_count
                 FROM 
                     orders
-                WHERE 
-                    status IN ('IN_PROGRESS', 'PENDING')
                 GROUP BY 
                     worker_id
             ) AS in_progress_counts ON w.id_worker = in_progress_counts.worker_id
