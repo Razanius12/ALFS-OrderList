@@ -142,10 +142,9 @@ $years = range($currentYear - 5, $currentYear + 5);
     </li>
    </ul>
    <div class="ms-md-auto py-2 py-md-0 mb-2">
-    <a href="main/api/exportToPdf.php">
-     <button class="btn btn-primary btn-round">
-      <i class="fas fa-file-pdf"></i> Export to PDF
-     </button>
+    <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#exportModal">
+     <i class="fas fa-file-pdf"></i> Export to PDF
+    </button>
     </a>
     <button class="btn btn-primary btn-round" data-toggle="modal" data-target="#filterModal">
      <i class="fas fa-filter"></i> Filter
@@ -355,6 +354,72 @@ $years = range($currentYear - 5, $currentYear + 5);
  </div>
 </div>
 
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-hidden="true">
+ <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-content">
+   <div class="modal-header">
+    <h5 class="modal-title">Export to PDF</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+     <span aria-hidden="true">&times;</span>
+    </button>
+   </div>
+   <form method="GET" action="main/api/exportToPdf.php" id="exportForm">
+    <div class="modal-body">
+     <div class="form-group">
+      <label>Select Month and Year</label>
+      <div class="row">
+       <div class="col">
+        <select class="form-control" id="exportMonthDropdown" name="month">
+         <option value="">Select Month</option>
+         <?php foreach ($months as $num => $name): ?>
+          <option value="<?= $num ?>"><?= $name ?></option>
+         <?php endforeach; ?>
+        </select>
+       </div>
+       <div class="col">
+        <select class="form-control" id="exportYearDropdown" name="year">
+         <option value="">Select Year</option>
+         <?php foreach ($years as $year): ?>
+          <option value="<?= $year ?>"><?= $year ?></option>
+         <?php endforeach; ?>
+        </select>
+       </div>
+      </div>
+     </div>
+     <div class="form-group">
+      <label>Export Options</label>
+      <div class="form-check">
+       <input class="form-check-input" type="radio" name="exportOption" id="exportDailyStatistics"
+        value="dailyStatistics" checked>
+       <label class="form-check-label" for="exportDailyStatistics">
+        Daily Statistics
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" type="radio" name="exportOption" id="exportWorkerPerformance"
+        value="workerPerformance">
+       <label class="form-check-label" for="exportWorkerPerformance">
+        Worker Performance
+       </label>
+      </div>
+      <div class="form-check">
+       <input class="form-check-input" type="radio" name="exportOption" id="exportAll" value="allData">
+       <label class="form-check-label" for="exportAll">
+        Export All
+       </label>
+      </div>
+     </div>
+    </div>
+    <div class="modal-footer">
+     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+     <button type="submit" class="btn btn-primary">Export</button>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -371,31 +436,47 @@ $years = range($currentYear - 5, $currentYear + 5);
     }
    });
 
-   const monthYearPicker = document.getElementById('monthYearPicker');
-   const monthInput = document.getElementById('monthInput');
-   const yearInput = document.getElementById('yearInput');
-   const filterForm = document.getElementById('filterForm');
+   const exportMonthDropdown = document.getElementById('exportMonthDropdown');
+   const exportYearDropdown = document.getElementById('exportYearDropdown');
+   const exportAllRadio = document.getElementById('exportAll');
+   const exportDailyStatisticsRadio = document.getElementById('exportDailyStatistics');
+   const exportWorkerPerformanceRadio = document.getElementById('exportWorkerPerformance');
+   const exportForm = document.getElementById('exportForm');
 
-   // Set initial values
-   const currentValue = monthYearPicker.value;
-   if (currentValue) {
-    const [year, month] = currentValue.split('-');
-    monthInput.value = parseInt(month);
-    yearInput.value = year;
+   // Disable month and year dropdowns if export all data is selected by default
+   if (exportAllRadio.checked) {
+    exportMonthDropdown.disabled = true;
+    exportYearDropdown.disabled = true;
    }
 
-   // Update hidden inputs when date is changed
-   monthYearPicker.addEventListener('change', function (e) {
-    const [year, month] = this.value.split('-');
-    monthInput.value = parseInt(month);
-    yearInput.value = year;
+   // Disable month and year dropdowns if export all data is selected
+   exportAllRadio.addEventListener('change', function () {
+    exportMonthDropdown.disabled = true;
+    exportYearDropdown.disabled = true;
+    exportMonthDropdown.value = '';
+    exportYearDropdown.value = '';
    });
 
-   // Prevent form submission if no date is selected
-   filterForm.addEventListener('submit', function (e) {
-    if (!monthYearPicker.value) {
+   // Enable month and year dropdowns if daily statistics or worker performance is selected
+   exportDailyStatisticsRadio.addEventListener('change', function () {
+    exportMonthDropdown.disabled = false;
+    exportYearDropdown.disabled = false;
+   });
+
+   exportWorkerPerformanceRadio.addEventListener('change', function () {
+    exportMonthDropdown.disabled = false;
+    exportYearDropdown.disabled = false;
+   });
+
+   // Prevent form submission if no date is selected and export all data is not selected
+   exportForm.addEventListener('submit', function (e) {
+    if (!exportAllRadio.checked && (!exportMonthDropdown.value || !exportYearDropdown.value)) {
      e.preventDefault();
-     alert('Please select a month and year');
+     Swal.fire({
+      icon: 'warning',
+      title: 'Incomplete Selection',
+      text: 'Please select a month and year or select "Export All"',
+     });
     }
    });
 

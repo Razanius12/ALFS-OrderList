@@ -193,7 +193,9 @@ function getStatusBadgeClass($status)
            <td>
             <?php
             // Convert datetime 
-            if (!empty(htmlspecialchars($order['finished_at']))) {
+            if (htmlspecialchars($order['status']) == 'CANCELLED') {
+             echo 'Cancelled';
+            } else if (!empty(htmlspecialchars($order['finished_at']))) {
              $finishedAT = new DateTime($order['finished_at']);
              echo $finishedAT->format('Y F d') . ' at ' . $finishedAT->format('h:i A');
             } else {
