@@ -108,6 +108,7 @@ function checkRememberMeToken()
    $_SESSION['role'] = $token_data['user_type'];
    $_SESSION['level'] = $token_data['user_type'];
    $_SESSION['position_id'] = $user['id_position'];
+   $_SESSION['profile_pic'] = $user['profile_pic'];
 
    // Refresh token
    refreshRememberMeToken($token_data['user_id'], $token_data['user_type']);
