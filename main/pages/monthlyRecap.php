@@ -5,8 +5,8 @@ checkPageAccess();
 
 require 'config/database.php';
 
-$selectedMonth = isset($_GET['month']) ? $_GET['month'] : date('m');
-$selectedYear = isset($_GET['year']) ? $_GET['year'] : date('Y');
+$selectedMonth = isset($_GET['month']) && !empty($_GET['month']) ? intval($_GET['month']) : date('m');
+$selectedYear = isset($_GET['year']) && !empty($_GET['year']) ? intval($_GET['year']) : date('Y');
 
 // Query for worker statistics
 $query = "SELECT 
@@ -197,7 +197,7 @@ $years = range($currentYear - 5, $currentYear + 5);
     <div class="card">
      <div class="card-header">
       <div class="d-flex align-items-center">
-       <h4 class="card-title">Daily Income Progress - <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?></h4>
+       <h4 class="card-title">Daily Income Progress - <?= $months[intval($selectedMonth)] . ' ' . $selectedYear; ?></h4>
       </div>
      </div>
      <div class="card-body">
@@ -216,7 +216,7 @@ $years = range($currentYear - 5, $currentYear + 5);
      <div class="card-header">
       <div class="d-flex align-items-center">
        <h4 class="card-title">Worker Performance -
-        <?php echo $months[$selectedMonth] . ' ' . $selectedYear; ?>
+        <?= $months[intval($selectedMonth)] . ' ' . $selectedYear; ?>
        </h4>
       </div>
      </div>
@@ -651,6 +651,18 @@ $years = range($currentYear - 5, $currentYear + 5);
       }
      }
     }
+   });
+
+   // Add event listener to the filter form submission
+   const filterForm = document.getElementById('filterForm');
+   const monthYearPicker = document.getElementById('monthYearPicker');
+   const monthInput = document.getElementById('monthInput');
+   const yearInput = document.getElementById('yearInput');
+
+   filterForm.addEventListener('submit', function (e) {
+    const [year, month] = monthYearPicker.value.split('-');
+    monthInput.value = month;
+    yearInput.value = year;
    });
 
   });
