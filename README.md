@@ -1,91 +1,49 @@
 # ALFS Order List System
 
-![CSS](https://img.shields.io/badge/CSS-72.6%25-blue)
-![PHP](https://img.shields.io/badge/PHP-20.1%25-purple)
-![JavaScript](https://img.shields.io/badge/JavaScript-6.6%25-yellow)
-![Hack](https://img.shields.io/badge/Hack-0.7%25-orange)
-
 A comprehensive project management system designed for CV ALF Solution to streamline their creative agency workflow and enhance project tracking efficiency.
 
 ## 🌐 Live Preview
 Check out the live version of the application: [ALFS Order List System](https://alfsorderlist.ct.ws/)
 
-## 📋 System Evolution
-### Previous Manual System
-The system replaces a manual workflow that consisted of:
-1. Project requests received through external websites
-2. Project details communicated via email
-3. Single worker assignments for logo design projects
-4. Email-based design submission
-5. Excel spreadsheet financial tracking
+## 📋 System Overview
 
-### System Improvements
-The new system addresses key limitations of the manual process:
-1. **Automated Task Assignment**: Replaces manual assignment with intelligent workload distribution
-2. **Centralized Communication**: Integrated notification system replacing email-based communication
-3. **Real-time Financial Tracking**: Automated financial monitoring replacing manual Excel tracking
-4. **Workload Management**: Real-time worker availability tracking
-5. **Flexible Role Management**: Customizable role configuration
-6. **Performance Analytics**: Comprehensive project performance insights
+### Technical Architecture
+- **Frontend**: Bootstrap 5 with responsive design
+- **Backend**: PHP-based server logic
+- **Database**: MySQL for data persistence
+- **Security**: Role-based authentication with secure login/logout
 
-## 💡 Key Features
+### Core Features
+1. **Project Management**
+   - New project information input
+   - Client requirement documentation
+   - Project pricing and financial tracking
+   - File attachment handling
+   - Status tracking (Pending, In Progress, Completed, Cancelled)
 
-### Project Management
-- **Detail Recording**
-  - New project information input
-  - Client requirement documentation
-  - Project's price
+2. **User Management**
+   - **Admin Role**
+     - Complete system access
+     - Project monitoring
+     - Worker management
+     - Location management
+     - Profile customization
+     - Financial reporting
+   - **Worker Role**
+     - Task management
+     - Status updates
+     - Profile customization
+     - Office location access
 
-### Status Monitoring
-- **Project States**
-  - Pending
-  - In Progress
-  - Completed
-  - Cancelled
+3. **Resource Management**
+   - Worker availability tracking
+   - Maximum project allocation
+   - Office location tracking (Google Maps integration)
 
-### Resource Management
-- **Worker Availability**
-  - Real-time availability status
-  - Maximum project limits per worker
-
-### Reporting System
-- **Performance Analytics**
-  - Daily reports
-  - Monthly summaries
-  - Annual statistics
-- **Financial Tracking**
-  - Project-based revenue recording
-  - Period-based analysis
-
-## 👥 User Roles
-
-### Admin Capabilities
-- Complete system access
-- Project monitoring
-- Worker management
-- Order management
-- Location management
-- Financial reporting
-- Profile management
-
-### Worker Features
-- Task management
-- Status updates
-- Office location access
-- Profile customization
-
-## 💻 Technical Implementation
-
-### Authentication System
-- Secure login/logout process
-- Role-based access control
-- Remember token functionality
-
-### Interface Design
-- Intuitive dashboard layout
-- Responsive design
-- User-friendly forms
-- Interactive data visualization
+4. **Reporting System**
+   - Daily/Monthly/Annual statistics
+   - Financial analysis
+   - Performance analytics
 
 ## 🚀 Getting Started
 Visit our [live platform](https://alfsorderlist.ct.ws/) to experience the system.
@@ -93,34 +51,17 @@ Visit our [live platform](https://alfsorderlist.ct.ws/) to experience the system
 ## 🏢 About CV ALF Solution
 A creative agency specializing in logo design and content creation, committed to delivering high-quality design solutions through efficient project management.
 
-## 👨‍💻 Development Details
-- **Developer**: [Razanius12](https://github.com/Razanius12) and [Fauzan](https://github.com/UjungberungG432)
+## 👨‍💻 Development Team
+- [Razanius12](https://github.com/Razanius12)
+- [Fauzan](https://github.com/UjungberungG432)
 
 ## 🎨 Credits
-
 ### Template
-This project uses [Kaiadmin Lite](https://themekita.com/kaiadmin-lite-bootstrap-5-dashboard.html) - a free Bootstrap 5 Admin Dashboard template by ThemeKita.
+- Based on [Kaiadmin Lite](https://themekita.com/kaiadmin-lite-bootstrap-5-dashboard.html)
+- Free Bootstrap 5 Admin Dashboard by ThemeKita
+- Customized for ALFS Order List System requirements
 
-#### Template Features:
-- Built with Bootstrap 5
-- Clean and Modern Design
-- Easy to Customize
-- Responsive Layout
-- Multiple Dashboard Variations
-- Well-Documented
-
-### Template Author
-- **Theme**: Kaiadmin Lite
-- **Created by**: ThemeKita
-- **Template Website**: [ThemeKita](https://themekita.com)
-- **Template Demo**: [Kaiadmin Lite Demo](https://themekita.com/demo-kaiadmin-lite-bootstrap-dashboard/livepreview/demo1/)
-
-### Implementation and Customization
-- Adapted and customized for ALFS Order List System
-- Modified to meet specific requirements of CV ALF Solution
-- Enhanced with additional features for project management
-
-For more information about the template, visit:
+For template information:
 - [Product Details](https://themekita.com/kaiadmin-lite-bootstrap-5-dashboard.html)
 - [ThemeKita Website](https://themekita.com)
 
